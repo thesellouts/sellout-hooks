@@ -1,6 +1,5 @@
 import { useMutation } from '@tanstack/react-query'
 import {
-  Config,
   simulateContract,
   waitForTransactionReceipt,
   writeContract

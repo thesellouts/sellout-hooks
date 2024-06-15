@@ -4,7 +4,7 @@ import {
   waitForTransactionReceipt,
   writeContract
 } from '@wagmi/core'
-import { sepolia, zora, zoraSepolia } from 'viem/chains'
+import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { VenueABI } from '../abis'
