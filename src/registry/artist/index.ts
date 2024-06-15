@@ -1,0 +1,6 @@
+export * from './acceptArtistNomination'
+export * from './deregisterArtist'
+export * from './getArtist'
+export * from './isArtistRegistered'
+export * from './nominateArtist'
+export * from './updateArtist'
