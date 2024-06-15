@@ -1,8 +1,8 @@
 {
   "name": "@thesellouts/sellout-protocol-sdk",
   "private": false,
-  "version": "1.0.2",
-  "description": "SDK for interacting with Sellout Protocol",
+  "version": "1.0.5",
+  "description": "sdk for interacting with sellout protocol",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -14,16 +14,20 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "format:check": "prettier --check 'src/**/*.{ts,tsx,js,json,md}'"
   },
-  "dependencies": {
-    "@tanstack/react-query": "^5.45.0",
+  "peerDependencies": {
+    "@tanstack/react-query": ">=5.0.0",
+    "react": ">=18",
+    "react-dom": ">=18",
+    "typescript": ">=5.0.4",
+    "viem": "2.x",
     "@wagmi/core": "^2.11.2",
-    "react": "^18.3.1",
-    "viem": "~2.7.22",
     "wagmi": "^2.10.2",
     "zod": "^3.23.0"
   },
+  "dependencies": {
+    "@lucidlabs/sellout-protocol": "^1.0.1"
+  },
   "devDependencies": {
-    "@lucidlabs/sellout-protocol": "^1.0.1",
     "@tanstack/eslint-plugin-query": "^5.27.7",
     "@types/react": "^18.3.3",
     "eslint": "^8.57.0",
