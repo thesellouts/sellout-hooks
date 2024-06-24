@@ -1,5 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import {
+  Config,
   simulateContract,
   waitForTransactionReceipt,
   writeContract
@@ -35,13 +36,16 @@ export const submitProposal = async (input: SubmitProposal) => {
   try {
     const validatedInput = SubmitProposalSchema.parse(input)
 
-    const { request } = await simulateContract(wagmiConfig as unknown as Config, {
-      abi: VenueABI,
-      address: addresses.Venue as `0x${string}`,
-      functionName: 'submitProposal',
-      args: [showId, venueId, proposedDates, paymentToken],
-      chainId
-    })
+    const { request } = await simulateContract(
+      wagmiConfig as unknown as Config,
+      {
+        abi: VenueABI,
+        address: addresses.Venue as `0x${string}`,
+        functionName: 'submitProposal',
+        args: [showId, venueId, proposedDates, paymentToken],
+        chainId
+      }
+    )
 
     const hash = await writeContract(wagmiConfig as unknown as Config, {
       ...request,
@@ -49,7 +53,8 @@ export const submitProposal = async (input: SubmitProposal) => {
     })
     return {
       hash,
-      getReceipt: () => waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
+      getReceipt: () =>
+        waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
     }
   } catch (err) {
     console.error('Validation or Execution Error:', err)
