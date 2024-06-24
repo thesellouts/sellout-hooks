@@ -1,5 +1,5 @@
-import zoraAddresses from '@lucidlabs/sellout-protocol/addresses/7777777.json'
-import sepoliaAddresses from '@lucidlabs/sellout-protocol/addresses/11155111.json'
+import zoraAddresses from '@thesellouts/sellout-protocol/addresses/7777777.json'
+import sepoliaAddresses from '@thesellouts/sellout-protocol/addresses/11155111.json'
 import { Chain, sepolia, zora } from 'viem/chains'
 
 interface ContractAddresses {

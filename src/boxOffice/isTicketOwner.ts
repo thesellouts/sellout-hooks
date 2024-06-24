@@ -1,5 +1,5 @@
-import BoxOfficeABI from '@lucidlabs/sellout-protocol/abis/BoxOffice.json'
 import { useQuery } from '@tanstack/react-query'
+import BoxOfficeABI from '@thesellouts/sellout-protocol/abis/BoxOffice.json'
 import { Config, readContract } from '@wagmi/core'
 import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'

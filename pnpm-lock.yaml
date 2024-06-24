@@ -8,12 +8,15 @@ importers:
 
   .:
     dependencies:
-      '@lucidlabs/sellout-protocol':
-        specifier: ^1.0.1
-        version: 1.0.1
       '@tanstack/react-query':
         specifier: '>=5.0.0'
         version: 5.45.0(react@18.3.1)
+      '@thesellouts/sellout-protocol':
+        specifier: ^0.1.0
+        version: 0.1.0
+      '@wagmi/core':
+        specifier: ^2.11.2
+        version: 2.11.2(@tanstack/query-core@5.45.0)(@types/react@18.3.3)(bufferutil@4.0.8)(react@18.3.1)(typescript@5.4.5)(viem@2.7.22(bufferutil@4.0.8)(typescript@5.4.5)(zod@3.23.8))(zod@3.23.8)
       react:
         specifier: '>=18'
         version: 18.3.1
@@ -23,6 +26,9 @@ importers:
       viem:
         specifier: 2.x
         version: 2.7.22(bufferutil@4.0.8)(typescript@5.4.5)(zod@3.23.8)
+      wagmi:
+        specifier: ^2.10.5
+        version: 2.10.5(@tanstack/query-core@5.45.0)(@tanstack/react-query@5.45.0(react@18.3.1))(@types/react@18.3.3)(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react-i18next@13.5.0(i18next@22.5.1)(react-dom@18.3.1(react@18.3.1))(react-native@0.74.2(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.3.3)(bufferutil@4.0.8)(react@18.3.1))(react@18.3.1))(react-native@0.74.2(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.3.3)(bufferutil@4.0.8)(react@18.3.1))(react@18.3.1)(typescript@5.4.5)(viem@2.7.22(bufferutil@4.0.8)(typescript@5.4.5)(zod@3.23.8))(zod@3.23.8)
       zod:
         specifier: ^3.23.0
         version: 3.23.8
@@ -33,9 +39,6 @@ importers:
       '@types/react':
         specifier: ^18.3.3
         version: 18.3.3
-      '@wagmi/core':
-        specifier: ^2.11.2
-        version: 2.11.2(@tanstack/query-core@5.45.0)(@types/react@18.3.3)(bufferutil@4.0.8)(react@18.3.1)(typescript@5.4.5)(viem@2.7.22(bufferutil@4.0.8)(typescript@5.4.5)(zod@3.23.8))(zod@3.23.8)
       eslint:
         specifier: ^8.57.0
         version: 8.57.0
@@ -63,9 +66,6 @@ importers:
       typescript:
         specifier: ^5.3.0
         version: 5.4.5
-      wagmi:
-        specifier: ^2.10.5
-        version: 2.10.5(@tanstack/query-core@5.45.0)(@tanstack/react-query@5.45.0(react@18.3.1))(@types/react@18.3.3)(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react-i18next@13.5.0(i18next@22.5.1)(react-dom@18.3.1(react@18.3.1))(react-native@0.74.2(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.3.3)(bufferutil@4.0.8)(react@18.3.1))(react@18.3.1))(react-native@0.74.2(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.3.3)(bufferutil@4.0.8)(react@18.3.1))(react@18.3.1)(typescript@5.4.5)(viem@2.7.22(bufferutil@4.0.8)(typescript@5.4.5)(zod@3.23.8))(zod@3.23.8)
 
 packages:
 
@@ -923,9 +923,6 @@ packages:
   '@lit/reactive-element@1.6.3':
     resolution: {integrity: sha512-QuTgnG52Poic7uM1AN5yJ09QMe0O28e10XzSvWDz02TJiiKee4stsiownEIadWm8nYzyDAyT+gKzUoZmiWQtsQ==}
 
-  '@lucidlabs/sellout-protocol@1.0.1':
-    resolution: {integrity: sha512-ODgcKKNxF5Om35MF7xMq2OASovh3rNHptLEMfHnoYnWLgRkVXUEe65qUwfuuo6FIVaRhbUGoJjdNarfY12Ayng==}
-
   '@metamask/eth-json-rpc-provider@1.0.1':
     resolution: {integrity: sha512-whiUMPlAOrVGmX8aKYVPvlKyG4CpQXiNNyt74vE1xb5sPvmx5oA7B/kOi/JdBvhGQq97U1/AVdXEdk2zkP8qyA==}
     engines: {node: '>=14.0.0'}
@@ -1369,6 +1366,9 @@ packages:
     resolution: {integrity: sha512-y272cKRJp1BvehrWG4ashOBuqBj1Qm2O6fgYJ9LYSHrLdsCXl74GbSVjUQTReUdHuRIl9cEOoyPa6HYag400lw==}
     peerDependencies:
       react: ^18.0.0
+
+  '@thesellouts/sellout-protocol@0.1.0':
+    resolution: {integrity: sha512-996cpLkn4K7solRZvaIlV/47/MKDvsqwHAPjo0Ff8+xI4lQMxh1+yFcIvhsWxYFXEJ1/Bjw95lHhmQaDvoglAA==}
 
   '@tsconfig/node10@1.0.11':
     resolution: {integrity: sha512-DcRjDCujK/kCk/cUe8Xz8ZSpm8mS3mNNpta+jGCA6USEDfktlNvm1+IuZ9eTcDbNk41BHwpHHeW+N1lKCz4zOw==}
@@ -5771,8 +5771,6 @@ snapshots:
     dependencies:
       '@lit-labs/ssr-dom-shim': 1.2.0
 
-  '@lucidlabs/sellout-protocol@1.0.1': {}
-
   '@metamask/eth-json-rpc-provider@1.0.1':
     dependencies:
       '@metamask/json-rpc-engine': 7.3.3
@@ -6522,6 +6520,8 @@ snapshots:
     dependencies:
       '@tanstack/query-core': 5.45.0
       react: 18.3.1
+
+  '@thesellouts/sellout-protocol@0.1.0': {}
 
   '@tsconfig/node10@1.0.11': {}
 
