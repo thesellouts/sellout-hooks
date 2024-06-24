@@ -9,7 +9,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { ArtistRegistryABI } from '../../abis'
-import { getContractAddresses, wagmiConfig } from '../../config'
+import { getContractAddresses } from '../../config'
 
 const DeregisterArtistSchema = z.object({
   artistId: z.number(),
@@ -18,12 +18,15 @@ const DeregisterArtistSchema = z.object({
 
 export type DeregisterArtistInput = z.infer<typeof DeregisterArtistSchema>
 
-export const deregisterArtist = async (input: DeregisterArtistInput) => {
+export const deregisterArtist = async (
+  input: DeregisterArtistInput,
+  config: Config
+) => {
   const { chainId, artistId } = input
   const addresses = getContractAddresses(chainId)
   const validatedInput = DeregisterArtistSchema.parse(input)
 
-  const { request } = await simulateContract(wagmiConfig as unknown as Config, {
+  const { request } = await simulateContract(config, {
     abi: ArtistRegistryABI,
     address: addresses.ArtistRegistry as `0x${string}`,
     functionName: 'deregisterArtist',
@@ -31,16 +34,19 @@ export const deregisterArtist = async (input: DeregisterArtistInput) => {
     chainId
   })
 
-  const hash = await writeContract(wagmiConfig as unknown as Config, request)
+  const hash = await writeContract(config, request)
   return {
     hash,
-    getReceipt: () => waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
+    getReceipt: () => waitForTransactionReceipt(config, { hash })
   }
 }
 
-export const useDeregisterArtist = () => {
+export const useDeregisterArtist = (
+  input: DeregisterArtistInput,
+  config: Config
+) => {
   return useMutation({
-    mutationFn: (input: DeregisterArtistInput) => deregisterArtist(input),
+    mutationFn: () => deregisterArtist(input, config),
     onError: error => {
       console.error('Error deregistering artist:', error)
     }

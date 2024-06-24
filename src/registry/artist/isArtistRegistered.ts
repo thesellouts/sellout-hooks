@@ -4,7 +4,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { ArtistRegistryABI } from '../../abis'
-import { getContractAddresses, wagmiConfig } from '../../config'
+import { getContractAddresses } from '../../config'
 
 const IsArtistRegisteredSchema = z.object({
   artistAddress: z.string(),
@@ -13,12 +13,15 @@ const IsArtistRegisteredSchema = z.object({
 
 export type IsArtistRegisteredInput = z.infer<typeof IsArtistRegisteredSchema>
 
-export const isArtistRegistered = async (input: IsArtistRegisteredInput) => {
+export const isArtistRegistered = async (
+  input: IsArtistRegisteredInput,
+  config: Config
+) => {
   const { chainId, artistAddress } = input
   const addresses = getContractAddresses(chainId)
   const validatedInput = IsArtistRegisteredSchema.parse(input)
 
-  return await readContract(wagmiConfig as unknown as Config, {
+  return await readContract(config, {
     abi: ArtistRegistryABI,
     address: addresses.ArtistRegistry as `0x${string}`,
     functionName: 'isArtistRegistered',
@@ -27,10 +30,13 @@ export const isArtistRegistered = async (input: IsArtistRegisteredInput) => {
   })
 }
 
-export const useIsArtistRegistered = (input: IsArtistRegisteredInput) => {
+export const useIsArtistRegistered = (
+  input: IsArtistRegisteredInput,
+  config: Config
+) => {
   return useQuery({
     queryKey: ['isArtistRegistered', input.artistAddress],
-    queryFn: () => isArtistRegistered(input),
+    queryFn: () => isArtistRegistered(input, config),
     enabled: !!input.artistAddress
   })
 }

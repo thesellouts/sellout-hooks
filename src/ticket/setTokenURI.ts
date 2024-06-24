@@ -9,7 +9,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { TicketABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const SetTokenURISchema = z.object({
   showId: z.string(),
@@ -20,14 +20,14 @@ const SetTokenURISchema = z.object({
 
 export type SetTokenURIType = z.infer<typeof SetTokenURISchema>
 
-export const setTokenURI = async (input: SetTokenURIType) => {
+export const setTokenURI = async (input: SetTokenURIType, config: Config) => {
   const { showId, tokenId, newURI, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
     const validatedInput = SetTokenURISchema.parse(input)
 
-    const { request } = await simulateContract(wagmiConfig as unknown as Config, {
+    const { request } = await simulateContract(config, {
       abi: TicketABI,
       address: addresses.Ticket as `0x${string}`,
       functionName: 'setTokenURI',
@@ -39,10 +39,10 @@ export const setTokenURI = async (input: SetTokenURIType) => {
       chainId
     })
 
-    const hash = await writeContract(wagmiConfig as unknown as Config, request)
+    const hash = await writeContract(config, request)
     return {
       hash,
-      getReceipt: () => waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
+      getReceipt: () => waitForTransactionReceipt(config, { hash })
     }
   } catch (err) {
     console.error('Validation or Execution Error:', err)
@@ -50,9 +50,9 @@ export const setTokenURI = async (input: SetTokenURIType) => {
   }
 }
 
-export const useSetTokenURI = () => {
+export const useSetTokenURI = (input: SetTokenURIType, config: Config) => {
   return useMutation({
-    mutationFn: (input: SetTokenURIType) => setTokenURI(input),
+    mutationFn: () => setTokenURI(input, config),
     onError: error => {
       console.error('Error setting token URI:', error)
     }

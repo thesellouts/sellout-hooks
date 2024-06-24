@@ -9,7 +9,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { ShowABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const VoteForEmergencyRefundSchema = z.object({
   showId: z.string(),
@@ -21,7 +21,8 @@ export type VoteForEmergencyRefundType = z.infer<
 >
 
 export const voteForEmergencyRefund = async (
-  input: VoteForEmergencyRefundType
+  input: VoteForEmergencyRefundType,
+  config: Config
 ) => {
   const { chainId } = input
   const addresses = getContractAddresses(chainId)
@@ -29,7 +30,7 @@ export const voteForEmergencyRefund = async (
   try {
     const validatedInput = VoteForEmergencyRefundSchema.parse(input)
 
-    const { request } = await simulateContract(wagmiConfig as unknown as Config, {
+    const { request } = await simulateContract(config, {
       abi: ShowABI,
       address: addresses.Show as `0x${string}`,
       functionName: 'voteForEmergencyRefund',
@@ -37,10 +38,10 @@ export const voteForEmergencyRefund = async (
       chainId
     })
 
-    const hash = await writeContract(wagmiConfig as unknown as Config, request)
+    const hash = await writeContract(config, request)
     return {
       hash,
-      getReceipt: () => waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
+      getReceipt: () => waitForTransactionReceipt(config, { hash })
     }
   } catch (err) {
     console.error('Validation or Execution Error:', err)
@@ -48,10 +49,12 @@ export const voteForEmergencyRefund = async (
   }
 }
 
-export const useVoteForEmergencyRefund = () => {
+export const useVoteForEmergencyRefund = (
+  input: VoteForEmergencyRefundType,
+  config: Config
+) => {
   return useMutation({
-    mutationFn: (input: VoteForEmergencyRefundType) =>
-      voteForEmergencyRefund(input),
+    mutationFn: () => voteForEmergencyRefund(input, config),
     onError: error => {
       console.error('Error voting for emergency refund:', error)
     }

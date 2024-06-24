@@ -4,7 +4,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { ShowABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const GetShowStatusSchema = z.object({
   showId: z.string(),
@@ -13,12 +13,15 @@ const GetShowStatusSchema = z.object({
 
 export type GetShowStatusInput = z.infer<typeof GetShowStatusSchema>
 
-export const getShowStatus = async (input: GetShowStatusInput) => {
+export const getShowStatus = async (
+  input: GetShowStatusInput,
+  config: Config
+) => {
   const { showId, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(wagmiConfig as unknown as Config, {
+    return await readContract(config, {
       address: addresses.Show as `0x${string}`,
       abi: ShowABI,
       functionName: 'getShowStatus',
@@ -31,10 +34,10 @@ export const getShowStatus = async (input: GetShowStatusInput) => {
   }
 }
 
-export const useGetShowStatus = (input: GetShowStatusInput) => {
+export const useGetShowStatus = (input: GetShowStatusInput, config: Config) => {
   return useQuery({
     queryKey: ['getShowStatus', input.showId],
-    queryFn: () => getShowStatus(input),
+    queryFn: () => getShowStatus(input, config),
     enabled: !!input.showId
   })
 }

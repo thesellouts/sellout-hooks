@@ -4,7 +4,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { VenueABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const GetProposalPeriodSchema = z.object({
   showId: z.string(),
@@ -13,12 +13,15 @@ const GetProposalPeriodSchema = z.object({
 
 export type GetProposalPeriodInput = z.infer<typeof GetProposalPeriodSchema>
 
-export const getProposalPeriod = async (input: GetProposalPeriodInput) => {
+export const getProposalPeriod = async (
+  input: GetProposalPeriodInput,
+  config: Config
+) => {
   const { showId, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(wagmiConfig as unknown as Config, {
+    return await readContract(config, {
       address: addresses.Venue as `0x${string}`,
       abi: VenueABI,
       functionName: 'getProposalPeriod',
@@ -31,10 +34,13 @@ export const getProposalPeriod = async (input: GetProposalPeriodInput) => {
   }
 }
 
-export const useGetProposalPeriod = (input: GetProposalPeriodInput) => {
+export const useGetProposalPeriod = (
+  input: GetProposalPeriodInput,
+  config: Config
+) => {
   return useQuery({
     queryKey: ['getProposalPeriod', input.showId],
-    queryFn: () => getProposalPeriod(input),
+    queryFn: () => getProposalPeriod(input, config),
     enabled: !!input.showId
   })
 }

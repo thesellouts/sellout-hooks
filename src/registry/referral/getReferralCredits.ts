@@ -4,7 +4,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { ReferralABI } from '../../abis'
-import { getContractAddresses, wagmiConfig } from '../../config'
+import { getContractAddresses } from '../../config'
 import { AddressSchema } from '../../utils'
 
 const GetReferralCreditsSchema = z.object({
@@ -14,12 +14,15 @@ const GetReferralCreditsSchema = z.object({
 
 export type GetReferralCreditsInput = z.infer<typeof GetReferralCreditsSchema>
 
-export const getReferralCredits = async (input: GetReferralCreditsInput) => {
+export const getReferralCredits = async (
+  input: GetReferralCreditsInput,
+  config: Config
+) => {
   const { chainId, referrer } = input
   const addresses = getContractAddresses(chainId)
   const validatedInput = GetReferralCreditsSchema.parse(input)
 
-  return await readContract(wagmiConfig as unknown as Config, {
+  return await readContract(config, {
     abi: ReferralABI,
     address: addresses.ReferralModule as `0x${string}`,
     functionName: 'getReferralCredits',
@@ -28,10 +31,13 @@ export const getReferralCredits = async (input: GetReferralCreditsInput) => {
   })
 }
 
-export const useGetReferralCredits = (input: GetReferralCreditsInput) => {
+export const useGetReferralCredits = (
+  input: GetReferralCreditsInput,
+  config: Config
+) => {
   return useQuery({
     queryKey: ['getReferralCredits', input.referrer],
-    queryFn: () => getReferralCredits(input),
+    queryFn: () => getReferralCredits(input, config),
     enabled: !!input.referrer
   })
 }

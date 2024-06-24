@@ -4,7 +4,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { VenueABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const GetHasDateVotedSchema = z.object({
   showId: z.string(),
@@ -14,12 +14,15 @@ const GetHasDateVotedSchema = z.object({
 
 export type GetHasDateVotedInput = z.infer<typeof GetHasDateVotedSchema>
 
-export const getHasDateVoted = async (input: GetHasDateVotedInput) => {
+export const getHasDateVoted = async (
+  input: GetHasDateVotedInput,
+  config: Config
+) => {
   const { showId, user, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(wagmiConfig as unknown as Config, {
+    return await readContract(config, {
       address: addresses.Venue as `0x${string}`,
       abi: VenueABI,
       functionName: 'getHasDateVoted',
@@ -32,10 +35,13 @@ export const getHasDateVoted = async (input: GetHasDateVotedInput) => {
   }
 }
 
-export const useGetHasDateVoted = (input: GetHasDateVotedInput) => {
+export const useGetHasDateVoted = (
+  input: GetHasDateVotedInput,
+  config: Config
+) => {
   return useQuery({
     queryKey: ['getHasDateVoted', input.showId, input.user],
-    queryFn: () => getHasDateVoted(input),
+    queryFn: () => getHasDateVoted(input, config),
     enabled: !!input.showId && !!input.user
   })
 }

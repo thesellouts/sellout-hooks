@@ -4,7 +4,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { OrganizerRegistryABI } from '../../abis'
-import { getContractAddresses, wagmiConfig } from '../../config'
+import { getContractAddresses } from '../../config'
 
 const GetOrganizerSchema = z.object({
   organizerAddress: z.string(),
@@ -13,12 +13,15 @@ const GetOrganizerSchema = z.object({
 
 export type GetOrganizerInput = z.infer<typeof GetOrganizerSchema>
 
-export const getOrganizer = async (input: GetOrganizerInput) => {
+export const getOrganizer = async (
+  input: GetOrganizerInput,
+  config: Config
+) => {
   const { chainId, organizerAddress } = input
   const addresses = getContractAddresses(chainId)
   const validatedInput = GetOrganizerSchema.parse(input)
 
-  return await readContract(wagmiConfig as unknown as Config, {
+  return await readContract(config, {
     abi: OrganizerRegistryABI,
     address: addresses.OrganizerRegistry as `0x${string}`,
     functionName: 'getOrganizer',
@@ -27,10 +30,10 @@ export const getOrganizer = async (input: GetOrganizerInput) => {
   })
 }
 
-export const useGetOrganizer = (input: GetOrganizerInput) => {
+export const useGetOrganizer = (input: GetOrganizerInput, config: Config) => {
   return useQuery({
     queryKey: ['getOrganizer', input.organizerAddress],
-    queryFn: () => getOrganizer(input),
+    queryFn: () => getOrganizer(input, config),
     enabled: !!input.organizerAddress
   })
 }

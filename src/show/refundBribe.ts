@@ -9,7 +9,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { ShowABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const RefundBribeSchema = z.object({
   showId: z.string(),
@@ -20,14 +20,14 @@ const RefundBribeSchema = z.object({
 
 export type RefundBribeType = z.infer<typeof RefundBribeSchema>
 
-export const refundBribe = async (input: RefundBribeType) => {
+export const refundBribe = async (input: RefundBribeType, config: Config) => {
   const { showId, venueId, proposalIndex, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
     const validatedInput = RefundBribeSchema.parse(input)
 
-    const { request } = await simulateContract(wagmiConfig as unknown as Config, {
+    const { request } = await simulateContract(config, {
       abi: ShowABI,
       address: addresses.Show as `0x${string}`,
       functionName: 'refundBribe',
@@ -39,10 +39,10 @@ export const refundBribe = async (input: RefundBribeType) => {
       chainId
     })
 
-    const hash = await writeContract(wagmiConfig as unknown as Config, request)
+    const hash = await writeContract(config, request)
     return {
       hash,
-      getReceipt: () => waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
+      getReceipt: () => waitForTransactionReceipt(config, { hash })
     }
   } catch (err) {
     console.error('Validation or Execution Error:', err)
@@ -50,9 +50,9 @@ export const refundBribe = async (input: RefundBribeType) => {
   }
 }
 
-export const useRefundBribe = () => {
+export const useRefundBribe = (input: RefundBribeType, config: Config) => {
   return useMutation({
-    mutationFn: (input: RefundBribeType) => refundBribe(input),
+    mutationFn: () => refundBribe(input, config),
     onError: error => {
       console.error('Error refunding bribe:', error)
     }

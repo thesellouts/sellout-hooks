@@ -9,7 +9,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { ShowABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const CompleteShowSchema = z.object({
   showId: z.string(),
@@ -18,13 +18,13 @@ const CompleteShowSchema = z.object({
 
 export type CompleteShowType = z.infer<typeof CompleteShowSchema>
 
-export const completeShow = async (input: CompleteShowType) => {
+export const completeShow = async (input: CompleteShowType, config: Config) => {
   const { chainId } = input
   const addresses = getContractAddresses(chainId)
   try {
     const validatedInput = CompleteShowSchema.parse(input)
 
-    const { request } = await simulateContract(wagmiConfig as unknown as Config, {
+    const { request } = await simulateContract(config, {
       abi: ShowABI,
       address: addresses.Show as `0x${string}`,
       functionName: 'completeShow',
@@ -32,10 +32,10 @@ export const completeShow = async (input: CompleteShowType) => {
       chainId
     })
 
-    const hash = await writeContract(wagmiConfig as unknown as Config, request)
+    const hash = await writeContract(config, request)
     return {
       hash,
-      getReceipt: () => waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
+      getReceipt: () => waitForTransactionReceipt(config, { hash })
     }
   } catch (err) {
     console.error('Validation or Execution Error:', err)
@@ -43,9 +43,9 @@ export const completeShow = async (input: CompleteShowType) => {
   }
 }
 
-export const useCompleteShow = () => {
+export const useCompleteShow = (input: CompleteShowType, config: Config) => {
   return useMutation({
-    mutationFn: (input: CompleteShowType) => completeShow(input),
+    mutationFn: () => completeShow(input, config),
     onError: error => {
       console.error('Error completing show:', error)
     }

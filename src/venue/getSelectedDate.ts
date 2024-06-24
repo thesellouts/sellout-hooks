@@ -4,7 +4,7 @@ import { sepolia, zora, zoraSepolia } from 'viem/chains'
 import { z } from 'zod'
 
 import { VenueABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const GetSelectedDateSchema = z.object({
   showId: z.string(),
@@ -13,12 +13,15 @@ const GetSelectedDateSchema = z.object({
 
 export type GetSelectedDateInput = z.infer<typeof GetSelectedDateSchema>
 
-export const getSelectedDate = async (input: GetSelectedDateInput) => {
+export const getSelectedDate = async (
+  input: GetSelectedDateInput,
+  config: Config
+) => {
   const { showId, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(wagmiConfig as unknown as Config, {
+    return await readContract(config, {
       address: addresses.Venue as `0x${string}`,
       abi: VenueABI,
       functionName: 'getSelectedDate',
@@ -31,10 +34,13 @@ export const getSelectedDate = async (input: GetSelectedDateInput) => {
   }
 }
 
-export const useGetSelectedDate = (input: GetSelectedDateInput) => {
+export const useGetSelectedDate = (
+  input: GetSelectedDateInput,
+  config: Config
+) => {
   return useQuery({
     queryKey: ['getSelectedDate', input.showId],
-    queryFn: () => getSelectedDate(input),
+    queryFn: () => getSelectedDate(input, config),
     enabled: !!input.showId
   })
 }

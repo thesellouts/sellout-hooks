@@ -4,7 +4,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { VenueABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const GetPreviousDateVoteSchema = z.object({
   showId: z.string(),
@@ -14,12 +14,15 @@ const GetPreviousDateVoteSchema = z.object({
 
 export type GetPreviousDateVoteInput = z.infer<typeof GetPreviousDateVoteSchema>
 
-export const getPreviousDateVote = async (input: GetPreviousDateVoteInput) => {
+export const getPreviousDateVote = async (
+  input: GetPreviousDateVoteInput,
+  config: Config
+) => {
   const { showId, user, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(wagmiConfig as unknown as Config, {
+    return await readContract(config, {
       address: addresses.Venue as `0x${string}`,
       abi: VenueABI,
       functionName: 'getPreviousDateVote',
@@ -32,10 +35,13 @@ export const getPreviousDateVote = async (input: GetPreviousDateVoteInput) => {
   }
 }
 
-export const useGetPreviousDateVote = (input: GetPreviousDateVoteInput) => {
+export const useGetPreviousDateVote = (
+  input: GetPreviousDateVoteInput,
+  config: Config
+) => {
   return useQuery({
     queryKey: ['getPreviousDateVote', input.showId, input.user],
-    queryFn: () => getPreviousDateVote(input),
+    queryFn: () => getPreviousDateVote(input, config),
     enabled: !!input.showId && !!input.user
   })
 }

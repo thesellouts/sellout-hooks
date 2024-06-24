@@ -9,7 +9,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { ShowABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const PayoutSchema = z.object({
   showId: z.string(),
@@ -18,14 +18,14 @@ const PayoutSchema = z.object({
 
 export type PayoutType = z.infer<typeof PayoutSchema>
 
-export const payout = async (input: PayoutType) => {
+export const payout = async (input: PayoutType, config: Config) => {
   const { showId, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
     const validatedInput = PayoutSchema.parse(input)
 
-    const { request } = await simulateContract(wagmiConfig as unknown as Config, {
+    const { request } = await simulateContract(config, {
       abi: ShowABI,
       address: addresses.Show as `0x${string}`,
       functionName: 'payout',
@@ -33,10 +33,10 @@ export const payout = async (input: PayoutType) => {
       chainId
     })
 
-    const hash = await writeContract(wagmiConfig as unknown as Config, request)
+    const hash = await writeContract(config, request)
     return {
       hash,
-      getReceipt: () => waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
+      getReceipt: () => waitForTransactionReceipt(config, { hash })
     }
   } catch (err) {
     console.error('Validation or Execution Error:', err)
@@ -44,9 +44,9 @@ export const payout = async (input: PayoutType) => {
   }
 }
 
-export const usePayout = () => {
+export const usePayout = (input: PayoutType, config: Config) => {
   return useMutation({
-    mutationFn: (input: PayoutType) => payout(input),
+    mutationFn: () => payout(input, config),
     onError: error => {
       console.error('Error executing payout:', error)
     }

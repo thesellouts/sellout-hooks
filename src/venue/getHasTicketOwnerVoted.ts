@@ -4,7 +4,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { VenueABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const GetHasTicketOwnerVotedSchema = z.object({
   showId: z.string(),
@@ -17,13 +17,14 @@ export type GetHasTicketOwnerVotedInput = z.infer<
 >
 
 export const getHasTicketOwnerVoted = async (
-  input: GetHasTicketOwnerVotedInput
+  input: GetHasTicketOwnerVotedInput,
+  config: Config
 ) => {
   const { showId, user, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(wagmiConfig as unknown as Config, {
+    return await readContract(config, {
       address: addresses.Venue as `0x${string}`,
       abi: VenueABI,
       functionName: 'getHasTicketOwnerVoted',
@@ -37,11 +38,12 @@ export const getHasTicketOwnerVoted = async (
 }
 
 export const useGetHasTicketOwnerVoted = (
-  input: GetHasTicketOwnerVotedInput
+  input: GetHasTicketOwnerVotedInput,
+  config: Config
 ) => {
   return useQuery({
     queryKey: ['getHasTicketOwnerVoted', input.showId, input.user],
-    queryFn: () => getHasTicketOwnerVoted(input),
+    queryFn: () => getHasTicketOwnerVoted(input, config),
     enabled: !!input.showId && !!input.user
   })
 }

@@ -4,7 +4,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { ShowVaultABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const GetShowPaymentTokenSchema = z.object({
   showId: z.string(),
@@ -13,12 +13,15 @@ const GetShowPaymentTokenSchema = z.object({
 
 export type GetShowPaymentTokenInput = z.infer<typeof GetShowPaymentTokenSchema>
 
-export const getShowPaymentToken = async (input: GetShowPaymentTokenInput) => {
+export const getShowPaymentToken = async (
+  input: GetShowPaymentTokenInput,
+  config: Config
+) => {
   const { showId, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(wagmiConfig as unknown as Config, {
+    return await readContract(config, {
       address: addresses.ShowVault as `0x${string}`,
       abi: ShowVaultABI,
       functionName: 'getShowPaymentToken',
@@ -31,10 +34,13 @@ export const getShowPaymentToken = async (input: GetShowPaymentTokenInput) => {
   }
 }
 
-export const useGetShowPaymentToken = (input: GetShowPaymentTokenInput) => {
+export const useGetShowPaymentToken = (
+  input: GetShowPaymentTokenInput,
+  config: Config
+) => {
   return useQuery({
     queryKey: ['getShowPaymentToken', input.showId],
-    queryFn: () => getShowPaymentToken(input),
+    queryFn: () => getShowPaymentToken(input, config),
     enabled: !!input.showId
   })
 }

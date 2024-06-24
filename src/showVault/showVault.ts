@@ -4,7 +4,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { ShowVaultABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const GetShowVaultSchema = z.object({
   showId: z.string(),
@@ -14,13 +14,14 @@ const GetShowVaultSchema = z.object({
 export type GetShowVaultInput = z.infer<typeof GetShowVaultSchema>
 
 export const getShowVault = async (
-  input: GetShowVaultInput
+  input: GetShowVaultInput,
+  config: Config
 ): Promise<bigint> => {
   const { showId, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return (await readContract(wagmiConfig as unknown as Config, {
+    return (await readContract(config, {
       address: addresses.ShowVault as `0x${string}`,
       abi: ShowVaultABI,
       functionName: 'showVault',
@@ -35,11 +36,12 @@ export const getShowVault = async (
 
 export const useGetShowVault = (
   input: GetShowVaultInput,
+  config: Config,
   enabled: boolean = true
 ) => {
   return useQuery({
     queryKey: ['getShowVault', input.showId],
-    queryFn: () => getShowVault(input),
+    queryFn: () => getShowVault(input, config),
     enabled: !!input.showId && enabled
   })
 }

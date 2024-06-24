@@ -4,7 +4,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { ShowABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const GetShowToTicketProxySchema = z.object({
   showId: z.string(),
@@ -16,13 +16,14 @@ export type GetShowToTicketProxyInput = z.infer<
 >
 
 export const getShowToTicketProxy = async (
-  input: GetShowToTicketProxyInput
+  input: GetShowToTicketProxyInput,
+  config: Config
 ) => {
   const { showId, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(wagmiConfig as unknown as Config, {
+    return await readContract(config, {
       address: addresses.Show as `0x${string}`,
       abi: ShowABI,
       functionName: 'getShowToTicketProxy',
@@ -35,10 +36,13 @@ export const getShowToTicketProxy = async (
   }
 }
 
-export const useGetShowToTicketProxy = (input: GetShowToTicketProxyInput) => {
+export const useGetShowToTicketProxy = (
+  input: GetShowToTicketProxyInput,
+  config: Config
+) => {
   return useQuery({
     queryKey: ['getShowToTicketProxy', input.showId],
-    queryFn: () => getShowToTicketProxy(input),
+    queryFn: () => getShowToTicketProxy(input, config),
     enabled: !!input.showId
   })
 }

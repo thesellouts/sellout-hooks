@@ -9,7 +9,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { VenueABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const TicketHolderVenueVoteSchema = z.object({
   showId: z.string(),
@@ -19,29 +19,28 @@ const TicketHolderVenueVoteSchema = z.object({
 
 export type TicketHolderVenueVote = z.infer<typeof TicketHolderVenueVoteSchema>
 
-export const ticketHolderVenueVote = async (input: TicketHolderVenueVote) => {
+export const ticketHolderVenueVote = async (
+  input: TicketHolderVenueVote,
+  config: Config
+) => {
   const { showId, proposalIndex, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
     const validatedInput = TicketHolderVenueVoteSchema.parse(input)
 
-    const { request } = await simulateContract(
-      wagmiConfig as unknown as Config,
-      {
-        abi: VenueABI,
-        address: addresses.Venue as `0x${string}`,
-        functionName: 'ticketHolderVenueVote',
-        args: [showId, proposalIndex],
-        chainId
-      }
-    )
+    const { request } = await simulateContract(config, {
+      abi: VenueABI,
+      address: addresses.Venue as `0x${string}`,
+      functionName: 'ticketHolderVenueVote',
+      args: [showId, proposalIndex],
+      chainId
+    })
 
-    const hash = await writeContract(wagmiConfig as unknown as Config, request)
+    const hash = await writeContract(config, request)
     return {
       hash,
-      getReceipt: () =>
-        waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
+      getReceipt: () => waitForTransactionReceipt(config, { hash })
     }
   } catch (err) {
     console.error('Validation or Execution Error:', err)
@@ -49,9 +48,12 @@ export const ticketHolderVenueVote = async (input: TicketHolderVenueVote) => {
   }
 }
 
-export const useTicketHolderVenueVote = () => {
+export const useTicketHolderVenueVote = (
+  input: TicketHolderVenueVote,
+  config: Config
+) => {
   return useMutation({
-    mutationFn: (input: TicketHolderVenueVote) => ticketHolderVenueVote(input),
+    mutationFn: () => ticketHolderVenueVote(input, config),
     onError: error => {
       console.error('Error executing ticketHolderVenueVote:', error)
     }

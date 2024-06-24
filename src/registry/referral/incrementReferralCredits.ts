@@ -9,7 +9,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { ReferralABI } from '../../abis'
-import { getContractAddresses, wagmiConfig } from '../../config'
+import { getContractAddresses } from '../../config'
 import { AddressSchema } from '../../utils'
 
 const IncrementReferralCreditsSchema = z.object({
@@ -25,13 +25,14 @@ export type IncrementReferralCreditsInput = z.infer<
 >
 
 export const incrementReferralCredits = async (
-  input: IncrementReferralCreditsInput
+  input: IncrementReferralCreditsInput,
+  config: Config
 ) => {
   const { chainId } = input
   const addresses = getContractAddresses(chainId)
   const validatedInput = IncrementReferralCreditsSchema.parse(input)
 
-  const { request } = await simulateContract(wagmiConfig as unknown as Config, {
+  const { request } = await simulateContract(config, {
     abi: ReferralABI,
     address: addresses.ReferralModule as `0x${string}`,
     functionName: 'incrementReferralCredits',
@@ -44,17 +45,19 @@ export const incrementReferralCredits = async (
     chainId
   })
 
-  const hash = await writeContract(wagmiConfig as unknown as Config, request)
+  const hash = await writeContract(config, request)
   return {
     hash,
-    getReceipt: () => waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
+    getReceipt: () => waitForTransactionReceipt(config, { hash })
   }
 }
 
-export const useIncrementReferralCredits = () => {
+export const useIncrementReferralCredits = (
+  input: IncrementReferralCreditsInput,
+  config: Config
+) => {
   return useMutation({
-    mutationFn: (input: IncrementReferralCreditsInput) =>
-      incrementReferralCredits(input),
+    mutationFn: () => incrementReferralCredits(input, config),
     onError: error => {
       console.error('Error incrementing referral credits:', error)
     }

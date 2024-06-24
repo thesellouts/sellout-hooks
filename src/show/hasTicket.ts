@@ -4,7 +4,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { ShowABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const HasTicketSchema = z.object({
   wallet: z.string(),
@@ -14,12 +14,12 @@ const HasTicketSchema = z.object({
 
 export type HasTicketInput = z.infer<typeof HasTicketSchema>
 
-export const hasTicket = async (input: HasTicketInput) => {
+export const hasTicket = async (input: HasTicketInput, config: Config) => {
   const { wallet, showId, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(wagmiConfig as unknown as Config, {
+    return await readContract(config, {
       address: addresses.Show as `0x${string}`,
       abi: ShowABI,
       functionName: 'hasTicket',
@@ -32,10 +32,10 @@ export const hasTicket = async (input: HasTicketInput) => {
   }
 }
 
-export const useHasTicket = (input: HasTicketInput) => {
+export const useHasTicket = (input: HasTicketInput, config: Config) => {
   return useQuery({
     queryKey: ['hasTicket', input.wallet, input.showId],
-    queryFn: () => hasTicket(input),
+    queryFn: () => hasTicket(input, config),
     enabled: !!input.wallet && !!input.showId
   })
 }

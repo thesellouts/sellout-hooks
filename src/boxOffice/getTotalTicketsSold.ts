@@ -4,7 +4,7 @@ import { Config, readContract } from '@wagmi/core'
 import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const GetTotalTicketsSoldSchema = z.object({
   showId: z.string(),
@@ -13,14 +13,17 @@ const GetTotalTicketsSoldSchema = z.object({
 
 export type GetTotalTicketsSoldType = z.infer<typeof GetTotalTicketsSoldSchema>
 
-export const getTotalTicketsSold = async (input: GetTotalTicketsSoldType) => {
+export const getTotalTicketsSold = async (
+  input: GetTotalTicketsSoldType,
+  config: Config
+) => {
   const { chainId, showId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
     const validatedInput = GetTotalTicketsSoldSchema.parse(input)
 
-    const result = await readContract(wagmiConfig as unknown as Config, {
+    const result = await readContract(config, {
       abi: BoxOfficeABI.abi,
       address: addresses.BoxOffice as `0x${string}`,
       functionName: 'getTotalTicketsSold',
@@ -35,9 +38,12 @@ export const getTotalTicketsSold = async (input: GetTotalTicketsSoldType) => {
   }
 }
 
-export const useGetTotalTicketsSold = (input: GetTotalTicketsSoldType) => {
+export const useGetTotalTicketsSold = (
+  input: GetTotalTicketsSoldType,
+  config: Config
+) => {
   return useQuery({
     queryKey: ['getTotalTicketsSold', input],
-    queryFn: () => getTotalTicketsSold(input)
+    queryFn: () => getTotalTicketsSold(input, config)
   })
 }

@@ -9,7 +9,7 @@ import { sepolia, zora, zoraSepolia } from 'viem/chains'
 import { z } from 'zod'
 
 import { VenueABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const VoteForDateSchema = z.object({
   showId: z.string(),
@@ -19,14 +19,14 @@ const VoteForDateSchema = z.object({
 
 export type VoteForDate = z.infer<typeof VoteForDateSchema>
 
-export const voteForDate = async (input: VoteForDate) => {
+export const voteForDate = async (input: VoteForDate, config: Config) => {
   const { showId, dateIndex, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
     const validatedInput = VoteForDateSchema.parse(input)
 
-    const { request } = await simulateContract(wagmiConfig as unknown as Config, {
+    const { request } = await simulateContract(config, {
       abi: VenueABI,
       address: addresses.Venue as `0x${string}`,
       functionName: 'voteForDate',
@@ -34,10 +34,10 @@ export const voteForDate = async (input: VoteForDate) => {
       chainId
     })
 
-    const hash = await writeContract(wagmiConfig as unknown as Config, request)
+    const hash = await writeContract(config, request)
     return {
       hash,
-      getReceipt: () => waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
+      getReceipt: () => waitForTransactionReceipt(config, { hash })
     }
   } catch (err) {
     console.error('Validation or Execution Error:', err)
@@ -45,9 +45,9 @@ export const voteForDate = async (input: VoteForDate) => {
   }
 }
 
-export const useVoteForDate = () => {
+export const useVoteForDate = (input: VoteForDate, config: Config) => {
   return useMutation({
-    mutationFn: (input: VoteForDate) => voteForDate(input),
+    mutationFn: () => voteForDate(input, config),
     onError: error => {
       console.error('Error executing voteForDate:', error)
     }

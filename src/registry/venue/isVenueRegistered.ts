@@ -4,7 +4,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { VenueRegistryABI } from '../../abis'
-import { getContractAddresses, wagmiConfig } from '../../config'
+import { getContractAddresses } from '../../config'
 
 const IsVenueRegisteredSchema = z.object({
   venueAddress: z.string(),
@@ -13,12 +13,15 @@ const IsVenueRegisteredSchema = z.object({
 
 export type IsVenueRegisteredInput = z.infer<typeof IsVenueRegisteredSchema>
 
-export const isVenueRegistered = async (input: IsVenueRegisteredInput) => {
+export const isVenueRegistered = async (
+  input: IsVenueRegisteredInput,
+  config: Config
+) => {
   const { chainId, venueAddress } = input
   const addresses = getContractAddresses(chainId)
   const validatedInput = IsVenueRegisteredSchema.parse(input)
 
-  return await readContract(wagmiConfig as unknown as Config, {
+  return await readContract(config, {
     abi: VenueRegistryABI,
     address: addresses.VenueRegistry as `0x${string}`,
     functionName: 'isVenueRegistered',
@@ -27,10 +30,13 @@ export const isVenueRegistered = async (input: IsVenueRegisteredInput) => {
   })
 }
 
-export const useIsVenueRegistered = (input: IsVenueRegisteredInput) => {
+export const useIsVenueRegistered = (
+  input: IsVenueRegisteredInput,
+  config: Config
+) => {
   return useQuery({
     queryKey: ['isVenueRegistered', input.venueAddress],
-    queryFn: () => isVenueRegistered(input),
+    queryFn: () => isVenueRegistered(input, config),
     enabled: !!input.venueAddress
   })
 }

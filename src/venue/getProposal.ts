@@ -4,7 +4,7 @@ import { sepolia, zora, zoraSepolia } from 'viem/chains'
 import { z } from 'zod'
 
 import { VenueABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const GetProposalSchema = z.object({
   showId: z.string(),
@@ -14,12 +14,12 @@ const GetProposalSchema = z.object({
 
 export type GetProposalInput = z.infer<typeof GetProposalSchema>
 
-export const getProposal = async (input: GetProposalInput) => {
+export const getProposal = async (input: GetProposalInput, config: Config) => {
   const { showId, proposalIndex, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(wagmiConfig as unknown as Config, {
+    return await readContract(config, {
       address: addresses.Venue as `0x${string}`,
       abi: VenueABI,
       functionName: 'getProposal',
@@ -32,10 +32,10 @@ export const getProposal = async (input: GetProposalInput) => {
   }
 }
 
-export const useGetProposal = (input: GetProposalInput) => {
+export const useGetProposal = (input: GetProposalInput, config: Config) => {
   return useQuery({
     queryKey: ['getProposal', input.showId, input.proposalIndex],
-    queryFn: () => getProposal(input),
+    queryFn: () => getProposal(input, config),
     enabled: !!input.showId && input.proposalIndex >= 0
   })
 }

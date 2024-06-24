@@ -4,7 +4,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { ShowABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const GetShowToVenueProxySchema = z.object({
   showId: z.string(),
@@ -13,12 +13,15 @@ const GetShowToVenueProxySchema = z.object({
 
 export type GetShowToVenueProxyInput = z.infer<typeof GetShowToVenueProxySchema>
 
-export const getShowToVenueProxy = async (input: GetShowToVenueProxyInput) => {
+export const getShowToVenueProxy = async (
+  input: GetShowToVenueProxyInput,
+  config: Config
+) => {
   const { showId, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(wagmiConfig as unknown as Config, {
+    return await readContract(config, {
       address: addresses.Show as `0x${string}`,
       abi: ShowABI,
       functionName: 'getShowToVenueProxy',
@@ -31,10 +34,13 @@ export const getShowToVenueProxy = async (input: GetShowToVenueProxyInput) => {
   }
 }
 
-export const useGetShowToVenueProxy = (input: GetShowToVenueProxyInput) => {
+export const useGetShowToVenueProxy = (
+  input: GetShowToVenueProxyInput,
+  config: Config
+) => {
   return useQuery({
     queryKey: ['getShowToVenueProxy', input.showId],
-    queryFn: () => getShowToVenueProxy(input),
+    queryFn: () => getShowToVenueProxy(input, config),
     enabled: !!input.showId
   })
 }

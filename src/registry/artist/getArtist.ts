@@ -4,7 +4,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { ArtistRegistryABI } from '../../abis'
-import { getContractAddresses, wagmiConfig } from '../../config'
+import { getContractAddresses } from '../../config'
 
 const GetArtistSchema = z.object({
   artistAddress: z.string(),
@@ -13,12 +13,12 @@ const GetArtistSchema = z.object({
 
 export type GetArtistInput = z.infer<typeof GetArtistSchema>
 
-export const getArtist = async (input: GetArtistInput) => {
-  const { chainId, artistAddress } = input
+export const getArtist = async (input: GetArtistInput, config: Config) => {
+  const { chainId } = input
   const addresses = getContractAddresses(chainId)
   const validatedInput = GetArtistSchema.parse(input)
 
-  return await readContract(wagmiConfig as unknown as Config, {
+  return await readContract(config, {
     abi: ArtistRegistryABI,
     address: addresses.ArtistRegistry as `0x${string}`,
     functionName: 'getArtist',
@@ -27,10 +27,10 @@ export const getArtist = async (input: GetArtistInput) => {
   })
 }
 
-export const useGetArtist = (input: GetArtistInput) => {
+export const useGetArtist = (input: GetArtistInput, config: Config) => {
   return useQuery({
     queryKey: ['getArtist', input.artistAddress],
-    queryFn: () => getArtist(input),
+    queryFn: () => getArtist(input, config),
     enabled: !!input.artistAddress
   })
 }

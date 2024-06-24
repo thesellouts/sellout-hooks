@@ -9,7 +9,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { VenueRegistryABI } from '../../abis'
-import { getContractAddresses, wagmiConfig } from '../../config'
+import { getContractAddresses } from '../../config'
 
 const DeregisterVenueSchema = z.object({
   venueId: z.number(),
@@ -18,12 +18,15 @@ const DeregisterVenueSchema = z.object({
 
 export type DeregisterVenueInput = z.infer<typeof DeregisterVenueSchema>
 
-export const deregisterVenue = async (input: DeregisterVenueInput) => {
+export const deregisterVenue = async (
+  input: DeregisterVenueInput,
+  config: Config
+) => {
   const { chainId, venueId } = input
   const addresses = getContractAddresses(chainId)
   const validatedInput = DeregisterVenueSchema.parse(input)
 
-  const { request } = await simulateContract(wagmiConfig as unknown as Config, {
+  const { request } = await simulateContract(config, {
     abi: VenueRegistryABI,
     address: addresses.VenueRegistry as `0x${string}`,
     functionName: 'deregisterVenue',
@@ -31,16 +34,19 @@ export const deregisterVenue = async (input: DeregisterVenueInput) => {
     chainId
   })
 
-  const hash = await writeContract(wagmiConfig as unknown as Config, request)
+  const hash = await writeContract(config, request)
   return {
     hash,
-    getReceipt: () => waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
+    getReceipt: () => waitForTransactionReceipt(config, { hash })
   }
 }
 
-export const useDeregisterVenue = () => {
+export const useDeregisterVenue = (
+  input: DeregisterVenueInput,
+  config: Config
+) => {
   return useMutation({
-    mutationFn: (input: DeregisterVenueInput) => deregisterVenue(input),
+    mutationFn: () => deregisterVenue(input, config),
     onError: error => {
       console.error('Error deregistering venue:', error)
     }

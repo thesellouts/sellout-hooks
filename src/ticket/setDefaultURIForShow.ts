@@ -9,7 +9,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { TicketABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const SetDefaultURIForShowSchema = z.object({
   showId: z.string(),
@@ -21,14 +21,17 @@ export type SetDefaultURIForShowType = z.infer<
   typeof SetDefaultURIForShowSchema
 >
 
-export const setDefaultURIForShow = async (input: SetDefaultURIForShowType) => {
+export const setDefaultURIForShow = async (
+  input: SetDefaultURIForShowType,
+  config: Config
+) => {
   const { chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
     const validatedInput = SetDefaultURIForShowSchema.parse(input)
 
-    const { request } = await simulateContract(wagmiConfig as unknown as Config, {
+    const { request } = await simulateContract(config, {
       abi: TicketABI,
       address: addresses.Ticket as `0x${string}`,
       functionName: 'setDefaultURIForShow',
@@ -36,10 +39,10 @@ export const setDefaultURIForShow = async (input: SetDefaultURIForShowType) => {
       chainId
     })
 
-    const hash = await writeContract(wagmiConfig as unknown as Config, request)
+    const hash = await writeContract(config, request)
     return {
       hash,
-      getReceipt: () => waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
+      getReceipt: () => waitForTransactionReceipt(config, { hash })
     }
   } catch (err) {
     console.error('Validation or Execution Error:', err)
@@ -47,10 +50,12 @@ export const setDefaultURIForShow = async (input: SetDefaultURIForShowType) => {
   }
 }
 
-export const useSetDefaultURIForShow = () => {
+export const useSetDefaultURIForShow = (
+  input: SetDefaultURIForShowType,
+  config: Config
+) => {
   return useMutation({
-    mutationFn: (input: SetDefaultURIForShowType) =>
-      setDefaultURIForShow(input),
+    mutationFn: () => setDefaultURIForShow(input, config),
     onError: error => {
       console.error('Error setting default URI for show:', error)
     }

@@ -9,7 +9,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { VenueRegistryABI } from '../../abis'
-import { getContractAddresses, wagmiConfig } from '../../config'
+import { getContractAddresses } from '../../config'
 
 const NominateVenueSchema = z.object({
   nominee: z.string(),
@@ -18,12 +18,15 @@ const NominateVenueSchema = z.object({
 
 export type NominateVenueInput = z.infer<typeof NominateVenueSchema>
 
-export const nominateVenue = async (input: NominateVenueInput) => {
+export const nominateVenue = async (
+  input: NominateVenueInput,
+  config: Config
+) => {
   const { chainId, nominee } = input
   const addresses = getContractAddresses(chainId)
   const validatedInput = NominateVenueSchema.parse(input)
 
-  const { request } = await simulateContract(wagmiConfig as unknown as Config, {
+  const { request } = await simulateContract(config, {
     abi: VenueRegistryABI,
     address: addresses.VenueRegistry as `0x${string}`,
     functionName: 'nominate',
@@ -31,16 +34,16 @@ export const nominateVenue = async (input: NominateVenueInput) => {
     chainId
   })
 
-  const hash = await writeContract(wagmiConfig as unknown as Config, request)
+  const hash = await writeContract(config, request)
   return {
     hash,
-    getReceipt: () => waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
+    getReceipt: () => waitForTransactionReceipt(config, { hash })
   }
 }
 
-export const useNominateVenue = () => {
+export const useNominateVenue = (input: NominateVenueInput, config: Config) => {
   return useMutation({
-    mutationFn: (input: NominateVenueInput) => nominateVenue(input),
+    mutationFn: () => nominateVenue(input, config),
     onError: error => {
       console.error('Error nominating venue:', error)
     }

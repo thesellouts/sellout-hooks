@@ -4,7 +4,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { ShowABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const GetNumberOfVotersSchema = z.object({
   showId: z.string(),
@@ -13,12 +13,15 @@ const GetNumberOfVotersSchema = z.object({
 
 export type GetNumberOfVotersInput = z.infer<typeof GetNumberOfVotersSchema>
 
-export const getNumberOfVoters = async (input: GetNumberOfVotersInput) => {
+export const getNumberOfVoters = async (
+  input: GetNumberOfVotersInput,
+  config: Config
+) => {
   const { showId, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(wagmiConfig as unknown as Config, {
+    return await readContract(config, {
       address: addresses.Show as `0x${string}`,
       abi: ShowABI,
       functionName: 'getNumberOfVoters',
@@ -31,10 +34,13 @@ export const getNumberOfVoters = async (input: GetNumberOfVotersInput) => {
   }
 }
 
-export const useGetNumberOfVoters = (input: GetNumberOfVotersInput) => {
+export const useGetNumberOfVoters = (
+  input: GetNumberOfVotersInput,
+  config: Config
+) => {
   return useQuery({
     queryKey: ['getNumberOfVoters', input.showId],
-    queryFn: () => getNumberOfVoters(input),
+    queryFn: () => getNumberOfVoters(input, config),
     enabled: !!input.showId
   })
 }

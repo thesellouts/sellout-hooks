@@ -4,7 +4,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { ShowVaultABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const CalculateTotalPayoutAmountSchema = z.object({
   showId: z.string(),
@@ -17,13 +17,14 @@ export type CalculateTotalPayoutAmountInput = z.infer<
 >
 
 export const calculateTotalPayoutAmount = async (
-  input: CalculateTotalPayoutAmountInput
+  input: CalculateTotalPayoutAmountInput,
+  config: Config
 ) => {
   const { showId, paymentToken, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(wagmiConfig as unknown as Config, {
+    return await readContract(config, {
       address: addresses.ShowVault as `0x${string}`,
       abi: ShowVaultABI,
       functionName: 'calculateTotalPayoutAmount',
@@ -37,11 +38,12 @@ export const calculateTotalPayoutAmount = async (
 }
 
 export const useCalculateTotalPayoutAmount = (
-  input: CalculateTotalPayoutAmountInput
+  input: CalculateTotalPayoutAmountInput,
+  config: Config
 ) => {
   return useQuery({
     queryKey: ['calculateTotalPayoutAmount', input.showId, input.paymentToken],
-    queryFn: () => calculateTotalPayoutAmount(input),
+    queryFn: () => calculateTotalPayoutAmount(input, config),
     enabled: !!input.showId && !!input.paymentToken
   })
 }

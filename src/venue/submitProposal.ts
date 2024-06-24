@@ -9,7 +9,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { VenueABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const SubmitProposalSchema = z.object({
   showId: z.string(),
@@ -22,7 +22,7 @@ const SubmitProposalSchema = z.object({
 
 export type SubmitProposal = z.infer<typeof SubmitProposalSchema>
 
-export const submitProposal = async (input: SubmitProposal) => {
+export const submitProposal = async (input: SubmitProposal, config: Config) => {
   const {
     showId,
     venueId,
@@ -36,25 +36,21 @@ export const submitProposal = async (input: SubmitProposal) => {
   try {
     const validatedInput = SubmitProposalSchema.parse(input)
 
-    const { request } = await simulateContract(
-      wagmiConfig as unknown as Config,
-      {
-        abi: VenueABI,
-        address: addresses.Venue as `0x${string}`,
-        functionName: 'submitProposal',
-        args: [showId, venueId, proposedDates, paymentToken],
-        chainId
-      }
-    )
+    const { request } = await simulateContract(config, {
+      abi: VenueABI,
+      address: addresses.Venue as `0x${string}`,
+      functionName: 'submitProposal',
+      args: [showId, venueId, proposedDates, paymentToken],
+      chainId
+    })
 
-    const hash = await writeContract(wagmiConfig as unknown as Config, {
+    const hash = await writeContract(config, {
       ...request,
       value: paymentAmount ? BigInt(paymentAmount) : BigInt(0)
     })
     return {
       hash,
-      getReceipt: () =>
-        waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
+      getReceipt: () => waitForTransactionReceipt(config, { hash })
     }
   } catch (err) {
     console.error('Validation or Execution Error:', err)
@@ -62,9 +58,9 @@ export const submitProposal = async (input: SubmitProposal) => {
   }
 }
 
-export const useSubmitProposal = () => {
+export const useSubmitProposal = (input: SubmitProposal, config: Config) => {
   return useMutation({
-    mutationFn: (input: SubmitProposal) => submitProposal(input),
+    mutationFn: () => submitProposal(input, config),
     onError: error => {
       console.error('Error executing submitProposal:', error)
     }

@@ -4,7 +4,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { ShowVaultABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const GetShowTokenVaultSchema = z.object({
   showId: z.string(),
@@ -16,13 +16,14 @@ export type GetShowTokenVaultInput = z.infer<typeof GetShowTokenVaultSchema>
 
 // Function to get the show token vault balance
 export const getShowTokenVault = async (
-  input: GetShowTokenVaultInput
+  input: GetShowTokenVaultInput,
+  config: Config
 ): Promise<bigint> => {
   const { showId, tokenAddress, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return (await readContract(wagmiConfig as unknown as Config, {
+    return (await readContract(config, {
       address: addresses.ShowVault as `0x${string}`,
       abi: ShowVaultABI,
       functionName: 'showTokenVault',
@@ -38,11 +39,12 @@ export const getShowTokenVault = async (
 // Hook to use the show token vault balance function
 export const useGetShowTokenVault = (
   input: GetShowTokenVaultInput,
+  config: Config,
   enabled: boolean = false
 ) => {
   return useQuery({
     queryKey: ['getShowTokenVault', input.showId, input.tokenAddress],
-    queryFn: () => getShowTokenVault(input),
+    queryFn: () => getShowTokenVault(input, config),
     enabled: !!input.showId && !!input.tokenAddress && enabled
   })
 }

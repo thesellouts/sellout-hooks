@@ -9,7 +9,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { ShowABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const WithdrawRefundSchema = z.object({
   showId: z.string(),
@@ -18,14 +18,17 @@ const WithdrawRefundSchema = z.object({
 
 export type WithdrawRefundType = z.infer<typeof WithdrawRefundSchema>
 
-export const withdrawRefund = async (input: WithdrawRefundType) => {
+export const withdrawRefund = async (
+  input: WithdrawRefundType,
+  config: Config
+) => {
   const { showId, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
     const validatedInput = WithdrawRefundSchema.parse(input)
 
-    const { request } = await simulateContract(wagmiConfig as unknown as Config, {
+    const { request } = await simulateContract(config, {
       abi: ShowABI,
       address: addresses.Show as `0x${string}`,
       functionName: 'withdrawRefund',
@@ -33,10 +36,10 @@ export const withdrawRefund = async (input: WithdrawRefundType) => {
       chainId
     })
 
-    const hash = await writeContract(wagmiConfig as unknown as Config, request)
+    const hash = await writeContract(config, request)
     return {
       hash,
-      getReceipt: () => waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
+      getReceipt: () => waitForTransactionReceipt(config, { hash })
     }
   } catch (err) {
     console.error('Validation or Execution Error:', err)
@@ -44,9 +47,12 @@ export const withdrawRefund = async (input: WithdrawRefundType) => {
   }
 }
 
-export const useWithdrawRefund = () => {
+export const useWithdrawRefund = (
+  input: WithdrawRefundType,
+  config: Config
+) => {
   return useMutation({
-    mutationFn: (input: WithdrawRefundType) => withdrawRefund(input),
+    mutationFn: () => withdrawRefund(input, config),
     onError: error => {
       console.error('Error withdrawing refund:', error)
     }

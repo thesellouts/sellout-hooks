@@ -4,7 +4,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { ShowABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const IsArtistSchema = z.object({
   user: z.string(),
@@ -14,12 +14,12 @@ const IsArtistSchema = z.object({
 
 export type IsArtistInput = z.infer<typeof IsArtistSchema>
 
-export const isArtist = async (input: IsArtistInput) => {
+export const isArtist = async (input: IsArtistInput, config: Config) => {
   const { user, showId, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(wagmiConfig as unknown as Config, {
+    return await readContract(config, {
       address: addresses.Show as `0x${string}`,
       abi: ShowABI,
       functionName: 'isArtist',
@@ -32,10 +32,10 @@ export const isArtist = async (input: IsArtistInput) => {
   }
 }
 
-export const useIsArtist = (input: IsArtistInput) => {
+export const useIsArtist = (input: IsArtistInput, config: Config) => {
   return useQuery({
     queryKey: ['isArtist', input.user, input.showId],
-    queryFn: () => isArtist(input),
+    queryFn: () => isArtist(input, config),
     enabled: !!input.user && !!input.showId
   })
 }

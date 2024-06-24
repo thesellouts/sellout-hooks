@@ -9,7 +9,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { OrganizerRegistryABI } from '../../abis'
-import { getContractAddresses, wagmiConfig } from '../../config'
+import { getContractAddresses } from '../../config'
 
 const AcceptNominationSchema = z.object({
   name: z.string(),
@@ -22,13 +22,14 @@ export type AcceptOrganizerNominationInput = z.infer<
 >
 
 export const acceptOrganizerNomination = async (
-  input: AcceptOrganizerNominationInput
+  input: AcceptOrganizerNominationInput,
+  config: Config
 ) => {
   const { chainId, name, bio } = input
   const addresses = getContractAddresses(chainId)
   const validatedInput = AcceptNominationSchema.parse(input)
 
-  const { request } = await simulateContract(wagmiConfig as unknown as Config, {
+  const { request } = await simulateContract(config, {
     abi: OrganizerRegistryABI,
     address: addresses.OrganizerRegistry as `0x${string}`,
     functionName: 'acceptNomination',
@@ -36,17 +37,19 @@ export const acceptOrganizerNomination = async (
     chainId
   })
 
-  const hash = await writeContract(wagmiConfig as unknown as Config, request)
+  const hash = await writeContract(config, request)
   return {
     hash,
-    getReceipt: () => waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
+    getReceipt: () => waitForTransactionReceipt(config, { hash })
   }
 }
 
-export const useAcceptOrganizerNomination = () => {
+export const useAcceptOrganizerNomination = (
+  input: AcceptOrganizerNominationInput,
+  config: Config
+) => {
   return useMutation({
-    mutationFn: (input: AcceptOrganizerNominationInput) =>
-      acceptOrganizerNomination(input),
+    mutationFn: () => acceptOrganizerNomination(input, config),
     onError: error => {
       console.error('Error accepting nomination:', error)
     }

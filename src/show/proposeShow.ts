@@ -9,7 +9,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { ShowABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 import { AddressSchema, NULL_ADDRESS } from '../utils'
 
 // Schema for VenueProposalParams matching the Solidity structure
@@ -61,29 +61,25 @@ const ProposeShowSchema = z.object({
 
 export type ProposeShowType = z.infer<typeof ProposeShowSchema>
 
-export const proposeShow = async (input: ProposeShowType) => {
+export const proposeShow = async (input: ProposeShowType, config: Config) => {
   const { chainId, ...args } = input
   const addresses = getContractAddresses(chainId)
 
   try {
     const validatedInput = ProposeShowSchema.parse(input)
 
-    const { request } = await simulateContract(
-      wagmiConfig as unknown as Config,
-      {
-        abi: ShowABI,
-        address: addresses.Show as `0x${string}`,
-        functionName: 'proposeShow',
-        args: [validatedInput],
-        chainId
-      }
-    )
+    const { request } = await simulateContract(config, {
+      abi: ShowABI,
+      address: addresses.Show as `0x${string}`,
+      functionName: 'proposeShow',
+      args: [validatedInput],
+      chainId
+    })
 
-    const hash = await writeContract(wagmiConfig as unknown as Config, request)
+    const hash = await writeContract(config, request)
     return {
       hash,
-      getReceipt: () =>
-        waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
+      getReceipt: () => waitForTransactionReceipt(config, { hash })
     }
   } catch (err) {
     console.error('Validation or Execution Error:', err)
@@ -91,9 +87,9 @@ export const proposeShow = async (input: ProposeShowType) => {
   }
 }
 
-export const useProposeShow = () => {
+export const useProposeShow = (input: ProposeShowType, config: Config) => {
   return useMutation({
-    mutationFn: (input: ProposeShowType) => proposeShow(input),
+    mutationFn: () => proposeShow(input, config),
     onError: error => {
       console.error('Error proposing show:', error)
     }

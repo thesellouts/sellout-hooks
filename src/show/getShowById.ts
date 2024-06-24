@@ -4,7 +4,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { ShowABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const GetShowByIdSchema = z.object({
   showId: z.string(),
@@ -13,12 +13,12 @@ const GetShowByIdSchema = z.object({
 
 export type GetShowByIdInput = z.infer<typeof GetShowByIdSchema>
 
-export const getShowById = async (input: GetShowByIdInput) => {
+export const getShowById = async (input: GetShowByIdInput, config: Config) => {
   const { showId, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(wagmiConfig as unknown as Config, {
+    return await readContract(config, {
       address: addresses.Show as `0x${string}`,
       abi: ShowABI,
       functionName: 'getShowById',
@@ -31,10 +31,10 @@ export const getShowById = async (input: GetShowByIdInput) => {
   }
 }
 
-export const useGetShowById = (input: GetShowByIdInput) => {
+export const useGetShowById = (input: GetShowByIdInput, config: Config) => {
   return useQuery({
     queryKey: ['getShowById', input.showId],
-    queryFn: () => getShowById(input),
+    queryFn: () => getShowById(input, config),
     enabled: !!input.showId
   })
 }

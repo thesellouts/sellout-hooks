@@ -9,7 +9,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { OrganizerRegistryABI } from '../../abis'
-import { getContractAddresses, wagmiConfig } from '../../config'
+import { getContractAddresses } from '../../config'
 
 const UpdateOrganizerSchema = z.object({
   organizerId: z.number(),
@@ -21,12 +21,15 @@ const UpdateOrganizerSchema = z.object({
 
 export type UpdateOrganizerInput = z.infer<typeof UpdateOrganizerSchema>
 
-export const updateOrganizer = async (input: UpdateOrganizerInput) => {
+export const updateOrganizer = async (
+  input: UpdateOrganizerInput,
+  config: Config
+) => {
   const { chainId, organizerId, name, bio, wallet } = input
   const addresses = getContractAddresses(chainId)
   const validatedInput = UpdateOrganizerSchema.parse(input)
 
-  const { request } = await simulateContract(wagmiConfig as unknown as Config, {
+  const { request } = await simulateContract(config, {
     abi: OrganizerRegistryABI,
     address: addresses.OrganizerRegistry as `0x${string}`,
     functionName: 'updateOrganizer',
@@ -39,16 +42,19 @@ export const updateOrganizer = async (input: UpdateOrganizerInput) => {
     chainId
   })
 
-  const hash = await writeContract(wagmiConfig as unknown as Config, request)
+  const hash = await writeContract(config, request)
   return {
     hash,
-    getReceipt: () => waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
+    getReceipt: () => waitForTransactionReceipt(config, { hash })
   }
 }
 
-export const useUpdateOrganizer = () => {
+export const useUpdateOrganizer = (
+  input: UpdateOrganizerInput,
+  config: Config
+) => {
   return useMutation({
-    mutationFn: (input: UpdateOrganizerInput) => updateOrganizer(input),
+    mutationFn: () => updateOrganizer(input, config),
     onError: error => {
       console.error('Error updating organizer:', error)
     }

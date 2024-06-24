@@ -9,7 +9,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { OrganizerRegistryABI } from '../../abis'
-import { getContractAddresses, wagmiConfig } from '../../config'
+import { getContractAddresses } from '../../config'
 
 const NominateOrganizerSchema = z.object({
   nominee: z.string(),
@@ -18,12 +18,15 @@ const NominateOrganizerSchema = z.object({
 
 export type NominateOrganizerInput = z.infer<typeof NominateOrganizerSchema>
 
-export const nominateOrganizer = async (input: NominateOrganizerInput) => {
+export const nominateOrganizer = async (
+  input: NominateOrganizerInput,
+  config: Config
+) => {
   const { chainId, nominee } = input
   const addresses = getContractAddresses(chainId)
   const validatedInput = NominateOrganizerSchema.parse(input)
 
-  const { request } = await simulateContract(wagmiConfig as unknown as Config, {
+  const { request } = await simulateContract(config, {
     abi: OrganizerRegistryABI,
     address: addresses.OrganizerRegistry as `0x${string}`,
     functionName: 'nominate',
@@ -31,16 +34,19 @@ export const nominateOrganizer = async (input: NominateOrganizerInput) => {
     chainId
   })
 
-  const hash = await writeContract(wagmiConfig as unknown as Config, request)
+  const hash = await writeContract(config, request)
   return {
     hash,
-    getReceipt: () => waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
+    getReceipt: () => waitForTransactionReceipt(config, { hash })
   }
 }
 
-export const useNominateOrganizer = () => {
+export const useNominateOrganizer = (
+  input: NominateOrganizerInput,
+  config: Config
+) => {
   return useMutation({
-    mutationFn: (input: NominateOrganizerInput) => nominateOrganizer(input),
+    mutationFn: () => nominateOrganizer(input, config),
     onError: error => {
       console.error('Error nominating organizer:', error)
     }

@@ -4,7 +4,7 @@ import { Config, readContract } from '@wagmi/core'
 import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const GetTicketPricePaidSchema = z.object({
   showId: z.string(),
@@ -14,14 +14,17 @@ const GetTicketPricePaidSchema = z.object({
 
 export type GetTicketPricePaidType = z.infer<typeof GetTicketPricePaidSchema>
 
-export const getTicketPricePaid = async (input: GetTicketPricePaidType) => {
+export const getTicketPricePaid = async (
+  input: GetTicketPricePaidType,
+  config: Config
+) => {
   const { chainId, showId, ticketId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
     const validatedInput = GetTicketPricePaidSchema.parse(input)
 
-    const result = await readContract(wagmiConfig as unknown as Config, {
+    const result = await readContract(config, {
       abi: BoxOfficeABI.abi,
       address: addresses.BoxOffice as `0x${string}`,
       functionName: 'getTicketPricePaid',
@@ -36,9 +39,12 @@ export const getTicketPricePaid = async (input: GetTicketPricePaidType) => {
   }
 }
 
-export const useGetTicketPricePaid = (input: GetTicketPricePaidType) => {
+export const useGetTicketPricePaid = (
+  input: GetTicketPricePaidType,
+  config: Config
+) => {
   return useQuery({
     queryKey: ['getTicketPricePaid', input],
-    queryFn: () => getTicketPricePaid(input)
+    queryFn: () => getTicketPricePaid(input, config)
   })
 }

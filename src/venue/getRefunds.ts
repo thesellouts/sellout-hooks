@@ -4,7 +4,7 @@ import { sepolia, zora, zoraSepolia } from 'viem/chains'
 import { z } from 'zod'
 
 import { VenueABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const GetRefundsSchema = z.object({
   user: z.string(),
@@ -13,12 +13,12 @@ const GetRefundsSchema = z.object({
 
 export type GetRefundsInput = z.infer<typeof GetRefundsSchema>
 
-export const getRefunds = async (input: GetRefundsInput) => {
+export const getRefunds = async (input: GetRefundsInput, config: Config) => {
   const { user, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(wagmiConfig as unknown as Config, {
+    return await readContract(config, {
       address: addresses.Venue as `0x${string}`,
       abi: VenueABI,
       functionName: 'getRefunds',
@@ -31,10 +31,10 @@ export const getRefunds = async (input: GetRefundsInput) => {
   }
 }
 
-export const useGetRefunds = (input: GetRefundsInput) => {
+export const useGetRefunds = (input: GetRefundsInput, config: Config) => {
   return useQuery({
     queryKey: ['getRefunds', input.user],
-    queryFn: () => getRefunds(input),
+    queryFn: () => getRefunds(input, config),
     enabled: !!input.user
   })
 }

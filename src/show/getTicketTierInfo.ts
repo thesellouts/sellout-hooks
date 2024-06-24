@@ -4,7 +4,7 @@ import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { ShowABI } from '../abis'
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const GetTicketTierInfoSchema = z.object({
   showId: z.string(),
@@ -14,12 +14,15 @@ const GetTicketTierInfoSchema = z.object({
 
 export type GetTicketTierInfoInput = z.infer<typeof GetTicketTierInfoSchema>
 
-export const getTicketTierInfo = async (input: GetTicketTierInfoInput) => {
+export const getTicketTierInfo = async (
+  input: GetTicketTierInfoInput,
+  config: Config
+) => {
   const { showId, tierIndex, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(wagmiConfig as unknown as Config, {
+    return await readContract(config, {
       address: addresses.Show as `0x${string}`,
       abi: ShowABI,
       functionName: 'getTicketTierInfo',
@@ -32,10 +35,13 @@ export const getTicketTierInfo = async (input: GetTicketTierInfoInput) => {
   }
 }
 
-export const useGetTicketTierInfo = (input: GetTicketTierInfoInput) => {
+export const useGetTicketTierInfo = (
+  input: GetTicketTierInfoInput,
+  config: Config
+) => {
   return useQuery({
     queryKey: ['getTicketTierInfo', input.showId, input.tierIndex],
-    queryFn: () => getTicketTierInfo(input),
+    queryFn: () => getTicketTierInfo(input, config),
     enabled: !!input.showId && input.tierIndex !== undefined
   })
 }

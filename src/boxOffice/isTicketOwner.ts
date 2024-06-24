@@ -4,7 +4,7 @@ import { Config, readContract } from '@wagmi/core'
 import { sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
-import { getContractAddresses, wagmiConfig } from '../config'
+import { getContractAddresses } from '../config'
 
 const IsTokenOwnerSchema = z.object({
   showId: z.string(),
@@ -15,14 +15,14 @@ const IsTokenOwnerSchema = z.object({
 
 export type IsTokenOwnerType = z.infer<typeof IsTokenOwnerSchema>
 
-export const isTokenOwner = async (input: IsTokenOwnerType) => {
+export const isTokenOwner = async (input: IsTokenOwnerType, config: Config) => {
   const { chainId, showId, wallet, tokenId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
     const validatedInput = IsTokenOwnerSchema.parse(input)
 
-    const result = await readContract(wagmiConfig as unknown as Config, {
+    const result = await readContract(config, {
       abi: BoxOfficeABI.abi,
       address: addresses.BoxOffice as `0x${string}`,
       functionName: 'isTokenOwner',
@@ -41,9 +41,9 @@ export const isTokenOwner = async (input: IsTokenOwnerType) => {
   }
 }
 
-export const useIsTokenOwner = (input: IsTokenOwnerType) => {
+export const useIsTokenOwner = (input: IsTokenOwnerType, config: Config) => {
   return useQuery({
     queryKey: ['isTokenOwner', input],
-    queryFn: () => isTokenOwner(input)
+    queryFn: () => isTokenOwner(input, config)
   })
 }
