@@ -26,7 +26,7 @@ export const updateArtist = async (input: UpdateArtistInput) => {
   const addresses = getContractAddresses(chainId)
   const validatedInput = UpdateArtistSchema.parse(input)
 
-  const { request } = await simulateContract(wagmiConfig, {
+  const { request } = await simulateContract(wagmiConfig as unknown as Config, {
     abi: ArtistRegistryABI,
     address: addresses.ArtistRegistry as `0x${string}`,
     functionName: 'updateArtist',
@@ -39,10 +39,11 @@ export const updateArtist = async (input: UpdateArtistInput) => {
     chainId
   })
 
-  const hash = await writeContract(wagmiConfig, request)
+  const hash = await writeContract(wagmiConfig as unknown as Config, request)
   return {
     hash,
-    getReceipt: () => waitForTransactionReceipt(wagmiConfig, { hash })
+    getReceipt: () =>
+      waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
   }
 }
 

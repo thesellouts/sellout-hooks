@@ -38,7 +38,7 @@ export const purchaseTickets = async (input: PurchaseTicketsType) => {
   try {
     const validatedInput = PurchaseTicketsSchema.parse(input)
 
-    const { request } = await simulateContract(wagmiConfig, {
+    const { request } = await simulateContract(wagmiConfig as unknown as Config, {
       abi: TicketABI,
       address: ticketProxy as `0x${string}`,
       functionName: 'purchaseTickets',
@@ -47,10 +47,10 @@ export const purchaseTickets = async (input: PurchaseTicketsType) => {
       chainId
     })
 
-    const hash = await writeContract(wagmiConfig, request)
+    const hash = await writeContract(wagmiConfig as unknown as Config, request)
     return {
       hash,
-      getReceipt: () => waitForTransactionReceipt(wagmiConfig, { hash })
+      getReceipt: () => waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
     }
   } catch (err) {
     console.error('Validation or Execution Error:', err)

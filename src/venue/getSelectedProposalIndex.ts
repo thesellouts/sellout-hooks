@@ -22,7 +22,7 @@ export const getSelectedProposalIndex = async (
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(wagmiConfig, {
+    return await readContract(wagmiConfig as unknown as Config, {
       address: addresses.Venue as `0x${string}`,
       abi: VenueABI,
       functionName: 'getSelectedProposalIndex',

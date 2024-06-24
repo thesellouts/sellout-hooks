@@ -25,7 +25,7 @@ export const cancelShow = async (input: CancelShowType) => {
   try {
     const validatedInput = CancelShowSchema.parse(input)
 
-    const { request } = await simulateContract(wagmiConfig, {
+    const { request } = await simulateContract(wagmiConfig as unknown as Config, {
       abi: ShowABI,
       address: addresses.Show as `0x${string}`,
       functionName: 'cancelShow',
@@ -33,10 +33,10 @@ export const cancelShow = async (input: CancelShowType) => {
       chainId
     })
 
-    const hash = await writeContract(wagmiConfig, request)
+    const hash = await writeContract(wagmiConfig as unknown as Config, request)
     return {
       hash,
-      getReceipt: () => waitForTransactionReceipt(wagmiConfig, { hash })
+      getReceipt: () => waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
     }
   } catch (err) {
     console.error('Validation or Execution Error:', err)

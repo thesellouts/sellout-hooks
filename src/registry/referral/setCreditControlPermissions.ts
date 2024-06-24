@@ -29,7 +29,7 @@ export const setCreditControlPermission = async (
   const addresses = getContractAddresses(chainId)
   const validatedInput = SetCreditControlPermissionSchema.parse(input)
 
-  const { request } = await simulateContract(wagmiConfig, {
+  const { request } = await simulateContract(wagmiConfig as unknown as Config, {
     abi: ReferralABI,
     address: addresses.ReferralModule as `0x${string}`,
     functionName: 'setCreditControlPermission',
@@ -37,10 +37,11 @@ export const setCreditControlPermission = async (
     chainId
   })
 
-  const hash = await writeContract(wagmiConfig, request)
+  const hash = await writeContract(wagmiConfig as unknown as Config, request)
   return {
     hash,
-    getReceipt: () => waitForTransactionReceipt(wagmiConfig, { hash })
+    getReceipt: () =>
+      waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
   }
 }
 

@@ -26,7 +26,7 @@ export const vote = async (input: Vote) => {
   try {
     const validatedInput = VoteSchema.parse(input)
 
-    const { request } = await simulateContract(wagmiConfig, {
+    const { request } = await simulateContract(wagmiConfig as unknown as Config, {
       abi: VenueABI,
       address: addresses.Venue as `0x${string}`,
       functionName: 'vote',
@@ -34,10 +34,10 @@ export const vote = async (input: Vote) => {
       chainId
     })
 
-    const hash = await writeContract(wagmiConfig, request)
+    const hash = await writeContract(wagmiConfig as unknown as Config, request)
     return {
       hash,
-      getReceipt: () => waitForTransactionReceipt(wagmiConfig, { hash })
+      getReceipt: () => waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
     }
   } catch (err) {
     console.error('Validation or Execution Error:', err)

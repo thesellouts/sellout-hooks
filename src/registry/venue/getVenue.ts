@@ -18,7 +18,7 @@ export const getVenue = async (input: GetVenueInput) => {
   const addresses = getContractAddresses(chainId)
   const validatedInput = GetVenueSchema.parse(input)
 
-  return await readContract(wagmiConfig, {
+  return await readContract(wagmiConfig as unknown as Config, {
     abi: VenueRegistryABI,
     address: addresses.VenueRegistry as `0x${string}`,
     functionName: 'getVenue',

@@ -31,7 +31,7 @@ export const decrementReferralCredits = async (
   const addresses = getContractAddresses(chainId)
   const validatedInput = DecrementReferralCreditsSchema.parse(input)
 
-  const { request } = await simulateContract(wagmiConfig, {
+  const { request } = await simulateContract(wagmiConfig as unknown as Config, {
     abi: ReferralABI,
     address: addresses.ReferralModule as `0x${string}`,
     functionName: 'decrementReferralCredits',
@@ -44,10 +44,10 @@ export const decrementReferralCredits = async (
     chainId
   })
 
-  const hash = await writeContract(wagmiConfig, request)
+  const hash = await writeContract(wagmiConfig as unknown as Config, request)
   return {
     hash,
-    getReceipt: () => waitForTransactionReceipt(wagmiConfig, { hash })
+    getReceipt: () => waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
   }
 }
 

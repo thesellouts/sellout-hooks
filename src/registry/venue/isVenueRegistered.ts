@@ -18,7 +18,7 @@ export const isVenueRegistered = async (input: IsVenueRegisteredInput) => {
   const addresses = getContractAddresses(chainId)
   const validatedInput = IsVenueRegisteredSchema.parse(input)
 
-  return await readContract(wagmiConfig, {
+  return await readContract(wagmiConfig as unknown as Config, {
     abi: VenueRegistryABI,
     address: addresses.VenueRegistry as `0x${string}`,
     functionName: 'isVenueRegistered',

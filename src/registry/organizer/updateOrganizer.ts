@@ -26,7 +26,7 @@ export const updateOrganizer = async (input: UpdateOrganizerInput) => {
   const addresses = getContractAddresses(chainId)
   const validatedInput = UpdateOrganizerSchema.parse(input)
 
-  const { request } = await simulateContract(wagmiConfig, {
+  const { request } = await simulateContract(wagmiConfig as unknown as Config, {
     abi: OrganizerRegistryABI,
     address: addresses.OrganizerRegistry as `0x${string}`,
     functionName: 'updateOrganizer',
@@ -39,10 +39,10 @@ export const updateOrganizer = async (input: UpdateOrganizerInput) => {
     chainId
   })
 
-  const hash = await writeContract(wagmiConfig, request)
+  const hash = await writeContract(wagmiConfig as unknown as Config, request)
   return {
     hash,
-    getReceipt: () => waitForTransactionReceipt(wagmiConfig, { hash })
+    getReceipt: () => waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
   }
 }
 

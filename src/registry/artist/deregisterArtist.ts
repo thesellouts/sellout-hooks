@@ -23,7 +23,7 @@ export const deregisterArtist = async (input: DeregisterArtistInput) => {
   const addresses = getContractAddresses(chainId)
   const validatedInput = DeregisterArtistSchema.parse(input)
 
-  const { request } = await simulateContract(wagmiConfig, {
+  const { request } = await simulateContract(wagmiConfig as unknown as Config, {
     abi: ArtistRegistryABI,
     address: addresses.ArtistRegistry as `0x${string}`,
     functionName: 'deregisterArtist',
@@ -31,10 +31,10 @@ export const deregisterArtist = async (input: DeregisterArtistInput) => {
     chainId
   })
 
-  const hash = await writeContract(wagmiConfig, request)
+  const hash = await writeContract(wagmiConfig as unknown as Config, request)
   return {
     hash,
-    getReceipt: () => waitForTransactionReceipt(wagmiConfig, { hash })
+    getReceipt: () => waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
   }
 }
 

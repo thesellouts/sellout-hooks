@@ -19,7 +19,7 @@ export const getReferralCredits = async (input: GetReferralCreditsInput) => {
   const addresses = getContractAddresses(chainId)
   const validatedInput = GetReferralCreditsSchema.parse(input)
 
-  return await readContract(wagmiConfig, {
+  return await readContract(wagmiConfig as unknown as Config, {
     abi: ReferralABI,
     address: addresses.ReferralModule as `0x${string}`,
     functionName: 'getReferralCredits',

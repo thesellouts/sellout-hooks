@@ -23,7 +23,7 @@ export const nominateOrganizer = async (input: NominateOrganizerInput) => {
   const addresses = getContractAddresses(chainId)
   const validatedInput = NominateOrganizerSchema.parse(input)
 
-  const { request } = await simulateContract(wagmiConfig, {
+  const { request } = await simulateContract(wagmiConfig as unknown as Config, {
     abi: OrganizerRegistryABI,
     address: addresses.OrganizerRegistry as `0x${string}`,
     functionName: 'nominate',
@@ -31,10 +31,10 @@ export const nominateOrganizer = async (input: NominateOrganizerInput) => {
     chainId
   })
 
-  const hash = await writeContract(wagmiConfig, request)
+  const hash = await writeContract(wagmiConfig as unknown as Config, request)
   return {
     hash,
-    getReceipt: () => waitForTransactionReceipt(wagmiConfig, { hash })
+    getReceipt: () => waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
   }
 }
 

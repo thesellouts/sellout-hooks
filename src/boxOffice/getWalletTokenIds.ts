@@ -21,7 +21,7 @@ export const getWalletTokenIds = async (input: GetWalletTokenIdsType) => {
   try {
     const validatedInput = GetWalletTokenIdsSchema.parse(input)
 
-    const result = await readContract(wagmiConfig, {
+    const result = await readContract(wagmiConfig as unknown as Config, {
       abi: BoxOfficeABI.abi,
       address: addresses.BoxOffice as `0x${string}`,
       functionName: 'getWalletTokenIds',

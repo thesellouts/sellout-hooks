@@ -20,7 +20,7 @@ export const getTotalTicketsSold = async (input: GetTotalTicketsSoldType) => {
   try {
     const validatedInput = GetTotalTicketsSoldSchema.parse(input)
 
-    const result = await readContract(wagmiConfig, {
+    const result = await readContract(wagmiConfig as unknown as Config, {
       abi: BoxOfficeABI.abi,
       address: addresses.BoxOffice as `0x${string}`,
       functionName: 'getTotalTicketsSold',

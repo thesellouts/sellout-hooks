@@ -28,7 +28,7 @@ export const setDefaultURIForShow = async (input: SetDefaultURIForShowType) => {
   try {
     const validatedInput = SetDefaultURIForShowSchema.parse(input)
 
-    const { request } = await simulateContract(wagmiConfig, {
+    const { request } = await simulateContract(wagmiConfig as unknown as Config, {
       abi: TicketABI,
       address: addresses.Ticket as `0x${string}`,
       functionName: 'setDefaultURIForShow',
@@ -36,10 +36,10 @@ export const setDefaultURIForShow = async (input: SetDefaultURIForShowType) => {
       chainId
     })
 
-    const hash = await writeContract(wagmiConfig, request)
+    const hash = await writeContract(wagmiConfig as unknown as Config, request)
     return {
       hash,
-      getReceipt: () => waitForTransactionReceipt(wagmiConfig, { hash })
+      getReceipt: () => waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
     }
   } catch (err) {
     console.error('Validation or Execution Error:', err)

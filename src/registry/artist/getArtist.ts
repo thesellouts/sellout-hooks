@@ -18,7 +18,7 @@ export const getArtist = async (input: GetArtistInput) => {
   const addresses = getContractAddresses(chainId)
   const validatedInput = GetArtistSchema.parse(input)
 
-  return await readContract(wagmiConfig, {
+  return await readContract(wagmiConfig as unknown as Config, {
     abi: ArtistRegistryABI,
     address: addresses.ArtistRegistry as `0x${string}`,
     functionName: 'getArtist',

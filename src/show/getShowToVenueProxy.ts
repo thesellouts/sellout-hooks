@@ -18,7 +18,7 @@ export const getShowToVenueProxy = async (input: GetShowToVenueProxyInput) => {
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(wagmiConfig, {
+    return await readContract(wagmiConfig as unknown as Config, {
       address: addresses.Show as `0x${string}`,
       abi: ShowABI,
       functionName: 'getShowToVenueProxy',

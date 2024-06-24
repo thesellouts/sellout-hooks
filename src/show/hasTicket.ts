@@ -19,7 +19,7 @@ export const hasTicket = async (input: HasTicketInput) => {
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(wagmiConfig, {
+    return await readContract(wagmiConfig as unknown as Config, {
       address: addresses.Show as `0x${string}`,
       abi: ShowABI,
       functionName: 'hasTicket',

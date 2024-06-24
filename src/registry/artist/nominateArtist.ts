@@ -23,7 +23,7 @@ export const nominateArtist = async (input: NominateArtistInput) => {
   const addresses = getContractAddresses(chainId)
   const validatedInput = NominateArtistSchema.parse(input)
 
-  const { request } = await simulateContract(wagmiConfig, {
+  const { request } = await simulateContract(wagmiConfig as unknown as Config, {
     abi: ArtistRegistryABI,
     address: addresses.ArtistRegistry as `0x${string}`,
     functionName: 'nominate',
@@ -31,10 +31,11 @@ export const nominateArtist = async (input: NominateArtistInput) => {
     chainId
   })
 
-  const hash = await writeContract(wagmiConfig, request)
+  const hash = await writeContract(wagmiConfig as unknown as Config, request)
   return {
     hash,
-    getReceipt: () => waitForTransactionReceipt(wagmiConfig, { hash })
+    getReceipt: () =>
+      waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
   }
 }
 

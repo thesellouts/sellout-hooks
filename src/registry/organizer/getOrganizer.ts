@@ -18,7 +18,7 @@ export const getOrganizer = async (input: GetOrganizerInput) => {
   const addresses = getContractAddresses(chainId)
   const validatedInput = GetOrganizerSchema.parse(input)
 
-  return await readContract(wagmiConfig, {
+  return await readContract(wagmiConfig as unknown as Config, {
     abi: OrganizerRegistryABI,
     address: addresses.OrganizerRegistry as `0x${string}`,
     functionName: 'getOrganizer',

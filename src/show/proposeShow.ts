@@ -68,18 +68,22 @@ export const proposeShow = async (input: ProposeShowType) => {
   try {
     const validatedInput = ProposeShowSchema.parse(input)
 
-    const { request } = await simulateContract(wagmiConfig, {
-      abi: ShowABI,
-      address: addresses.Show as `0x${string}`,
-      functionName: 'proposeShow',
-      args: [validatedInput],
-      chainId
-    })
+    const { request } = await simulateContract(
+      wagmiConfig as unknown as Config,
+      {
+        abi: ShowABI,
+        address: addresses.Show as `0x${string}`,
+        functionName: 'proposeShow',
+        args: [validatedInput],
+        chainId
+      }
+    )
 
-    const hash = await writeContract(wagmiConfig, request)
+    const hash = await writeContract(wagmiConfig as unknown as Config, request)
     return {
       hash,
-      getReceipt: () => waitForTransactionReceipt(wagmiConfig, { hash })
+      getReceipt: () =>
+        waitForTransactionReceipt(wagmiConfig as unknown as Config, { hash })
     }
   } catch (err) {
     console.error('Validation or Execution Error:', err)
