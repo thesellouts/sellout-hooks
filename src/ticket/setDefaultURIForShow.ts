@@ -14,7 +14,7 @@ import { getContractAddresses } from '../config'
 const SetDefaultURIForShowSchema = z.object({
   showId: z.string(),
   newDefaultURI: z.string(),
-  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id)])
+  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id), z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
 export type SetDefaultURIForShowType = z.infer<

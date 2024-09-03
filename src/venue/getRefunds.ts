@@ -8,7 +8,7 @@ import { getContractAddresses } from '../config'
 
 const GetRefundsSchema = z.object({
   user: z.string(),
-  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id)])
+  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id), z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
 export type GetRefundsInput = z.infer<typeof GetRefundsSchema>

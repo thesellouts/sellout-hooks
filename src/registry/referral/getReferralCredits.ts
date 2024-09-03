@@ -9,7 +9,7 @@ import { AddressSchema } from '../../utils'
 
 const GetReferralCreditsSchema = z.object({
   referrer: AddressSchema,
-  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id)])
+  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id), z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
 export type GetReferralCreditsInput = z.infer<typeof GetReferralCreditsSchema>

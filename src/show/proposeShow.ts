@@ -56,7 +56,7 @@ const ProposeShowSchema = z.object({
   split: z.array(z.bigint()),
   currencyAddress: AddressSchema.default(NULL_ADDRESS),
   venueProposalParams: VenueProposalParamsSchema,
-  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id)])
+  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id), z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
 export type ProposeShowType = z.infer<typeof ProposeShowSchema>

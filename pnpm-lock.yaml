@@ -12,11 +12,14 @@ importers:
         specifier: '>=5.0.0'
         version: 5.45.0(react@18.3.1)
       '@thesellouts/sellout-protocol':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.2
+        version: 0.1.2
       '@wagmi/core':
         specifier: ^2.11.2
         version: 2.11.2(@tanstack/query-core@5.45.0)(@types/react@18.3.3)(bufferutil@4.0.8)(react@18.3.1)(typescript@5.4.5)(viem@2.7.22(bufferutil@4.0.8)(typescript@5.4.5)(zod@3.23.8))(zod@3.23.8)
+      permissionless:
+        specifier: ^0.0.18
+        version: 0.0.18(viem@2.7.22(bufferutil@4.0.8)(typescript@5.4.5)(zod@3.23.8))
       react:
         specifier: '>=18'
         version: 18.3.1
@@ -1367,8 +1370,8 @@ packages:
     peerDependencies:
       react: ^18.0.0
 
-  '@thesellouts/sellout-protocol@0.1.0':
-    resolution: {integrity: sha512-996cpLkn4K7solRZvaIlV/47/MKDvsqwHAPjo0Ff8+xI4lQMxh1+yFcIvhsWxYFXEJ1/Bjw95lHhmQaDvoglAA==}
+  '@thesellouts/sellout-protocol@0.1.2':
+    resolution: {integrity: sha512-B/DiZLb7iyAEmsGXuq6RSxGt9W7xUR8zDpXTF/Vj1Nphq+NqBDoSIPuGf7tOrpSpS2QxmU3EaTSY0fqmlLs9jg==}
 
   '@tsconfig/node10@1.0.11':
     resolution: {integrity: sha512-DcRjDCujK/kCk/cUe8Xz8ZSpm8mS3mNNpta+jGCA6USEDfktlNvm1+IuZ9eTcDbNk41BHwpHHeW+N1lKCz4zOw==}
@@ -3598,6 +3601,11 @@ packages:
 
   pathe@1.1.2:
     resolution: {integrity: sha512-whLdWMYL2TwI08hn8/ZqAbrVemu0LNaNNJZX73O6qaIdCTfXutsLhMkjdENX0qhsQ9uIimo4/aQOmXkoon2nDQ==}
+
+  permissionless@0.0.18:
+    resolution: {integrity: sha512-Rd3SR+ZMBeySIgh+2qwoSYV/Q6hgh+T6kb8SRDbM727L6C/OW9tE6IgHDIf/2LAlcjMTNb/BMZaPF1MQYZg49Q==}
+    peerDependencies:
+      viem: ^1.19.4
 
   picocolors@1.0.1:
     resolution: {integrity: sha512-anP1Z8qwhkbmu7MFP5iTt+wQKXgwzf7zTyGlcdzabySa9vd0Xt392U0rVmz9poOaBj0uHJKyyo9/upk0HrEQew==}
@@ -6521,7 +6529,7 @@ snapshots:
       '@tanstack/query-core': 5.45.0
       react: 18.3.1
 
-  '@thesellouts/sellout-protocol@0.1.0': {}
+  '@thesellouts/sellout-protocol@0.1.2': {}
 
   '@tsconfig/node10@1.0.11': {}
 
@@ -9353,6 +9361,10 @@ snapshots:
   path-type@4.0.0: {}
 
   pathe@1.1.2: {}
+
+  permissionless@0.0.18(viem@2.7.22(bufferutil@4.0.8)(typescript@5.4.5)(zod@3.23.8)):
+    dependencies:
+      viem: 2.7.22(bufferutil@4.0.8)(typescript@5.4.5)(zod@3.23.8)
 
   picocolors@1.0.1: {}
 

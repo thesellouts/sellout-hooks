@@ -18,7 +18,7 @@ const AcceptNominationSchema = z.object({
   longitude: z.number(),
   totalCapacity: z.number(),
   streetAddress: z.string(),
-  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id)])
+  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id), z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
 export type AcceptVenueNominationInput = z.infer<typeof AcceptNominationSchema>
@@ -39,7 +39,6 @@ export const acceptVenueNomination = async (
   const addresses = getContractAddresses(chainId)
   const validatedInput = AcceptNominationSchema.parse(input)
 
-  console.log('VA', validatedInput, chainId)
   const { request } = await simulateContract(config, {
     abi: VenueRegistryABI,
     address: addresses.VenueRegistry as `0x${string}`,

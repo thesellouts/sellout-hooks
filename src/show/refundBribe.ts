@@ -15,7 +15,7 @@ const RefundBribeSchema = z.object({
   showId: z.string(),
   venueId: z.number(),
   proposalIndex: z.number(),
-  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id)])
+  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id), z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
 export type RefundBribeType = z.infer<typeof RefundBribeSchema>

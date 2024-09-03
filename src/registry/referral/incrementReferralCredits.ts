@@ -17,7 +17,7 @@ const IncrementReferralCreditsSchema = z.object({
   artistCredits: z.number(),
   organizerCredits: z.number(),
   venueCredits: z.number(),
-  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id)])
+  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id), z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
 export type IncrementReferralCreditsInput = z.infer<

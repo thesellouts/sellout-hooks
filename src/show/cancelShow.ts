@@ -13,7 +13,7 @@ import { getContractAddresses } from '../config'
 
 const CancelShowSchema = z.object({
   showId: z.string(),
-  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id)])
+  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id), z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
 export type CancelShowType = z.infer<typeof CancelShowSchema>

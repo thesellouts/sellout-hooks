@@ -17,7 +17,7 @@ const SubmitProposalSchema = z.object({
   proposedDates: z.array(z.number()),
   paymentToken: z.string(),
   paymentAmount: z.string().optional(),
-  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id)])
+  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id), z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
 export type SubmitProposal = z.infer<typeof SubmitProposalSchema>

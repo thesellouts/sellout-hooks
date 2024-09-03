@@ -14,7 +14,7 @@ import { getContractAddresses } from '../config'
 const VoteForDateSchema = z.object({
   showId: z.string(),
   dateIndex: z.number(),
-  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id)])
+  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id), z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
 export type VoteForDate = z.infer<typeof VoteForDateSchema>

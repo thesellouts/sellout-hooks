@@ -9,7 +9,7 @@ import { AddressSchema } from '../../utils'
 
 const IsOrganizerRegisteredSchema = z.object({
   organizerAddress: AddressSchema,
-  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id)])
+  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id), z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
 export type IsOrganizerRegisteredInput = z.infer<

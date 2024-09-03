@@ -8,7 +8,7 @@ import { getContractAddresses } from '../config'
 
 const GetNumberOfVotersSchema = z.object({
   showId: z.string(),
-  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id)])
+  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id), z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
 export type GetNumberOfVotersInput = z.infer<typeof GetNumberOfVotersSchema>

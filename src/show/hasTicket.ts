@@ -9,7 +9,7 @@ import { getContractAddresses } from '../config'
 const HasTicketSchema = z.object({
   wallet: z.string(),
   showId: z.string(),
-  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id)])
+  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id), z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
 export type HasTicketInput = z.infer<typeof HasTicketSchema>

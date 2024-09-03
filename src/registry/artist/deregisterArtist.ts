@@ -13,7 +13,7 @@ import { getContractAddresses } from '../../config'
 
 const DeregisterArtistSchema = z.object({
   artistId: z.number(),
-  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id)])
+  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id), z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
 export type DeregisterArtistInput = z.infer<typeof DeregisterArtistSchema>

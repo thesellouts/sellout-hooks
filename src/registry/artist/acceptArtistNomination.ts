@@ -5,7 +5,7 @@ import {
   waitForTransactionReceipt,
   writeContract
 } from '@wagmi/core'
-import { sepolia, zora } from 'viem/chains'
+import { base, baseSepolia, sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { ArtistRegistryABI } from '../../abis'
@@ -14,7 +14,12 @@ import { getContractAddresses } from '../../config'
 const AcceptNominationSchema = z.object({
   name: z.string(),
   bio: z.string(),
-  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id)])
+  chainId: z.union([
+    z.literal(sepolia.id),
+    z.literal(zora.id),
+    z.literal(base.id),
+    z.literal(baseSepolia.id)
+  ])
 })
 
 export type AcceptArtistNominationInput = z.infer<typeof AcceptNominationSchema>

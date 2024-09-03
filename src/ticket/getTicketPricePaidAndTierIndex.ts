@@ -9,7 +9,7 @@ import { getContractAddresses } from '../config'
 const GetTicketPricePaidAndTierIndexSchema = z.object({
   showId: z.string(),
   ticketId: z.number(),
-  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id)])
+  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id), z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
 export type GetTicketPricePaidAndTierIndexInput = z.infer<

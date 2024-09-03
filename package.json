@@ -1,7 +1,7 @@
 {
   "name": "@thesellouts/sellout-hooks",
   "private": false,
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "react hooks for interacting with sellout protocol",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -25,7 +25,8 @@
     "zod": "^3.23.0"
   },
   "dependencies": {
-    "@thesellouts/sellout-protocol": "^0.1.0"
+    "@thesellouts/sellout-protocol": "^0.1.2",
+    "permissionless": "^0.0.18"
   },
   "devDependencies": {
     "@tanstack/eslint-plugin-query": "^5.27.7",

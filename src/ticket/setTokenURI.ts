@@ -15,7 +15,7 @@ const SetTokenURISchema = z.object({
   showId: z.string(),
   tokenId: z.number(),
   newURI: z.string(),
-  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id)])
+  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id), z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
 export type SetTokenURIType = z.infer<typeof SetTokenURISchema>

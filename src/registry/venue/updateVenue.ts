@@ -20,7 +20,7 @@ const UpdateVenueSchema = z.object({
   longitude: z.number(),
   totalCapacity: z.number(),
   streetAddress: z.string(),
-  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id)])
+  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id), z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
 export type UpdateVenueInput = z.infer<typeof UpdateVenueSchema>

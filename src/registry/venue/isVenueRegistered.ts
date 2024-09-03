@@ -8,7 +8,7 @@ import { getContractAddresses } from '../../config'
 
 const IsVenueRegisteredSchema = z.object({
   venueAddress: z.string(),
-  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id)])
+  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id), z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
 export type IsVenueRegisteredInput = z.infer<typeof IsVenueRegisteredSchema>

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import BoxOfficeABI from '@thesellouts/sellout-protocol/abis/BoxOffice.json'
 import { Config, readContract } from '@wagmi/core'
-import { sepolia, zora } from 'viem/chains'
+import { base, baseSepolia, sepolia, zora } from 'viem/chains'
 import { z } from 'zod'
 
 import { getContractAddresses } from '../config'
@@ -9,7 +9,12 @@ import { getContractAddresses } from '../config'
 const GetWalletTokenIdsSchema = z.object({
   showId: z.string(),
   address: z.string().optional(),
-  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id)])
+  chainId: z.union([
+    z.literal(sepolia.id),
+    z.literal(zora.id),
+    z.literal(base.id),
+    z.literal(baseSepolia.id)
+  ])
 })
 
 export type GetWalletTokenIdsType = z.infer<typeof GetWalletTokenIdsSchema>
