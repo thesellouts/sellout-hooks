@@ -10,8 +10,6 @@ const GetShowTokenVaultSchema = z.object({
   showId: z.string(),
   tokenAddress: z.string(),
   chainId: z.union([
-    z.literal(sepolia.id),
-    z.literal(zora.id),
     z.literal(base.id),
     z.literal(baseSepolia.id)
   ])

@@ -5,7 +5,7 @@ import {
   waitForTransactionReceipt,
   writeContract
 } from '@wagmi/core'
-import { sepolia, zora, base, baseSepolia } from 'viem/chains'
+import { base, baseSepolia } from 'viem/chains'
 import { z } from 'zod'
 
 import { TicketABI } from '../abis'
@@ -18,7 +18,7 @@ const PurchaseTicketsSchema = z.object({
   quantity: z.number(),
   paymentToken: AddressSchema,
   value: z.bigint().optional(),
-  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id), z.literal(base.id), z.literal(baseSepolia.id)])
+  chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
 export type PurchaseTicketsType = z.infer<typeof PurchaseTicketsSchema>

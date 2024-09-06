@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Config, readContract } from '@wagmi/core'
-import { sepolia, zora, base, baseSepolia } from 'viem/chains'
+import { base, baseSepolia } from 'viem/chains'
 import { z } from 'zod'
 
 import { VenueABI } from '../abis'
@@ -8,7 +8,7 @@ import { getContractAddresses } from '../config'
 
 const GetRefundsSchema = z.object({
   user: z.string(),
-  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id), z.literal(base.id), z.literal(baseSepolia.id)])
+  chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
 export type GetRefundsInput = z.infer<typeof GetRefundsSchema>

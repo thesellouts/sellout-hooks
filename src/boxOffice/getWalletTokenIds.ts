@@ -10,8 +10,6 @@ const GetWalletTokenIdsSchema = z.object({
   showId: z.string(),
   address: z.string().optional(),
   chainId: z.union([
-    z.literal(sepolia.id),
-    z.literal(zora.id),
     z.literal(base.id),
     z.literal(baseSepolia.id)
   ])

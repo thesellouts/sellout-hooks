@@ -10,8 +10,6 @@ const GetDateVotesSchema = z.object({
   showId: z.string(),
   date: z.number(),
   chainId: z.union([
-    z.literal(sepolia.id),
-    z.literal(zora.id),
     z.literal(base.id),
     z.literal(baseSepolia.id)
   ])

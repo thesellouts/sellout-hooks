@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Config, readContract } from '@wagmi/core'
-import { sepolia, zora, base, baseSepolia } from 'viem/chains'
+import { base, baseSepolia } from 'viem/chains'
 import { z } from 'zod'
 
 import { TicketABI } from '../abis'
@@ -9,7 +9,7 @@ import { getContractAddresses } from '../config'
 const GetTicketPricePaidAndTierIndexSchema = z.object({
   showId: z.string(),
   ticketId: z.number(),
-  chainId: z.union([z.literal(sepolia.id), z.literal(zora.id), z.literal(base.id), z.literal(baseSepolia.id)])
+  chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
 export type GetTicketPricePaidAndTierIndexInput = z.infer<

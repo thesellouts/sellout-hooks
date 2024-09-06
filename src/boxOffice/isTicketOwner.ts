@@ -11,8 +11,6 @@ const IsTokenOwnerSchema = z.object({
   wallet: z.string(),
   tokenId: z.number(),
   chainId: z.union([
-    z.literal(sepolia.id),
-    z.literal(zora.id),
     z.literal(base.id),
     z.literal(baseSepolia.id)
   ])
