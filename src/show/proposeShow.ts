@@ -1,18 +1,16 @@
-import { useMutation } from '@tanstack/react-query'
-import {
-  Config,
-  simulateContract,
-  waitForTransactionReceipt,
-  writeContract
-} from '@wagmi/core'
+import { useMutation, UseMutationResult } from '@tanstack/react-query'
+import { Config, simulateContract } from '@wagmi/core'
+import { useMemo } from 'react'
+import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
+import { useConfig } from 'wagmi'
 import { z } from 'zod'
 
 import { ShowABI } from '../abis'
 import { getContractAddresses } from '../config'
+import { useContractInteractor } from '../contractInteractor'
 import { AddressSchema, NULL_ADDRESS } from '../utils'
 
-// Schema for VenueProposalParams matching the Solidity structure
 const VenueProposalParamsSchema = z.object({
   proposalPeriodDuration: z.number(),
   proposalDateExtension: z.number(),
@@ -61,35 +59,67 @@ const ProposeShowSchema = z.object({
 
 export type ProposeShowType = z.infer<typeof ProposeShowSchema>
 
-export const proposeShow = async (input: ProposeShowType, config: Config) => {
-  const { chainId, ...args } = input
-  const addresses = getContractAddresses(chainId)
-
-  try {
-    const validatedInput = ProposeShowSchema.parse(input)
-
-    const { request } = await simulateContract(config, {
-      abi: ShowABI,
-      address: addresses.Show as `0x${string}`,
-      functionName: 'proposeShow',
-      args: [validatedInput],
-      chainId
-    })
-
-    const hash = await writeContract(config, request)
-    return {
-      hash,
-      getReceipt: () => waitForTransactionReceipt(config, { hash })
-    }
-  } catch (err) {
-    console.error('Validation or Execution Error:', err)
-    throw err
-  }
+interface TransactionReceipt {
+  transactionHash: `0x${string}`
+  blockNumber: bigint
+  status: 'success' | 'reverted'
 }
 
-export const useProposeShow = (input: ProposeShowType, config: Config) => {
+interface ProposeShowResult {
+  hash: `0x${string}`
+  receipt: TransactionReceipt
+}
+
+const createProposeShow =
+  (
+    contractInteractor: ReturnType<typeof useContractInteractor>,
+    config: Config
+  ) =>
+  async (input: ProposeShowType): Promise<ProposeShowResult> => {
+    const { chainId, ...args } = input
+    const addresses = getContractAddresses(chainId)
+
+    try {
+      const validatedInput = ProposeShowSchema.parse(input)
+
+      const { request } = await simulateContract(config, {
+        abi: ShowABI as Abi,
+        address: addresses.Show as `0x${string}`,
+        functionName: 'proposeShow',
+        args: [validatedInput],
+        chainId
+      })
+
+      const receipt = await contractInteractor.execute({
+        address: request.address,
+        abi: ShowABI as Abi,
+        functionName: request.functionName,
+        args: Array.isArray(request.args) ? [...request.args] : undefined,
+        value: request.value
+      })
+
+      return {
+        hash: receipt.transactionHash,
+        receipt
+      }
+    } catch (err) {
+      console.error('Validation or Execution Error:', err)
+      throw err
+    }
+  }
+
+export const useProposeShow = (
+  input: ProposeShowType
+): UseMutationResult<ProposeShowResult, Error> => {
+  const contractInteractor = useContractInteractor()
+  const config = useConfig()
+  const proposeShow = useMemo(
+    () => createProposeShow(contractInteractor, config),
+    [contractInteractor, config]
+  )
+
   return useMutation({
-    mutationFn: () => proposeShow(input, config),
+    mutationFn: () => proposeShow(input),
     onError: error => {
       console.error('Error proposing show:', error)
     }
