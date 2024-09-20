@@ -1,15 +1,13 @@
-import { useMutation } from '@tanstack/react-query'
-import {
-  Config,
-  simulateContract,
-  waitForTransactionReceipt,
-  writeContract
-} from '@wagmi/core'
+import { useMutation, UseMutationResult } from '@tanstack/react-query'
+import { Config, simulateContract } from '@wagmi/core'
+import { useMemo } from 'react'
+import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { z } from 'zod'
 
 import { ReferralABI } from '../../abis'
 import { getContractAddresses } from '../../config'
+import { ContractInteractor } from '../../contractInteractor'
 import { AddressSchema } from '../../utils'
 
 const DecrementReferralCreditsSchema = z.object({
@@ -24,40 +22,70 @@ export type DecrementReferralCreditsInput = z.infer<
   typeof DecrementReferralCreditsSchema
 >
 
-export const decrementReferralCredits = async (
-  input: DecrementReferralCreditsInput,
-  config: Config
-) => {
-  const { chainId } = input
-  const addresses = getContractAddresses(chainId)
-  const validatedInput = DecrementReferralCreditsSchema.parse(input)
-
-  const { request } = await simulateContract(config, {
-    abi: ReferralABI,
-    address: addresses.ReferralModule as `0x${string}`,
-    functionName: 'decrementReferralCredits',
-    args: [
-      validatedInput.referrer,
-      validatedInput.artistCredits,
-      validatedInput.organizerCredits,
-      validatedInput.venueCredits
-    ],
-    chainId
-  })
-
-  const hash = await writeContract(config, request)
-  return {
-    hash,
-    getReceipt: () => waitForTransactionReceipt(config, { hash })
+export interface DecrementReferralCreditsResult {
+  hash: `0x${string}`
+  receipt: {
+    transactionHash: `0x${string}`
+    blockNumber: bigint
+    status: 'success' | 'reverted'
   }
 }
 
+const createDecrementReferralCredits =
+  (contractInteractor: ContractInteractor, config: Config) =>
+  async (
+    input: DecrementReferralCreditsInput
+  ): Promise<DecrementReferralCreditsResult> => {
+    const { chainId } = input
+    const addresses = getContractAddresses(chainId)
+
+    try {
+      const validatedInput = DecrementReferralCreditsSchema.parse(input)
+
+      // Simulate the contract call
+      const { request } = await simulateContract(config, {
+        abi: ReferralABI,
+        address: addresses.ReferralModule as `0x${string}`,
+        functionName: 'decrementReferralCredits',
+        args: [
+          validatedInput.referrer,
+          validatedInput.artistCredits,
+          validatedInput.organizerCredits,
+          validatedInput.venueCredits
+        ],
+        chainId
+      })
+
+      // Execute the contract interaction
+      const receipt = await contractInteractor.execute({
+        address: request.address,
+        abi: ReferralABI as Abi,
+        functionName: request.functionName,
+        args: request.args ? [...request.args] : undefined
+      })
+
+      return {
+        hash: receipt.transactionHash,
+        receipt
+      }
+    } catch (err) {
+      console.error('Validation or Execution Error:', err)
+      throw err
+    }
+  }
+
 export const useDecrementReferralCredits = (
   input: DecrementReferralCreditsInput,
+  contractInteractor: ContractInteractor,
   config: Config
-) => {
+): UseMutationResult<DecrementReferralCreditsResult, Error> => {
+  const decrementReferralCredits = useMemo(
+    () => createDecrementReferralCredits(contractInteractor, config),
+    [contractInteractor, config]
+  )
+
   return useMutation({
-    mutationFn: () => decrementReferralCredits(input, config),
+    mutationFn: () => decrementReferralCredits(input),
     onError: error => {
       console.error('Error decrementing referral credits:', error)
     }

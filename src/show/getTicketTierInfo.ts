@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { Config, readContract } from '@wagmi/core'
+import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { z } from 'zod'
 
 import { ShowABI } from '../abis'
 import { getContractAddresses } from '../config'
+import { ContractInteractor } from '../contractInteractor'
 
 const GetTicketTierInfoSchema = z.object({
   showId: z.string(),
@@ -16,18 +17,17 @@ export type GetTicketTierInfoInput = z.infer<typeof GetTicketTierInfoSchema>
 
 export const getTicketTierInfo = async (
   input: GetTicketTierInfoInput,
-  config: Config
+  contractInteractor: ContractInteractor
 ) => {
   const { showId, tierIndex, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(config, {
+    return await contractInteractor.read({
       address: addresses.Show as `0x${string}`,
-      abi: ShowABI,
+      abi: ShowABI as Abi,
       functionName: 'getTicketTierInfo',
-      args: [showId, tierIndex],
-      chainId
+      args: [showId, tierIndex]
     })
   } catch (error) {
     console.error('Error reading ticket tier info:', error)
@@ -37,11 +37,11 @@ export const getTicketTierInfo = async (
 
 export const useGetTicketTierInfo = (
   input: GetTicketTierInfoInput,
-  config: Config
+  contractInteractor: ContractInteractor
 ) => {
   return useQuery({
     queryKey: ['getTicketTierInfo', input.showId, input.tierIndex],
-    queryFn: () => getTicketTierInfo(input, config),
+    queryFn: () => getTicketTierInfo(input, contractInteractor),
     enabled: !!input.showId && input.tierIndex !== undefined
   })
 }

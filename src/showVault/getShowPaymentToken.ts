@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { Config, readContract } from '@wagmi/core'
+import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { z } from 'zod'
 
 import { ShowVaultABI } from '../abis'
 import { getContractAddresses } from '../config'
+import { ContractInteractor } from '../contractInteractor'
 
 const GetShowPaymentTokenSchema = z.object({
   showId: z.string(),
@@ -15,18 +16,17 @@ export type GetShowPaymentTokenInput = z.infer<typeof GetShowPaymentTokenSchema>
 
 export const getShowPaymentToken = async (
   input: GetShowPaymentTokenInput,
-  config: Config
+  contractInteractor: ContractInteractor
 ) => {
   const { showId, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(config, {
+    return await contractInteractor.read({
       address: addresses.ShowVault as `0x${string}`,
-      abi: ShowVaultABI,
+      abi: ShowVaultABI as Abi,
       functionName: 'getShowPaymentToken',
-      args: [showId],
-      chainId
+      args: [showId]
     })
   } catch (error) {
     console.error('Error getting show payment token:', error)
@@ -36,11 +36,11 @@ export const getShowPaymentToken = async (
 
 export const useGetShowPaymentToken = (
   input: GetShowPaymentTokenInput,
-  config: Config
+  contractInteractor: ContractInteractor
 ) => {
   return useQuery({
     queryKey: ['getShowPaymentToken', input.showId],
-    queryFn: () => getShowPaymentToken(input, config),
+    queryFn: () => getShowPaymentToken(input, contractInteractor),
     enabled: !!input.showId
   })
 }

@@ -1,15 +1,13 @@
-import { useMutation } from '@tanstack/react-query'
-import {
-  Config,
-  simulateContract,
-  waitForTransactionReceipt,
-  writeContract
-} from '@wagmi/core'
+import { useMutation, UseMutationResult } from '@tanstack/react-query'
+import { Config, simulateContract } from '@wagmi/core'
+import { useMemo } from 'react'
+import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { z } from 'zod'
 
 import { VenueRegistryABI } from '../../abis'
 import { getContractAddresses } from '../../config'
+import { ContractInteractor } from '../../contractInteractor'
 
 const UpdateVenueSchema = z.object({
   venueId: z.number(),
@@ -25,38 +23,72 @@ const UpdateVenueSchema = z.object({
 
 export type UpdateVenueInput = z.infer<typeof UpdateVenueSchema>
 
-export const updateVenue = async (input: UpdateVenueInput, config: Config) => {
-  const { chainId } = input
-  const addresses = getContractAddresses(chainId)
-  const validatedInput = UpdateVenueSchema.parse(input)
-
-  const { request } = await simulateContract(config, {
-    abi: VenueRegistryABI,
-    address: addresses.VenueRegistry as `0x${string}`,
-    functionName: 'updateVenue',
-    args: [
-      validatedInput.venueId,
-      validatedInput.name,
-      validatedInput.bio,
-      validatedInput.wallet,
-      validatedInput.latitude,
-      validatedInput.longitude,
-      validatedInput.totalCapacity,
-      validatedInput.streetAddress
-    ],
-    chainId
-  })
-
-  const hash = await writeContract(config, request)
-  return {
-    hash,
-    getReceipt: () => waitForTransactionReceipt(config, { hash })
+export interface UpdateVenueResult {
+  hash: `0x${string}`
+  receipt: {
+    transactionHash: `0x${string}`
+    blockNumber: bigint
+    status: 'success' | 'reverted'
   }
 }
 
-export const useUpdateVenue = (input: UpdateVenueInput, config: Config) => {
+const createUpdateVenue =
+  (contractInteractor: ContractInteractor, config: Config) =>
+  async (input: UpdateVenueInput): Promise<UpdateVenueResult> => {
+    const { chainId } = input
+    const addresses = getContractAddresses(chainId)
+
+    try {
+      const validatedInput = UpdateVenueSchema.parse(input)
+
+      // Simulate the contract call
+      const { request } = await simulateContract(config, {
+        abi: VenueRegistryABI,
+        address: addresses.VenueRegistry as `0x${string}`,
+        functionName: 'updateVenue',
+        args: [
+          validatedInput.venueId,
+          validatedInput.name,
+          validatedInput.bio,
+          validatedInput.wallet,
+          validatedInput.latitude,
+          validatedInput.longitude,
+          validatedInput.totalCapacity,
+          validatedInput.streetAddress
+        ],
+        chainId
+      })
+
+      // Execute the contract interaction
+      const receipt = await contractInteractor.execute({
+        address: request.address,
+        abi: VenueRegistryABI as Abi,
+        functionName: request.functionName,
+        args: request.args ? [...request.args] : undefined
+      })
+
+      return {
+        hash: receipt.transactionHash,
+        receipt
+      }
+    } catch (err) {
+      console.error('Validation or Execution Error:', err)
+      throw err
+    }
+  }
+
+export const useUpdateVenue = (
+  input: UpdateVenueInput,
+  contractInteractor: ContractInteractor,
+  config: Config
+): UseMutationResult<UpdateVenueResult, Error> => {
+  const updateVenue = useMemo(
+    () => createUpdateVenue(contractInteractor, config),
+    [contractInteractor, config]
+  )
+
   return useMutation({
-    mutationFn: () => updateVenue(input, config),
+    mutationFn: () => updateVenue(input),
     onError: error => {
       console.error('Error updating venue:', error)
     }

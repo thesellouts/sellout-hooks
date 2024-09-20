@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { Config, readContract } from '@wagmi/core'
+import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { z } from 'zod'
 
 import { VenueABI } from '../abis'
 import { getContractAddresses } from '../config'
+import { ContractInteractor } from '../contractInteractor'
 
 const GetProposalsCountSchema = z.object({
   showId: z.string(),
@@ -15,18 +16,17 @@ export type GetProposalsCountInput = z.infer<typeof GetProposalsCountSchema>
 
 export const getProposalsCount = async (
   input: GetProposalsCountInput,
-  config: Config
+  contractInteractor: ContractInteractor
 ) => {
   const { showId, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(config, {
+    return await contractInteractor.read({
       address: addresses.Venue as `0x${string}`,
-      abi: VenueABI,
+      abi: VenueABI as Abi,
       functionName: 'getProposalsCount',
-      args: [showId],
-      chainId
+      args: [showId]
     })
   } catch (error) {
     console.error('Error getting proposals count:', error)
@@ -36,11 +36,11 @@ export const getProposalsCount = async (
 
 export const useGetProposalsCount = (
   input: GetProposalsCountInput,
-  config: Config
+  contractInteractor: ContractInteractor
 ) => {
   return useQuery({
     queryKey: ['getProposalsCount', input.showId],
-    queryFn: () => getProposalsCount(input, config),
+    queryFn: () => getProposalsCount(input, contractInteractor),
     enabled: !!input.showId
   })
 }

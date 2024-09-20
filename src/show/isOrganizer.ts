@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { Config, readContract } from '@wagmi/core'
+import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { z } from 'zod'
 
 import { ShowABI } from '../abis'
 import { getContractAddresses } from '../config'
+import { ContractInteractor } from '../contractInteractor'
 
 const IsOrganizerSchema = z.object({
   user: z.string(),
@@ -14,17 +15,19 @@ const IsOrganizerSchema = z.object({
 
 export type IsOrganizerInput = z.infer<typeof IsOrganizerSchema>
 
-export const isOrganizer = async (input: IsOrganizerInput, config: Config) => {
+export const isOrganizer = async (
+  input: IsOrganizerInput,
+  contractInteractor: ContractInteractor
+): Promise<boolean> => {
   const { user, showId, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(config, {
+    return await contractInteractor.read({
       address: addresses.Show as `0x${string}`,
-      abi: ShowABI,
+      abi: ShowABI as Abi,
       functionName: 'isOrganizer',
-      args: [user, showId],
-      chainId
+      args: [user, showId]
     })
   } catch (error) {
     console.error('Error checking if user is an organizer:', error)
@@ -32,10 +35,13 @@ export const isOrganizer = async (input: IsOrganizerInput, config: Config) => {
   }
 }
 
-export const useIsOrganizer = (input: IsOrganizerInput, config: Config) => {
+export const useIsOrganizer = (
+  input: IsOrganizerInput,
+  contractInteractor: ContractInteractor
+) => {
   return useQuery({
     queryKey: ['isOrganizer', input.user, input.showId],
-    queryFn: () => isOrganizer(input, config),
+    queryFn: () => isOrganizer(input, contractInteractor),
     enabled: !!input.user && !!input.showId
   })
 }

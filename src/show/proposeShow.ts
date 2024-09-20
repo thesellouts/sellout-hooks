@@ -3,12 +3,11 @@ import { Config, simulateContract } from '@wagmi/core'
 import { useMemo } from 'react'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
-import { useConfig } from 'wagmi'
 import { z } from 'zod'
 
 import { ShowABI } from '../abis'
 import { getContractAddresses } from '../config'
-import { useContractInteractor } from '../contractInteractor'
+import { ContractInteractor } from '../contractInteractor'
 import { AddressSchema, NULL_ADDRESS } from '../utils'
 
 const VenueProposalParamsSchema = z.object({
@@ -59,22 +58,17 @@ const ProposeShowSchema = z.object({
 
 export type ProposeShowType = z.infer<typeof ProposeShowSchema>
 
-interface TransactionReceipt {
-  transactionHash: `0x${string}`
-  blockNumber: bigint
-  status: 'success' | 'reverted'
-}
-
-interface ProposeShowResult {
+export interface ProposeShowResult {
   hash: `0x${string}`
-  receipt: TransactionReceipt
+  receipt: {
+    transactionHash: `0x${string}`
+    blockNumber: bigint
+    status: 'success' | 'reverted'
+  }
 }
 
 const createProposeShow =
-  (
-    contractInteractor: ReturnType<typeof useContractInteractor>,
-    config: Config
-  ) =>
+  (contractInteractor: ContractInteractor, config: Config) =>
   async (input: ProposeShowType): Promise<ProposeShowResult> => {
     const { chainId, ...args } = input
     const addresses = getContractAddresses(chainId)
@@ -109,10 +103,10 @@ const createProposeShow =
   }
 
 export const useProposeShow = (
-  input: ProposeShowType
+  input: ProposeShowType,
+  contractInteractor: ContractInteractor,
+  config: Config
 ): UseMutationResult<ProposeShowResult, Error> => {
-  const contractInteractor = useContractInteractor()
-  const config = useConfig()
   const proposeShow = useMemo(
     () => createProposeShow(contractInteractor, config),
     [contractInteractor, config]

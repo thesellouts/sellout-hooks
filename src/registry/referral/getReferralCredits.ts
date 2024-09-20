@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { Config, readContract } from '@wagmi/core'
+import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { z } from 'zod'
 
 import { ReferralABI } from '../../abis'
 import { getContractAddresses } from '../../config'
+import { ContractInteractor } from '../../contractInteractor'
 import { AddressSchema } from '../../utils'
 
 const GetReferralCreditsSchema = z.object({
@@ -16,28 +17,27 @@ export type GetReferralCreditsInput = z.infer<typeof GetReferralCreditsSchema>
 
 export const getReferralCredits = async (
   input: GetReferralCreditsInput,
-  config: Config
+  contractInteractor: ContractInteractor
 ) => {
   const { chainId, referrer } = input
   const addresses = getContractAddresses(chainId)
   const validatedInput = GetReferralCreditsSchema.parse(input)
 
-  return await readContract(config, {
-    abi: ReferralABI,
+  return await contractInteractor.read({
+    abi: ReferralABI as Abi,
     address: addresses.ReferralModule as `0x${string}`,
     functionName: 'getReferralCredits',
-    args: [validatedInput.referrer],
-    chainId
+    args: [validatedInput.referrer]
   })
 }
 
 export const useGetReferralCredits = (
   input: GetReferralCreditsInput,
-  config: Config
+  contractInteractor: ContractInteractor
 ) => {
   return useQuery({
     queryKey: ['getReferralCredits', input.referrer],
-    queryFn: () => getReferralCredits(input, config),
+    queryFn: () => getReferralCredits(input, contractInteractor),
     enabled: !!input.referrer
   })
 }

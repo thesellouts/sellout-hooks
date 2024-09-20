@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { Config, readContract } from '@wagmi/core'
+import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { z } from 'zod'
 
 import { ShowABI } from '../abis'
 import { getContractAddresses } from '../config'
+import { ContractInteractor } from '../contractInteractor'
 
 const IsArtistSchema = z.object({
   user: z.string(),
@@ -14,17 +15,19 @@ const IsArtistSchema = z.object({
 
 export type IsArtistInput = z.infer<typeof IsArtistSchema>
 
-export const isArtist = async (input: IsArtistInput, config: Config) => {
+export const isArtist = async (
+  input: IsArtistInput,
+  contractInteractor: ContractInteractor
+): Promise<boolean> => {
   const { user, showId, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(config, {
+    return await contractInteractor.read({
       address: addresses.Show as `0x${string}`,
-      abi: ShowABI,
+      abi: ShowABI as Abi,
       functionName: 'isArtist',
-      args: [user, showId],
-      chainId
+      args: [user, showId]
     })
   } catch (error) {
     console.error('Error checking if user is an artist:', error)
@@ -32,10 +35,13 @@ export const isArtist = async (input: IsArtistInput, config: Config) => {
   }
 }
 
-export const useIsArtist = (input: IsArtistInput, config: Config) => {
+export const useIsArtist = (
+  input: IsArtistInput,
+  contractInteractor: ContractInteractor
+) => {
   return useQuery({
     queryKey: ['isArtist', input.user, input.showId],
-    queryFn: () => isArtist(input, config),
+    queryFn: () => isArtist(input, contractInteractor),
     enabled: !!input.user && !!input.showId
   })
 }

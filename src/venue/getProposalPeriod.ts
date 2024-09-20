@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { Config, readContract } from '@wagmi/core'
+import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { z } from 'zod'
 
 import { VenueABI } from '../abis'
 import { getContractAddresses } from '../config'
+import { ContractInteractor } from '../contractInteractor'
 
 const GetProposalPeriodSchema = z.object({
   showId: z.string(),
@@ -15,18 +16,17 @@ export type GetProposalPeriodInput = z.infer<typeof GetProposalPeriodSchema>
 
 export const getProposalPeriod = async (
   input: GetProposalPeriodInput,
-  config: Config
+  contractInteractor: ContractInteractor
 ) => {
   const { showId, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(config, {
+    return await contractInteractor.read({
       address: addresses.Venue as `0x${string}`,
-      abi: VenueABI,
+      abi: VenueABI as Abi,
       functionName: 'getProposalPeriod',
-      args: [showId],
-      chainId
+      args: [showId]
     })
   } catch (error) {
     console.error('Error getting proposal period:', error)
@@ -36,11 +36,11 @@ export const getProposalPeriod = async (
 
 export const useGetProposalPeriod = (
   input: GetProposalPeriodInput,
-  config: Config
+  contractInteractor: ContractInteractor
 ) => {
   return useQuery({
     queryKey: ['getProposalPeriod', input.showId],
-    queryFn: () => getProposalPeriod(input, config),
+    queryFn: () => getProposalPeriod(input, contractInteractor),
     enabled: !!input.showId
   })
 }

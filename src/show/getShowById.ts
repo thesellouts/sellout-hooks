@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { Config, readContract } from '@wagmi/core'
+import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { z } from 'zod'
 
 import { ShowABI } from '../abis'
 import { getContractAddresses } from '../config'
+import { ContractInteractor } from '../contractInteractor'
 
 const GetShowByIdSchema = z.object({
   showId: z.string(),
@@ -13,17 +14,19 @@ const GetShowByIdSchema = z.object({
 
 export type GetShowByIdInput = z.infer<typeof GetShowByIdSchema>
 
-export const getShowById = async (input: GetShowByIdInput, config: Config) => {
+export const getShowById = async (
+  input: GetShowByIdInput,
+  contractInteractor: ContractInteractor
+) => {
   const { showId, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(config, {
+    return await contractInteractor.read({
       address: addresses.Show as `0x${string}`,
-      abi: ShowABI,
+      abi: ShowABI as Abi,
       functionName: 'getShowById',
-      args: [showId],
-      chainId
+      args: [showId]
     })
   } catch (error) {
     console.error('Error reading show details:', error)
@@ -31,10 +34,13 @@ export const getShowById = async (input: GetShowByIdInput, config: Config) => {
   }
 }
 
-export const useGetShowById = (input: GetShowByIdInput, config: Config) => {
+export const useGetShowById = (
+  input: GetShowByIdInput,
+  contractInteractor: ContractInteractor
+) => {
   return useQuery({
     queryKey: ['getShowById', input.showId],
-    queryFn: () => getShowById(input, config),
+    queryFn: () => getShowById(input, contractInteractor),
     enabled: !!input.showId
   })
 }

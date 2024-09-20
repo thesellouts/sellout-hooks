@@ -1,27 +1,26 @@
 import { Config, getPublicClient, writeContract } from '@wagmi/core'
 import { SmartAccountClient } from 'permissionless'
-import { useMemo } from 'react'
-import { Abi, Address, Chain, Hash } from 'viem'
-import { useChainId, useConfig } from 'wagmi'
+import { Abi, Address, Chain, Hash, PublicClient } from 'viem'
 
-interface TransactionReceipt {
+export interface TransactionReceipt {
   transactionHash: Hash
   blockNumber: bigint
   status: 'success' | 'reverted'
 }
 
-interface ContractInteractionParams {
+export interface ContractInteractionParams {
   address: Address
   abi: Abi
   functionName: string
-  args?: unknown[]
+  args?: readonly unknown[]
   value?: bigint
 }
 
-class ContractInteractor {
+export class ContractInteractor {
   private config: Config
   private smartAccountClient?: SmartAccountClient
   private chain: Chain
+  private publicClient: PublicClient | undefined
 
   constructor(
     config: Config,
@@ -31,6 +30,11 @@ class ContractInteractor {
     this.config = config
     this.chain = chain
     this.smartAccountClient = smartAccountClient
+    this.publicClient = getPublicClient(config)
+
+    if (!this.publicClient) {
+      throw new Error('Failed to initialize public client')
+    }
   }
 
   async execute(
@@ -43,19 +47,40 @@ class ContractInteractor {
     }
   }
 
+  async read<T>(params: ContractInteractionParams): Promise<T> {
+    if (!this.publicClient) {
+      throw new Error('Public client is not available')
+    }
+
+    try {
+      const result = await this.publicClient.readContract({
+        ...params,
+        args: params.args ? [...params.args] : undefined
+      })
+      return result as T
+    } catch (error) {
+      console.error('Error reading from contract:', error)
+      throw error
+    }
+  }
+
   private async executeWithSmartAccount(
     params: ContractInteractionParams
   ): Promise<TransactionReceipt> {
+    if (!this.publicClient) {
+      throw new Error('Public client is not available')
+    }
+
     try {
       const hash = await (this.smartAccountClient as any).writeContract({
         ...params,
+        args: params.args ? [...params.args] : undefined,
         chain: this.chain
       })
 
-      const publicClient = getPublicClient(this.config)
-      if (!publicClient) throw new Error('Failed to get public client')
-
-      const receipt = await publicClient.waitForTransactionReceipt({ hash })
+      const receipt = await this.publicClient.waitForTransactionReceipt({
+        hash
+      })
 
       return {
         transactionHash: receipt.transactionHash,
@@ -71,16 +96,20 @@ class ContractInteractor {
   private async executeWithEOA(
     params: ContractInteractionParams
   ): Promise<TransactionReceipt> {
+    if (!this.publicClient) {
+      throw new Error('Public client is not available')
+    }
+
     try {
       const hash = await writeContract(this.config, {
         ...params,
+        args: params.args ? [...params.args] : undefined,
         chain: this.chain
       })
 
-      const publicClient = await getPublicClient(this.config)
-      if (!publicClient) throw new Error('Failed to get public client')
-
-      const receipt = await publicClient.waitForTransactionReceipt({ hash })
+      const receipt = await this.publicClient.waitForTransactionReceipt({
+        hash
+      })
 
       return {
         transactionHash: receipt.transactionHash,
@@ -100,15 +129,4 @@ export function createContractInteractor(
   smartAccountClient?: SmartAccountClient
 ): ContractInteractor {
   return new ContractInteractor(config, chain, smartAccountClient)
-}
-
-export function useContractInteractor(smartAccountClient?: SmartAccountClient) {
-  const config = useConfig()
-  const chainId = useChainId()
-  const chain = config.chains.find(c => c.id === chainId)!
-
-  return useMemo(
-    () => createContractInteractor(config, chain, smartAccountClient),
-    [config, chain, smartAccountClient]
-  )
 }

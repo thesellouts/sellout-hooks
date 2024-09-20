@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { Config, readContract } from '@wagmi/core'
+import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { z } from 'zod'
 
 import { ArtistRegistryABI } from '../../abis'
 import { getContractAddresses } from '../../config'
+import { ContractInteractor } from '../../contractInteractor'
 
 const GetArtistSchema = z.object({
   artistAddress: z.string(),
@@ -13,24 +14,29 @@ const GetArtistSchema = z.object({
 
 export type GetArtistInput = z.infer<typeof GetArtistSchema>
 
-export const getArtist = async (input: GetArtistInput, config: Config) => {
+export const getArtist = async (
+  input: GetArtistInput,
+  contractInteractor: ContractInteractor
+) => {
   const { chainId } = input
   const addresses = getContractAddresses(chainId)
   const validatedInput = GetArtistSchema.parse(input)
 
-  return await readContract(config, {
-    abi: ArtistRegistryABI,
+  return await contractInteractor.read({
+    abi: ArtistRegistryABI as Abi,
     address: addresses.ArtistRegistry as `0x${string}`,
     functionName: 'getArtist',
-    args: [validatedInput.artistAddress],
-    chainId
+    args: [validatedInput.artistAddress]
   })
 }
 
-export const useGetArtist = (input: GetArtistInput, config: Config) => {
+export const useGetArtist = (
+  input: GetArtistInput,
+  contractInteractor: ContractInteractor
+) => {
   return useQuery({
     queryKey: ['getArtist', input.artistAddress],
-    queryFn: () => getArtist(input, config),
+    queryFn: () => getArtist(input, contractInteractor),
     enabled: !!input.artistAddress
   })
 }

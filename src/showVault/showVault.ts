@@ -1,35 +1,32 @@
 import { useQuery } from '@tanstack/react-query'
-import { Config, readContract } from '@wagmi/core'
-import { base, baseSepolia, sepolia, zora } from 'viem/chains'
+import { Abi } from 'viem'
+import { base, baseSepolia } from 'viem/chains'
 import { z } from 'zod'
 
 import { ShowVaultABI } from '../abis'
 import { getContractAddresses } from '../config'
+import { ContractInteractor } from '../contractInteractor'
 
 const GetShowVaultSchema = z.object({
   showId: z.string(),
-  chainId: z.union([
-    z.literal(base.id),
-    z.literal(baseSepolia.id)
-  ])
+  chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
 export type GetShowVaultInput = z.infer<typeof GetShowVaultSchema>
 
 export const getShowVault = async (
   input: GetShowVaultInput,
-  config: Config
+  contractInteractor: ContractInteractor
 ): Promise<bigint> => {
   const { showId, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return (await readContract(config, {
+    return (await contractInteractor.read({
       address: addresses.ShowVault as `0x${string}`,
-      abi: ShowVaultABI,
+      abi: ShowVaultABI as Abi,
       functionName: 'showVault',
-      args: [showId],
-      chainId
+      args: [showId]
     })) as bigint
   } catch (error) {
     console.error('Error getting show vault balance:', error)
@@ -39,12 +36,11 @@ export const getShowVault = async (
 
 export const useGetShowVault = (
   input: GetShowVaultInput,
-  config: Config,
-  enabled: boolean = true
+  contractInteractor: ContractInteractor
 ) => {
   return useQuery({
     queryKey: ['getShowVault', input.showId],
-    queryFn: () => getShowVault(input, config),
-    enabled: !!input.showId && enabled
+    queryFn: () => getShowVault(input, contractInteractor),
+    enabled: !!input.showId
   })
 }

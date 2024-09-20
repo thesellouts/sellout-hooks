@@ -1,41 +1,34 @@
 import { useQuery } from '@tanstack/react-query'
-import BoxOfficeABI from '@thesellouts/sellout-protocol/abis/BoxOffice.json'
-import { Config, readContract } from '@wagmi/core'
-import { base, baseSepolia, sepolia, zora } from 'viem/chains'
+import { Abi } from 'viem'
+import { base, baseSepolia } from 'viem/chains'
 import { z } from 'zod'
 
+import { BoxOfficeABI } from '../abis'
 import { getContractAddresses } from '../config'
+import { ContractInteractor } from '../contractInteractor'
 
 const GetWalletTokenIdsSchema = z.object({
   showId: z.string(),
   address: z.string().optional(),
-  chainId: z.union([
-    z.literal(base.id),
-    z.literal(baseSepolia.id)
-  ])
+  chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type GetWalletTokenIdsType = z.infer<typeof GetWalletTokenIdsSchema>
+export type GetWalletTokenIdsInput = z.infer<typeof GetWalletTokenIdsSchema>
 
 export const getWalletTokenIds = async (
-  input: GetWalletTokenIdsType,
-  config: Config
-) => {
+  input: GetWalletTokenIdsInput,
+  contractInteractor: ContractInteractor
+): Promise<bigint[]> => {
   const { chainId, showId, address } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    const validatedInput = GetWalletTokenIdsSchema.parse(input)
-
-    const result = await readContract(config, {
-      abi: BoxOfficeABI.abi,
+    return await contractInteractor.read({
+      abi: BoxOfficeABI as Abi,
       address: addresses.BoxOffice as `0x${string}`,
       functionName: 'getWalletTokenIds',
-      args: [validatedInput.showId, validatedInput.address],
-      chainId
+      args: [showId, address]
     })
-
-    return result as bigint[]
   } catch (err) {
     console.error('Error fetching wallet token IDs:', err)
     throw err
@@ -43,12 +36,12 @@ export const getWalletTokenIds = async (
 }
 
 export const useGetWalletTokenIds = (
-  input: GetWalletTokenIdsType,
-  config: Config
+  input: GetWalletTokenIdsInput,
+  contractInteractor: ContractInteractor
 ) => {
   return useQuery({
     queryKey: ['getWalletTokenIds', input],
-    queryFn: () => getWalletTokenIds(input, config),
-    enabled: !!input.address
+    queryFn: () => getWalletTokenIds(input, contractInteractor),
+    enabled: !!input.showId && !!input.address
   })
 }

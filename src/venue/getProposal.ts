@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { Config, readContract } from '@wagmi/core'
+import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { z } from 'zod'
 
 import { VenueABI } from '../abis'
 import { getContractAddresses } from '../config'
+import { ContractInteractor } from '../contractInteractor'
 
 const GetProposalSchema = z.object({
   showId: z.string(),
@@ -14,17 +15,19 @@ const GetProposalSchema = z.object({
 
 export type GetProposalInput = z.infer<typeof GetProposalSchema>
 
-export const getProposal = async (input: GetProposalInput, config: Config) => {
+export const getProposal = async (
+  input: GetProposalInput,
+  contractInteractor: ContractInteractor
+) => {
   const { showId, proposalIndex, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(config, {
+    return await contractInteractor.read({
       address: addresses.Venue as `0x${string}`,
-      abi: VenueABI,
+      abi: VenueABI as Abi,
       functionName: 'getProposal',
-      args: [showId, proposalIndex],
-      chainId
+      args: [showId, proposalIndex]
     })
   } catch (error) {
     console.error('Error getting proposal:', error)
@@ -32,10 +35,13 @@ export const getProposal = async (input: GetProposalInput, config: Config) => {
   }
 }
 
-export const useGetProposal = (input: GetProposalInput, config: Config) => {
+export const useGetProposal = (
+  input: GetProposalInput,
+  contractInteractor: ContractInteractor
+) => {
   return useQuery({
     queryKey: ['getProposal', input.showId, input.proposalIndex],
-    queryFn: () => getProposal(input, config),
+    queryFn: () => getProposal(input, contractInteractor),
     enabled: !!input.showId && input.proposalIndex >= 0
   })
 }

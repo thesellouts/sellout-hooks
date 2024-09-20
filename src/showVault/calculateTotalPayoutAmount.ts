@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { Config, readContract } from '@wagmi/core'
+import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { z } from 'zod'
 
 import { ShowVaultABI } from '../abis'
 import { getContractAddresses } from '../config'
+import { ContractInteractor } from '../contractInteractor'
 
 const CalculateTotalPayoutAmountSchema = z.object({
   showId: z.string(),
@@ -18,18 +19,17 @@ export type CalculateTotalPayoutAmountInput = z.infer<
 
 export const calculateTotalPayoutAmount = async (
   input: CalculateTotalPayoutAmountInput,
-  config: Config
+  contractInteractor: ContractInteractor
 ) => {
   const { showId, paymentToken, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(config, {
+    return await contractInteractor.read({
       address: addresses.ShowVault as `0x${string}`,
-      abi: ShowVaultABI,
+      abi: ShowVaultABI as Abi,
       functionName: 'calculateTotalPayoutAmount',
-      args: [showId, paymentToken],
-      chainId
+      args: [showId, paymentToken]
     })
   } catch (error) {
     console.error('Error calculating total payout amount:', error)
@@ -39,11 +39,11 @@ export const calculateTotalPayoutAmount = async (
 
 export const useCalculateTotalPayoutAmount = (
   input: CalculateTotalPayoutAmountInput,
-  config: Config
+  contractInteractor: ContractInteractor
 ) => {
   return useQuery({
     queryKey: ['calculateTotalPayoutAmount', input.showId, input.paymentToken],
-    queryFn: () => calculateTotalPayoutAmount(input, config),
+    queryFn: () => calculateTotalPayoutAmount(input, contractInteractor),
     enabled: !!input.showId && !!input.paymentToken
   })
 }

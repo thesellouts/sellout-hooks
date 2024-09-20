@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { Config, readContract } from '@wagmi/core'
+import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { z } from 'zod'
 
 import { OrganizerRegistryABI } from '../../abis'
 import { getContractAddresses } from '../../config'
+import { ContractInteractor } from '../../contractInteractor'
 import { AddressSchema } from '../../utils'
 
 const IsOrganizerRegisteredSchema = z.object({
@@ -18,28 +19,27 @@ export type IsOrganizerRegisteredInput = z.infer<
 
 export const isOrganizerRegistered = async (
   input: IsOrganizerRegisteredInput,
-  config: Config
+  contractInteractor: ContractInteractor
 ) => {
   const { chainId, organizerAddress } = input
   const addresses = getContractAddresses(chainId)
   const validatedInput = IsOrganizerRegisteredSchema.parse(input)
 
-  return await readContract(config, {
-    abi: OrganizerRegistryABI,
+  return await contractInteractor.read({
+    abi: OrganizerRegistryABI as Abi,
     address: addresses.OrganizerRegistry as `0x${string}`,
     functionName: 'isOrganizerRegistered',
-    args: [validatedInput.organizerAddress],
-    chainId
+    args: [validatedInput.organizerAddress]
   })
 }
 
 export const useIsOrganizerRegistered = (
   input: IsOrganizerRegisteredInput,
-  config: Config
+  contractInteractor: ContractInteractor
 ) => {
   return useQuery({
     queryKey: ['isOrganizerRegistered', input.organizerAddress],
-    queryFn: () => isOrganizerRegistered(input, config),
+    queryFn: () => isOrganizerRegistered(input, contractInteractor),
     enabled: !!input.organizerAddress
   })
 }

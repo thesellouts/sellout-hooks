@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { Config, readContract } from '@wagmi/core'
+import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { z } from 'zod'
 
 import { TicketABI } from '../abis'
 import { getContractAddresses } from '../config'
+import { ContractInteractor } from '../contractInteractor'
 
 const GetTicketPricePaidAndTierIndexSchema = z.object({
   showId: z.string(),
@@ -18,18 +19,17 @@ export type GetTicketPricePaidAndTierIndexInput = z.infer<
 
 export const getTicketPricePaidAndTierIndex = async (
   input: GetTicketPricePaidAndTierIndexInput,
-  config: Config
+  contractInteractor: ContractInteractor
 ) => {
   const { showId, ticketId, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(config, {
+    return await contractInteractor.read({
       address: addresses.Ticket as `0x${string}`,
-      abi: TicketABI,
+      abi: TicketABI as Abi,
       functionName: 'getTicketPricePaidAndTierIndex',
-      args: [showId, ticketId],
-      chainId
+      args: [showId, ticketId]
     })
   } catch (error) {
     console.error('Error getting ticket price and tier index:', error)
@@ -39,11 +39,11 @@ export const getTicketPricePaidAndTierIndex = async (
 
 export const useGetTicketPricePaidAndTierIndex = (
   input: GetTicketPricePaidAndTierIndexInput,
-  config: Config
+  contractInteractor: ContractInteractor
 ) => {
   return useQuery({
     queryKey: ['getTicketPricePaidAndTierIndex', input.showId, input.ticketId],
-    queryFn: () => getTicketPricePaidAndTierIndex(input, config),
+    queryFn: () => getTicketPricePaidAndTierIndex(input, contractInteractor),
     enabled: !!input.showId && !!input.ticketId
   })
 }

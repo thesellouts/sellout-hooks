@@ -1,41 +1,34 @@
 import { useQuery } from '@tanstack/react-query'
-import BoxOfficeABI from '@thesellouts/sellout-protocol/abis/BoxOffice.json'
-import { Config, readContract } from '@wagmi/core'
-import { base, baseSepolia, sepolia, zora } from 'viem/chains'
+import { Abi } from 'viem'
+import { base, baseSepolia } from 'viem/chains'
 import { z } from 'zod'
 
+import { BoxOfficeABI } from '../abis'
 import { getContractAddresses } from '../config'
+import { ContractInteractor } from '../contractInteractor'
 
 const GetTicketPricePaidSchema = z.object({
   showId: z.string(),
   ticketId: z.number(),
-  chainId: z.union([
-    z.literal(base.id),
-    z.literal(baseSepolia.id)
-  ])
+  chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type GetTicketPricePaidType = z.infer<typeof GetTicketPricePaidSchema>
+export type GetTicketPricePaidInput = z.infer<typeof GetTicketPricePaidSchema>
 
 export const getTicketPricePaid = async (
-  input: GetTicketPricePaidType,
-  config: Config
-) => {
+  input: GetTicketPricePaidInput,
+  contractInteractor: ContractInteractor
+): Promise<bigint> => {
   const { chainId, showId, ticketId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    const validatedInput = GetTicketPricePaidSchema.parse(input)
-
-    const result = await readContract(config, {
-      abi: BoxOfficeABI.abi,
+    return await contractInteractor.read({
+      abi: BoxOfficeABI as Abi,
       address: addresses.BoxOffice as `0x${string}`,
       functionName: 'getTicketPricePaid',
-      args: [validatedInput.showId, validatedInput.ticketId],
-      chainId
+      args: [showId, ticketId]
     })
-
-    return result as bigint
   } catch (err) {
     console.error('Error fetching ticket price paid:', err)
     throw err
@@ -43,11 +36,12 @@ export const getTicketPricePaid = async (
 }
 
 export const useGetTicketPricePaid = (
-  input: GetTicketPricePaidType,
-  config: Config
+  input: GetTicketPricePaidInput,
+  contractInteractor: ContractInteractor
 ) => {
   return useQuery({
     queryKey: ['getTicketPricePaid', input],
-    queryFn: () => getTicketPricePaid(input, config)
+    queryFn: () => getTicketPricePaid(input, contractInteractor),
+    enabled: !!input.showId && !!input.ticketId
   })
 }

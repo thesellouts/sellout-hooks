@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { Config, readContract } from '@wagmi/core'
+import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { z } from 'zod'
 
 import { VenueABI } from '../abis'
 import { getContractAddresses } from '../config'
+import { ContractInteractor } from '../contractInteractor'
 
 const GetPreviousVoteSchema = z.object({
   showId: z.string(),
@@ -16,18 +17,17 @@ export type GetPreviousVoteInput = z.infer<typeof GetPreviousVoteSchema>
 
 export const getPreviousVote = async (
   input: GetPreviousVoteInput,
-  config: Config
+  contractInteractor: ContractInteractor
 ) => {
   const { showId, user, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(config, {
+    return await contractInteractor.read({
       address: addresses.Venue as `0x${string}`,
-      abi: VenueABI,
+      abi: VenueABI as Abi,
       functionName: 'getPreviousVote',
-      args: [showId, user],
-      chainId
+      args: [showId, user]
     })
   } catch (error) {
     console.error('Error getting previous vote:', error)
@@ -37,11 +37,11 @@ export const getPreviousVote = async (
 
 export const useGetPreviousVote = (
   input: GetPreviousVoteInput,
-  config: Config
+  contractInteractor: ContractInteractor
 ) => {
   return useQuery({
     queryKey: ['getPreviousVote', input.showId, input.user],
-    queryFn: () => getPreviousVote(input, config),
+    queryFn: () => getPreviousVote(input, contractInteractor),
     enabled: !!input.showId && !!input.user
   })
 }

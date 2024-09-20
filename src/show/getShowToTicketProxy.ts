@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { Config, readContract } from '@wagmi/core'
+import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { z } from 'zod'
 
 import { ShowABI } from '../abis'
 import { getContractAddresses } from '../config'
+import { ContractInteractor } from '../contractInteractor'
 
 const GetShowToTicketProxySchema = z.object({
   showId: z.string(),
@@ -17,18 +18,17 @@ export type GetShowToTicketProxyInput = z.infer<
 
 export const getShowToTicketProxy = async (
   input: GetShowToTicketProxyInput,
-  config: Config
+  contractInteractor: ContractInteractor
 ) => {
   const { showId, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(config, {
+    return await contractInteractor.read<`0x${string}`>({
       address: addresses.Show as `0x${string}`,
-      abi: ShowABI,
+      abi: ShowABI as Abi,
       functionName: 'getShowToTicketProxy',
-      args: [showId],
-      chainId
+      args: [showId]
     })
   } catch (error) {
     console.error('Error reading ticket proxy:', error)
@@ -38,11 +38,11 @@ export const getShowToTicketProxy = async (
 
 export const useGetShowToTicketProxy = (
   input: GetShowToTicketProxyInput,
-  config: Config
+  contractInteractor: ContractInteractor
 ) => {
   return useQuery({
     queryKey: ['getShowToTicketProxy', input.showId],
-    queryFn: () => getShowToTicketProxy(input, config),
+    queryFn: () => getShowToTicketProxy(input, contractInteractor),
     enabled: !!input.showId
   })
 }

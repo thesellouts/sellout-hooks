@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { Config, readContract } from '@wagmi/core'
+import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { z } from 'zod'
 
 import { VenueABI } from '../abis'
 import { getContractAddresses } from '../config'
+import { ContractInteractor } from '../contractInteractor'
 
 const GetHasDateVotedSchema = z.object({
   showId: z.string(),
@@ -16,18 +17,17 @@ export type GetHasDateVotedInput = z.infer<typeof GetHasDateVotedSchema>
 
 export const getHasDateVoted = async (
   input: GetHasDateVotedInput,
-  config: Config
+  contractInteractor: ContractInteractor
 ) => {
   const { showId, user, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(config, {
+    return await contractInteractor.read({
       address: addresses.Venue as `0x${string}`,
-      abi: VenueABI,
+      abi: VenueABI as Abi,
       functionName: 'getHasDateVoted',
-      args: [showId, user],
-      chainId
+      args: [showId, user]
     })
   } catch (error) {
     console.error('Error checking if user has date voted:', error)
@@ -37,11 +37,11 @@ export const getHasDateVoted = async (
 
 export const useGetHasDateVoted = (
   input: GetHasDateVotedInput,
-  config: Config
+  contractInteractor: ContractInteractor
 ) => {
   return useQuery({
     queryKey: ['getHasDateVoted', input.showId, input.user],
-    queryFn: () => getHasDateVoted(input, config),
+    queryFn: () => getHasDateVoted(input, contractInteractor),
     enabled: !!input.showId && !!input.user
   })
 }

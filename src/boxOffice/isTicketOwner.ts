@@ -1,52 +1,48 @@
 import { useQuery } from '@tanstack/react-query'
-import BoxOfficeABI from '@thesellouts/sellout-protocol/abis/BoxOffice.json'
-import { Config, readContract } from '@wagmi/core'
-import { base, baseSepolia, sepolia, zora } from 'viem/chains'
+import { Abi } from 'viem'
+import { base, baseSepolia } from 'viem/chains'
 import { z } from 'zod'
 
+import { BoxOfficeABI } from '../abis'
 import { getContractAddresses } from '../config'
+import { ContractInteractor } from '../contractInteractor'
 
-const IsTokenOwnerSchema = z.object({
+const IsTicketOwnerSchema = z.object({
   showId: z.string(),
   wallet: z.string(),
   tokenId: z.number(),
-  chainId: z.union([
-    z.literal(base.id),
-    z.literal(baseSepolia.id)
-  ])
+  chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type IsTokenOwnerType = z.infer<typeof IsTokenOwnerSchema>
+export type IsTicketOwnerInput = z.infer<typeof IsTicketOwnerSchema>
 
-export const isTokenOwner = async (input: IsTokenOwnerType, config: Config) => {
+export const isTicketOwner = async (
+  input: IsTicketOwnerInput,
+  contractInteractor: ContractInteractor
+): Promise<boolean> => {
   const { chainId, showId, wallet, tokenId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    const validatedInput = IsTokenOwnerSchema.parse(input)
-
-    const result = await readContract(config, {
-      abi: BoxOfficeABI.abi,
+    return await contractInteractor.read({
+      abi: BoxOfficeABI as Abi,
       address: addresses.BoxOffice as `0x${string}`,
       functionName: 'isTokenOwner',
-      args: [
-        validatedInput.showId,
-        validatedInput.wallet,
-        validatedInput.tokenId
-      ],
-      chainId
+      args: [showId, wallet, tokenId]
     })
-
-    return result as boolean
   } catch (err) {
     console.error('Error checking token owner:', err)
     throw err
   }
 }
 
-export const useIsTokenOwner = (input: IsTokenOwnerType, config: Config) => {
+export const useIsTicketOwner = (
+  input: IsTicketOwnerInput,
+  contractInteractor: ContractInteractor
+) => {
   return useQuery({
-    queryKey: ['isTokenOwner', input],
-    queryFn: () => isTokenOwner(input, config)
+    queryKey: ['isTicketOwner', input],
+    queryFn: () => isTicketOwner(input, contractInteractor),
+    enabled: !!input.showId && !!input.wallet && input.tokenId !== undefined
   })
 }

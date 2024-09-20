@@ -1,40 +1,33 @@
 import { useQuery } from '@tanstack/react-query'
-import BoxOfficeABI from '@thesellouts/sellout-protocol/abis/BoxOffice.json'
-import { Config, readContract } from '@wagmi/core'
-import { base, baseSepolia, sepolia, zora } from 'viem/chains'
+import { Abi } from 'viem'
+import { base, baseSepolia } from 'viem/chains'
 import { z } from 'zod'
 
+import { BoxOfficeABI } from '../abis'
 import { getContractAddresses } from '../config'
+import { ContractInteractor } from '../contractInteractor'
 
 const GetTotalTicketsSoldSchema = z.object({
   showId: z.string(),
-  chainId: z.union([
-    z.literal(base.id),
-    z.literal(baseSepolia.id)
-  ])
+  chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type GetTotalTicketsSoldType = z.infer<typeof GetTotalTicketsSoldSchema>
+export type GetTotalTicketsSoldInput = z.infer<typeof GetTotalTicketsSoldSchema>
 
 export const getTotalTicketsSold = async (
-  input: GetTotalTicketsSoldType,
-  config: Config
-) => {
+  input: GetTotalTicketsSoldInput,
+  contractInteractor: ContractInteractor
+): Promise<bigint> => {
   const { chainId, showId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    const validatedInput = GetTotalTicketsSoldSchema.parse(input)
-
-    const result = await readContract(config, {
-      abi: BoxOfficeABI.abi,
+    return await contractInteractor.read({
+      abi: BoxOfficeABI as Abi,
       address: addresses.BoxOffice as `0x${string}`,
       functionName: 'getTotalTicketsSold',
-      args: [validatedInput.showId],
-      chainId
+      args: [showId]
     })
-
-    return result as bigint
   } catch (err) {
     console.error('Error fetching total tickets sold:', err)
     throw err
@@ -42,11 +35,12 @@ export const getTotalTicketsSold = async (
 }
 
 export const useGetTotalTicketsSold = (
-  input: GetTotalTicketsSoldType,
-  config: Config
+  input: GetTotalTicketsSoldInput,
+  contractInteractor: ContractInteractor
 ) => {
   return useQuery({
     queryKey: ['getTotalTicketsSold', input],
-    queryFn: () => getTotalTicketsSold(input, config)
+    queryFn: () => getTotalTicketsSold(input, contractInteractor),
+    enabled: !!input.showId
   })
 }
