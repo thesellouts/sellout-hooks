@@ -11,3 +11,4 @@ export const AddressSchema = z.string().refine(
 )
 
 export const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
+

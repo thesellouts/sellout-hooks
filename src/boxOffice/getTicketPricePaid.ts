@@ -1,11 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
+import { useChainId } from 'wagmi'
 import { z } from 'zod'
 
 import { BoxOfficeABI } from '../abis'
 import { getContractAddresses } from '../config'
-import { ContractInteractor } from '../contractInteractor'
+import {
+  ConfigService,
+  ContractInteractor,
+  createContractInteractor,
+  useContractInteractor
+} from '../contractInteractor'
 
 const GetTicketPricePaidSchema = z.object({
   showId: z.string(),
@@ -15,7 +21,7 @@ const GetTicketPricePaidSchema = z.object({
 
 export type GetTicketPricePaidInput = z.infer<typeof GetTicketPricePaidSchema>
 
-export const getTicketPricePaid = async (
+const getTicketPricePaidCore = async (
   input: GetTicketPricePaidInput,
   contractInteractor: ContractInteractor
 ): Promise<bigint> => {
@@ -23,7 +29,7 @@ export const getTicketPricePaid = async (
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await contractInteractor.read({
+    return await contractInteractor.read<bigint>({
       abi: BoxOfficeABI as Abi,
       address: addresses.BoxOffice as `0x${string}`,
       functionName: 'getTicketPricePaid',
@@ -35,13 +41,30 @@ export const getTicketPricePaid = async (
   }
 }
 
-export const useGetTicketPricePaid = (
-  input: GetTicketPricePaidInput,
-  contractInteractor: ContractInteractor
-) => {
+export const getTicketPricePaid = async (
+  input: GetTicketPricePaidInput
+): Promise<bigint> => {
+  const config = ConfigService.getConfig()
+  const chain = config.chains.find(c => c.id === input.chainId)!
+  if (!chain) {
+    throw new Error(`Chain with id ${input.chainId} not found in config`)
+  }
+  const contractInteractor = createContractInteractor(config, chain)
+  return getTicketPricePaidCore(input, contractInteractor)
+}
+
+export const useGetTicketPricePaid = (input: GetTicketPricePaidInput) => {
+  const contextChainId = useChainId()
+  const effectiveChainId = input.chainId ?? contextChainId
+  const contractInteractor = useContractInteractor(effectiveChainId)
+
   return useQuery({
     queryKey: ['getTicketPricePaid', input],
-    queryFn: () => getTicketPricePaid(input, contractInteractor),
+    queryFn: () =>
+      getTicketPricePaidCore(
+        { ...input, chainId: effectiveChainId },
+        contractInteractor
+      ),
     enabled: !!input.showId && !!input.ticketId
   })
 }

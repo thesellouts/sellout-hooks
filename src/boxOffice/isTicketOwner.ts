@@ -1,11 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
+import { useChainId } from 'wagmi'
 import { z } from 'zod'
 
 import { BoxOfficeABI } from '../abis'
 import { getContractAddresses } from '../config'
-import { ContractInteractor } from '../contractInteractor'
+import {
+  ConfigService,
+  ContractInteractor,
+  createContractInteractor,
+  useContractInteractor
+} from '../contractInteractor'
 
 const IsTicketOwnerSchema = z.object({
   showId: z.string(),
@@ -16,7 +22,7 @@ const IsTicketOwnerSchema = z.object({
 
 export type IsTicketOwnerInput = z.infer<typeof IsTicketOwnerSchema>
 
-export const isTicketOwner = async (
+const isTicketOwnerCore = async (
   input: IsTicketOwnerInput,
   contractInteractor: ContractInteractor
 ): Promise<boolean> => {
@@ -24,7 +30,7 @@ export const isTicketOwner = async (
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await contractInteractor.read({
+    return await contractInteractor.read<boolean>({
       abi: BoxOfficeABI as Abi,
       address: addresses.BoxOffice as `0x${string}`,
       functionName: 'isTokenOwner',
@@ -36,13 +42,30 @@ export const isTicketOwner = async (
   }
 }
 
-export const useIsTicketOwner = (
-  input: IsTicketOwnerInput,
-  contractInteractor: ContractInteractor
-) => {
+export const isTicketOwner = async (
+  input: IsTicketOwnerInput
+): Promise<boolean> => {
+  const config = ConfigService.getConfig()
+  const chain = config.chains.find(c => c.id === input.chainId)!
+  if (!chain) {
+    throw new Error(`Chain with id ${input.chainId} not found in config`)
+  }
+  const contractInteractor = createContractInteractor(config, chain)
+  return isTicketOwnerCore(input, contractInteractor)
+}
+
+export const useIsTicketOwner = (input: IsTicketOwnerInput) => {
+  const contextChainId = useChainId()
+  const effectiveChainId = input.chainId ?? contextChainId
+  const contractInteractor = useContractInteractor(effectiveChainId)
+
   return useQuery({
     queryKey: ['isTicketOwner', input],
-    queryFn: () => isTicketOwner(input, contractInteractor),
+    queryFn: () =>
+      isTicketOwnerCore(
+        { ...input, chainId: effectiveChainId },
+        contractInteractor
+      ),
     enabled: !!input.showId && !!input.wallet && input.tokenId !== undefined
   })
 }

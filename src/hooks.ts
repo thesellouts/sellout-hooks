@@ -56,6 +56,7 @@ export {
   useGetWalletTokenIds
 } from './boxOffice/getWalletTokenIds'
 export { IsTicketOwnerInput, useIsTicketOwner } from './boxOffice/isTicketOwner'
+export { ConfigService } from './contractInteractor'
 export type { AcceptArtistNominationInput } from './registry/artist/acceptArtistNomination'
 export * from './registry/artist/acceptArtistNomination'
 export type { DeregisterArtistInput } from './registry/artist/deregisterArtist'
@@ -116,6 +117,10 @@ export {
   GetShowToTicketProxyInput,
   useGetShowToTicketProxy
 } from './show/getShowToTicketProxy'
+export {
+  GetShowToVenueProxyInput,
+  useGetShowToVenueProxy
+} from './show/getShowToVenueProxy'
 export {
   GetTicketTierInfoInput,
   useGetTicketTierInfo

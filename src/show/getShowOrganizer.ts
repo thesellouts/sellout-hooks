@@ -1,11 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
+import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
+import { useChainId } from 'wagmi'
 import { z } from 'zod'
 
 import { ShowABI } from '../abis'
 import { getContractAddresses } from '../config'
-import { ContractInteractor } from '../contractInteractor'
-import { Abi } from 'viem'
+import {
+  ConfigService,
+  ContractInteractor,
+  createContractInteractor,
+  useContractInteractor
+} from '../contractInteractor'
 
 const GetShowOrganizerSchema = z.object({
   showId: z.string(),
@@ -14,10 +20,10 @@ const GetShowOrganizerSchema = z.object({
 
 export type GetShowOrganizerInput = z.infer<typeof GetShowOrganizerSchema>
 
-export const getShowOrganizer = async (
+const getShowOrganizerCore = async (
   input: GetShowOrganizerInput,
   contractInteractor: ContractInteractor
-) => {
+): Promise<string> => {
   const { showId, chainId } = input
   const addresses = getContractAddresses(chainId)
 
@@ -34,13 +40,30 @@ export const getShowOrganizer = async (
   }
 }
 
-export const useGetShowOrganizer = (
-  input: GetShowOrganizerInput,
-  contractInteractor: ContractInteractor
-) => {
+export const getShowOrganizer = async (
+  input: GetShowOrganizerInput
+): Promise<string> => {
+  const config = ConfigService.getConfig()
+  const chain = config.chains.find(c => c.id === input.chainId)!
+  if (!chain) {
+    throw new Error(`Chain with id ${input.chainId} not found in config`)
+  }
+  const contractInteractor = createContractInteractor(config, chain)
+  return getShowOrganizerCore(input, contractInteractor)
+}
+
+export const useGetShowOrganizer = (input: GetShowOrganizerInput) => {
+  const contextChainId = useChainId()
+  const effectiveChainId = input.chainId ?? contextChainId
+  const contractInteractor = useContractInteractor(effectiveChainId)
+
   return useQuery({
     queryKey: ['getOrganizer', input.showId],
-    queryFn: () => getShowOrganizer(input, contractInteractor),
+    queryFn: () =>
+      getShowOrganizerCore(
+        { ...input, chainId: effectiveChainId },
+        contractInteractor
+      ),
     enabled: !!input.showId
   })
 }

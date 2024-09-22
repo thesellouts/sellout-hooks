@@ -1,10 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
-import { Config, readContract } from '@wagmi/core'
+import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
+import { useChainId } from 'wagmi'
 import { z } from 'zod'
 
 import { ShowABI } from '../abis'
 import { getContractAddresses } from '../config'
+import {
+  ConfigService,
+  ContractInteractor,
+  createContractInteractor,
+  useContractInteractor
+} from '../contractInteractor'
 
 const GetShowToVenueProxySchema = z.object({
   showId: z.string(),
@@ -13,20 +20,19 @@ const GetShowToVenueProxySchema = z.object({
 
 export type GetShowToVenueProxyInput = z.infer<typeof GetShowToVenueProxySchema>
 
-export const getShowToVenueProxy = async (
+const getShowToVenueProxyCore = async (
   input: GetShowToVenueProxyInput,
-  config: Config
-) => {
+  contractInteractor: ContractInteractor
+): Promise<`0x${string}`> => {
   const { showId, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await readContract(config, {
+    return await contractInteractor.read<`0x${string}`>({
       address: addresses.Show as `0x${string}`,
-      abi: ShowABI,
+      abi: ShowABI as Abi,
       functionName: 'getShowToVenueProxy',
-      args: [showId],
-      chainId
+      args: [showId]
     })
   } catch (error) {
     console.error('Error reading venue proxy:', error)
@@ -34,13 +40,30 @@ export const getShowToVenueProxy = async (
   }
 }
 
-export const useGetShowToVenueProxy = (
-  input: GetShowToVenueProxyInput,
-  config: Config
-) => {
+export const getShowToVenueProxy = async (
+  input: GetShowToVenueProxyInput
+): Promise<`0x${string}`> => {
+  const config = ConfigService.getConfig()
+  const chain = config.chains.find(c => c.id === input.chainId)!
+  if (!chain) {
+    throw new Error(`Chain with id ${input.chainId} not found in config`)
+  }
+  const contractInteractor = createContractInteractor(config, chain)
+  return getShowToVenueProxyCore(input, contractInteractor)
+}
+
+export const useGetShowToVenueProxy = (input: GetShowToVenueProxyInput) => {
+  const contextChainId = useChainId()
+  const effectiveChainId = input.chainId ?? contextChainId
+  const contractInteractor = useContractInteractor(effectiveChainId)
+
   return useQuery({
     queryKey: ['getShowToVenueProxy', input.showId],
-    queryFn: () => getShowToVenueProxy(input, config),
+    queryFn: () =>
+      getShowToVenueProxyCore(
+        { ...input, chainId: effectiveChainId },
+        contractInteractor
+      ),
     enabled: !!input.showId
   })
 }

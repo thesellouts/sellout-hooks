@@ -1,8 +1,8 @@
 import { Config } from '@wagmi/core'
 import { SmartAccountClient } from 'permissionless'
 import { useMemo } from 'react'
-import { base, baseSepolia, Chain } from 'viem/chains'
-import { useChainId, useConfig } from 'wagmi'
+import { base, baseSepolia } from 'viem/chains'
+import { useConfig } from 'wagmi'
 
 import {
   ContractInteractor,
@@ -10,16 +10,20 @@ import {
 } from './contractInteractor'
 import * as hooks from './hooks'
 
-export class sdk {
+export class SelloutSDK {
   private contractInteractor: ContractInteractor
-  private config: Config
+  private chainId: typeof base.id | typeof baseSepolia.id
 
   constructor(
-    config: Config,
-    chain: Chain,
+    private config: Config,
+    chainId: typeof base.id | typeof baseSepolia.id,
     smartAccountClient?: SmartAccountClient
   ) {
-    this.config = config
+    this.chainId = chainId
+    const chain = config.chains.find(c => c.id === chainId)
+    if (!chain) {
+      throw new Error(`Chain with id ${chainId} not found in config`)
+    }
     this.contractInteractor = createContractInteractor(
       config,
       chain,
@@ -30,385 +34,369 @@ export class sdk {
   // ====================================
   // SHOW
   // ====================================
-  proposeShow(input: hooks.ProposeShowType) {
-    return hooks.useProposeShow(input, this.contractInteractor, this.config)
+  proposeShow(input: Omit<hooks.ProposeShowType, 'chainId'>) {
+    return hooks.useProposeShow({ ...input, chainId: this.chainId })
   }
 
-  cancelShow(input: hooks.CancelShowType) {
-    return hooks.useCancelShow(input, this.contractInteractor, this.config)
+  cancelShow(input: Omit<hooks.CancelShowType, 'chainId'>) {
+    return hooks.useCancelShow({ ...input, chainId: this.chainId })
   }
 
-  completeShow(input: hooks.CompleteShowType) {
-    return hooks.useCompleteShow(input, this.contractInteractor, this.config)
+  completeShow(input: Omit<hooks.CompleteShowType, 'chainId'>) {
+    return hooks.useCompleteShow({ ...input, chainId: this.chainId })
   }
 
-  getNumberOfVoters(input: hooks.GetNumberOfVotersInput) {
-    return hooks.useGetNumberOfVoters(input, this.contractInteractor)
+  getNumberOfVoters(input: Omit<hooks.GetNumberOfVotersInput, 'chainId'>) {
+    return hooks.useGetNumberOfVoters({ ...input, chainId: this.chainId })
   }
 
-  getShowById(input: hooks.GetShowByIdInput) {
-    return hooks.useGetShowById(input, this.contractInteractor)
+  getShowById(input: Omit<hooks.GetShowByIdInput, 'chainId'>) {
+    return hooks.useGetShowById({ ...input, chainId: this.chainId })
   }
 
-  getShowOrganizer(input: hooks.GetShowOrganizerInput) {
-    return hooks.useGetShowOrganizer(input, this.contractInteractor)
+  getShowOrganizer(input: Omit<hooks.GetShowOrganizerInput, 'chainId'>) {
+    return hooks.useGetShowOrganizer({ ...input, chainId: this.chainId })
   }
 
-  getShowStatus(input: hooks.GetShowStatusInput) {
-    return hooks.useGetShowStatus(input, this.contractInteractor)
+  getShowStatus(input: Omit<hooks.GetShowStatusInput, 'chainId'>) {
+    return hooks.useGetShowStatus({ ...input, chainId: this.chainId })
   }
 
-  getShowToTicketProxy(input: hooks.GetShowToTicketProxyInput) {
-    return hooks.useGetShowToTicketProxy(input, this.contractInteractor)
+  getShowToTicketProxy(
+    input: Omit<hooks.GetShowToTicketProxyInput, 'chainId'>
+  ) {
+    return hooks.useGetShowToTicketProxy({ ...input, chainId: this.chainId })
   }
 
-  getTicketTierInfo(input: hooks.GetTicketTierInfoInput) {
-    return hooks.useGetTicketTierInfo(input, this.contractInteractor)
+  getShowToVenueProxy(input: Omit<hooks.GetShowToVenueProxyInput, 'chainId'>) {
+    return hooks.useGetShowToVenueProxy({ ...input, chainId: this.chainId })
   }
 
-  hasTicket(input: hooks.HasTicketInput) {
-    return hooks.useHasTicket(input, this.contractInteractor)
+  getTicketTierInfo(input: Omit<hooks.GetTicketTierInfoInput, 'chainId'>) {
+    return hooks.useGetTicketTierInfo({ ...input, chainId: this.chainId })
   }
 
-  isArtist(input: hooks.IsArtistInput) {
-    return hooks.useIsArtist(input, this.contractInteractor)
+  hasTicket(input: Omit<hooks.HasTicketInput, 'chainId'>) {
+    return hooks.useHasTicket({ ...input, chainId: this.chainId })
   }
 
-  isOrganizer(input: hooks.IsOrganizerInput) {
-    return hooks.useIsOrganizer(input, this.contractInteractor)
+  isArtist(input: Omit<hooks.IsArtistInput, 'chainId'>) {
+    return hooks.useIsArtist({ ...input, chainId: this.chainId })
   }
 
-  payout(input: hooks.PayoutType) {
-    return hooks.usePayout(input, this.contractInteractor, this.config)
+  isOrganizer(input: Omit<hooks.IsOrganizerInput, 'chainId'>) {
+    return hooks.useIsOrganizer({ ...input, chainId: this.chainId })
   }
 
-  refundBribe(input: hooks.RefundBribeType) {
-    return hooks.useRefundBribe(input, this.contractInteractor, this.config)
+  payout(input: Omit<hooks.PayoutType, 'chainId'>) {
+    return hooks.usePayout({ ...input, chainId: this.chainId })
   }
 
-  refundTicket(input: hooks.RefundTicketType) {
-    return hooks.useRefundTicket(input, this.contractInteractor, this.config)
+  refundBribe(input: Omit<hooks.RefundBribeType, 'chainId'>) {
+    return hooks.useRefundBribe({ ...input, chainId: this.chainId })
   }
 
-  voteForEmergencyRefund(input: hooks.VoteForEmergencyRefundType) {
-    return hooks.useVoteForEmergencyRefund(
-      input,
-      this.contractInteractor,
-      this.config
-    )
+  refundTicket(input: Omit<hooks.RefundTicketType, 'chainId'>) {
+    return hooks.useRefundTicket({ ...input, chainId: this.chainId })
   }
 
-  withdrawRefund(input: hooks.WithdrawRefundType) {
-    return hooks.useWithdrawRefund(input, this.contractInteractor, this.config)
+  voteForEmergencyRefund(
+    input: Omit<hooks.VoteForEmergencyRefundType, 'chainId'>
+  ) {
+    return hooks.useVoteForEmergencyRefund({ ...input, chainId: this.chainId })
+  }
+
+  withdrawRefund(input: Omit<hooks.WithdrawRefundType, 'chainId'>) {
+    return hooks.useWithdrawRefund({ ...input, chainId: this.chainId })
   }
 
   // ====================================
   // BOX OFFICE
   // ====================================
-  getTicketPricePaid(input: hooks.GetTicketPricePaidInput) {
-    return hooks.useGetTicketPricePaid(input, this.contractInteractor)
+  getTicketPricePaid(input: Omit<hooks.GetTicketPricePaidInput, 'chainId'>) {
+    return hooks.useGetTicketPricePaid({ ...input, chainId: this.chainId })
   }
 
-  getTotalTicketsSold(input: hooks.GetTotalTicketsSoldInput) {
-    return hooks.useGetTotalTicketsSold(input, this.contractInteractor)
+  getTotalTicketsSold(input: Omit<hooks.GetTotalTicketsSoldInput, 'chainId'>) {
+    return hooks.useGetTotalTicketsSold({ ...input, chainId: this.chainId })
   }
 
-  getWalletTokenIds(input: hooks.GetWalletTokenIdsInput) {
-    return hooks.useGetWalletTokenIds(input, this.contractInteractor)
+  getWalletTokenIds(input: Omit<hooks.GetWalletTokenIdsInput, 'chainId'>) {
+    return hooks.useGetWalletTokenIds({ ...input, chainId: this.chainId })
   }
 
-  isTicketOwner(input: hooks.IsTicketOwnerInput) {
-    return hooks.useIsTicketOwner(input, this.contractInteractor)
+  isTicketOwner(input: Omit<hooks.IsTicketOwnerInput, 'chainId'>) {
+    return hooks.useIsTicketOwner({ ...input, chainId: this.chainId })
   }
 
   // ====================================
   // SHOW VAULT
   // ====================================
-  calculateTotalPayoutAmount(input: hooks.CalculateTotalPayoutAmountInput) {
-    return hooks.useCalculateTotalPayoutAmount(input, this.contractInteractor)
+  calculateTotalPayoutAmount(
+    input: Omit<hooks.CalculateTotalPayoutAmountInput, 'chainId'>
+  ) {
+    return hooks.useCalculateTotalPayoutAmount({
+      ...input,
+      chainId: this.chainId
+    })
   }
 
-  getShowPaymentToken(input: hooks.GetShowPaymentTokenInput) {
-    return hooks.useGetShowPaymentToken(input, this.contractInteractor)
+  getShowPaymentToken(input: Omit<hooks.GetShowPaymentTokenInput, 'chainId'>) {
+    return hooks.useGetShowPaymentToken({ ...input, chainId: this.chainId })
   }
 
-  getShowTokenVault(input: hooks.GetShowTokenVaultInput) {
-    return hooks.useGetShowTokenVault(input, this.contractInteractor)
+  getShowTokenVault(input: Omit<hooks.GetShowTokenVaultInput, 'chainId'>) {
+    return hooks.useGetShowTokenVault({ ...input, chainId: this.chainId })
   }
 
-  getShowVault(input: hooks.GetShowVaultInput) {
-    return hooks.useGetShowVault(input, this.contractInteractor)
+  getShowVault(input: Omit<hooks.GetShowVaultInput, 'chainId'>) {
+    return hooks.useGetShowVault({ ...input, chainId: this.chainId })
   }
 
   // ====================================
   // TICKET
   // ====================================
   getTicketPricePaidAndTierIndex(
-    input: hooks.GetTicketPricePaidAndTierIndexInput
+    input: Omit<hooks.GetTicketPricePaidAndTierIndexInput, 'chainId'>
   ) {
-    return hooks.useGetTicketPricePaidAndTierIndex(
-      input,
-      this.contractInteractor
-    )
+    return hooks.useGetTicketPricePaidAndTierIndex({
+      ...input,
+      chainId: this.chainId
+    })
   }
 
-  purchaseTickets(input: hooks.PurchaseTicketsType) {
-    return hooks.usePurchaseTickets(input, this.contractInteractor, this.config)
+  purchaseTickets(input: Omit<hooks.PurchaseTicketsType, 'chainId'>) {
+    return hooks.usePurchaseTickets({ ...input, chainId: this.chainId })
   }
 
-  setDefaultURIForShow(input: hooks.SetDefaultURIForShowType) {
-    return hooks.useSetDefaultURIForShow(
-      input,
-      this.contractInteractor,
-      this.config
-    )
+  setDefaultURIForShow(input: Omit<hooks.SetDefaultURIForShowType, 'chainId'>) {
+    return hooks.useSetDefaultURIForShow({ ...input, chainId: this.chainId })
   }
 
-  setTokenURI(input: hooks.SetTokenURIType) {
-    return hooks.useSetTokenURI(input, this.contractInteractor, this.config)
+  setTokenURI(input: Omit<hooks.SetTokenURIType, 'chainId'>) {
+    return hooks.useSetTokenURI({ ...input, chainId: this.chainId })
   }
 
   // ====================================
   // VENUE
   // ====================================
-  getDateVotes(input: hooks.GetDateVotesInput) {
-    return hooks.useGetDateVotes(input, this.contractInteractor)
+  getDateVotes(input: Omit<hooks.GetDateVotesInput, 'chainId'>) {
+    return hooks.useGetDateVotes({ ...input, chainId: this.chainId })
   }
 
-  getHasDateVoted(input: hooks.GetHasDateVotedInput) {
-    return hooks.useGetHasDateVoted(input, this.contractInteractor)
+  getHasDateVoted(input: Omit<hooks.GetHasDateVotedInput, 'chainId'>) {
+    return hooks.useGetHasDateVoted({ ...input, chainId: this.chainId })
   }
 
-  getHasTicketOwnerVoted(input: hooks.GetHasTicketOwnerVotedInput) {
-    return hooks.useGetHasTicketOwnerVoted(input, this.contractInteractor)
+  getHasTicketOwnerVoted(
+    input: Omit<hooks.GetHasTicketOwnerVotedInput, 'chainId'>
+  ) {
+    return hooks.useGetHasTicketOwnerVoted({ ...input, chainId: this.chainId })
   }
 
-  getHasVoted(input: hooks.GetHasVotedInput) {
-    return hooks.useGetHasVoted(input, this.contractInteractor)
+  getHasVoted(input: Omit<hooks.GetHasVotedInput, 'chainId'>) {
+    return hooks.useGetHasVoted({ ...input, chainId: this.chainId })
   }
 
-  getPreviousDateVote(input: hooks.GetPreviousDateVotesInput) {
-    return hooks.useGetPreviousDateVote(input, this.contractInteractor)
+  getPreviousDateVote(input: Omit<hooks.GetPreviousDateVotesInput, 'chainId'>) {
+    return hooks.useGetPreviousDateVote({ ...input, chainId: this.chainId })
   }
 
-  getPreviousVote(input: hooks.GetPreviousVoteInput) {
-    return hooks.useGetPreviousVote(input, this.contractInteractor)
+  getPreviousVote(input: Omit<hooks.GetPreviousVoteInput, 'chainId'>) {
+    return hooks.useGetPreviousVote({ ...input, chainId: this.chainId })
   }
 
-  getProposal(input: hooks.GetProposalInput) {
-    return hooks.useGetProposal(input, this.contractInteractor)
+  getProposal(input: Omit<hooks.GetProposalInput, 'chainId'>) {
+    return hooks.useGetProposal({ ...input, chainId: this.chainId })
   }
 
-  getProposalPeriod(input: hooks.GetProposalPeriodInput) {
-    return hooks.useGetProposalPeriod(input, this.contractInteractor)
+  getProposalPeriod(input: Omit<hooks.GetProposalPeriodInput, 'chainId'>) {
+    return hooks.useGetProposalPeriod({ ...input, chainId: this.chainId })
   }
 
-  getProposalsCount(input: hooks.GetProposalsCountInput) {
-    return hooks.useGetProposalsCount(input, this.contractInteractor)
+  getProposalsCount(input: Omit<hooks.GetProposalsCountInput, 'chainId'>) {
+    return hooks.useGetProposalsCount({ ...input, chainId: this.chainId })
   }
 
-  getRefunds(input: hooks.GetRefundsInput) {
-    return hooks.useGetRefunds(input, this.contractInteractor)
+  getRefunds(input: Omit<hooks.GetRefundsInput, 'chainId'>) {
+    return hooks.useGetRefunds({ ...input, chainId: this.chainId })
   }
 
-  getSelectedDate(input: hooks.GetSelectedDateInput) {
-    return hooks.useGetSelectedDate(input, this.contractInteractor)
+  getSelectedDate(input: Omit<hooks.GetSelectedDateInput, 'chainId'>) {
+    return hooks.useGetSelectedDate({ ...input, chainId: this.chainId })
   }
 
-  getSelectedProposalIndex(input: hooks.GetSelectedProposalIndexInput) {
-    return hooks.useGetSelectedProposalIndex(input, this.contractInteractor)
+  getSelectedProposalIndex(
+    input: Omit<hooks.GetSelectedProposalIndexInput, 'chainId'>
+  ) {
+    return hooks.useGetSelectedProposalIndex({
+      ...input,
+      chainId: this.chainId
+    })
   }
 
-  getShowProposals(input: hooks.GetShowProposalsInput) {
-    return hooks.useGetShowProposals(input, this.contractInteractor)
+  getShowProposals(input: Omit<hooks.GetShowProposalsInput, 'chainId'>) {
+    return hooks.useGetShowProposals({ ...input, chainId: this.chainId })
   }
 
-  getVotingPeriods(input: hooks.GetVotingPeriodsInput) {
-    return hooks.useGetVotingPeriods(input, this.contractInteractor)
+  getVotingPeriods(input: Omit<hooks.GetVotingPeriodsInput, 'chainId'>) {
+    return hooks.useGetVotingPeriods({ ...input, chainId: this.chainId })
   }
 
-  submitProposal(input: hooks.SubmitProposal) {
-    return hooks.useSubmitProposal(input, this.contractInteractor, this.config)
+  submitProposal(input: Omit<hooks.SubmitProposal, 'chainId'>) {
+    return hooks.useSubmitProposal({ ...input, chainId: this.chainId })
   }
 
-  ticketHolderVenueVote(input: hooks.TicketHolderVenueVote) {
-    return hooks.useTicketHolderVenueVote(
-      input,
-      this.contractInteractor,
-      this.config
-    )
+  ticketHolderVenueVote(input: Omit<hooks.TicketHolderVenueVote, 'chainId'>) {
+    return hooks.useTicketHolderVenueVote({ ...input, chainId: this.chainId })
   }
 
-  vote(input: hooks.Vote) {
-    return hooks.useVote(input, this.contractInteractor, this.config)
+  vote(input: Omit<hooks.Vote, 'chainId'>) {
+    return hooks.useVote({ ...input, chainId: this.chainId })
   }
 
-  voteForDate(input: hooks.VoteForDate) {
-    return hooks.useVoteForDate(input, this.contractInteractor, this.config)
+  voteForDate(input: Omit<hooks.VoteForDate, 'chainId'>) {
+    return hooks.useVoteForDate({ ...input, chainId: this.chainId })
   }
 
   // ====================================
   // REGISTRY - ARTIST
   // ====================================
-  acceptArtistNomination(input: hooks.AcceptArtistNominationInput) {
-    return hooks.useAcceptArtistNomination(
-      input,
-      this.contractInteractor,
-      this.config
-    )
+  acceptArtistNomination(
+    input: Omit<hooks.AcceptArtistNominationInput, 'chainId'>
+  ) {
+    return hooks.useAcceptArtistNomination({ ...input, chainId: this.chainId })
   }
 
-  deregisterArtist(input: hooks.DeregisterArtistInput) {
-    return hooks.useDeregisterArtist(
-      input,
-      this.contractInteractor,
-      this.config
-    )
+  deregisterArtist(input: Omit<hooks.DeregisterArtistInput, 'chainId'>) {
+    return hooks.useDeregisterArtist({ ...input, chainId: this.chainId })
   }
 
-  getArtist(input: hooks.GetArtistInput) {
-    return hooks.useGetArtist(input, this.contractInteractor)
+  getArtist(input: Omit<hooks.GetArtistInput, 'chainId'>) {
+    return hooks.useGetArtist({ ...input, chainId: this.chainId })
   }
 
-  isArtistRegistered(input: hooks.IsArtistRegisteredInput) {
-    return hooks.useIsArtistRegistered(input, this.contractInteractor)
+  isArtistRegistered(input: Omit<hooks.IsArtistRegisteredInput, 'chainId'>) {
+    return hooks.useIsArtistRegistered({ ...input, chainId: this.chainId })
   }
 
-  nominateArtist(input: hooks.NominateArtistInput) {
-    return hooks.useNominateArtist(input, this.contractInteractor, this.config)
+  nominateArtist(input: Omit<hooks.NominateArtistInput, 'chainId'>) {
+    return hooks.useNominateArtist({ ...input, chainId: this.chainId })
   }
 
-  updateArtist(input: hooks.UpdateArtistInput) {
-    return hooks.useUpdateArtist(input, this.contractInteractor, this.config)
+  updateArtist(input: Omit<hooks.UpdateArtistInput, 'chainId'>) {
+    return hooks.useUpdateArtist({ ...input, chainId: this.chainId })
   }
 
   // ====================================
   // REGISTRY - ORGANIZER
   // ====================================
-  acceptOrganizerNomination(input: hooks.AcceptOrganizerNominationInput) {
-    return hooks.useAcceptOrganizerNomination(
-      input,
-      this.contractInteractor,
-      this.config
-    )
+  acceptOrganizerNomination(
+    input: Omit<hooks.AcceptOrganizerNominationInput, 'chainId'>
+  ) {
+    return hooks.useAcceptOrganizerNomination({
+      ...input,
+      chainId: this.chainId
+    })
   }
 
-  deregisterOrganizer(input: hooks.DeregisterOrganizerInput) {
-    return hooks.useDeregisterOrganizer(
-      input,
-      this.contractInteractor,
-      this.config
-    )
+  deregisterOrganizer(input: Omit<hooks.DeregisterOrganizerInput, 'chainId'>) {
+    return hooks.useDeregisterOrganizer({ ...input, chainId: this.chainId })
   }
 
-  getOrganizer(input: hooks.GetOrganizerInput) {
-    return hooks.useGetOrganizer(input, this.contractInteractor)
+  getOrganizer(input: Omit<hooks.GetOrganizerInput, 'chainId'>) {
+    return hooks.useGetOrganizer({ ...input, chainId: this.chainId })
   }
 
-  isOrganizerRegistered(input: hooks.IsOrganizerRegisteredInput) {
-    return hooks.useIsOrganizerRegistered(input, this.contractInteractor)
+  isOrganizerRegistered(
+    input: Omit<hooks.IsOrganizerRegisteredInput, 'chainId'>
+  ) {
+    return hooks.useIsOrganizerRegistered({ ...input, chainId: this.chainId })
   }
 
-  nominateOrganizer(input: hooks.NominateOrganizerInput) {
-    return hooks.useNominateOrganizer(
-      input,
-      this.contractInteractor,
-      this.config
-    )
+  nominateOrganizer(input: Omit<hooks.NominateOrganizerInput, 'chainId'>) {
+    return hooks.useNominateOrganizer({ ...input, chainId: this.chainId })
   }
 
-  updateOrganizer(input: hooks.UpdateOrganizerInput) {
-    return hooks.useUpdateOrganizer(input, this.contractInteractor, this.config)
+  updateOrganizer(input: Omit<hooks.UpdateOrganizerInput, 'chainId'>) {
+    return hooks.useUpdateOrganizer({ ...input, chainId: this.chainId })
   }
 
   // ====================================
   // REFERRAL
   // ====================================
-  decrementReferralCredits(input: hooks.DecrementReferralCreditsInput) {
-    return hooks.useDecrementReferralCredits(
-      input,
-      this.contractInteractor,
-      this.config
-    )
+  decrementReferralCredits(
+    input: Omit<hooks.DecrementReferralCreditsInput, 'chainId'>
+  ) {
+    return hooks.useDecrementReferralCredits({
+      ...input,
+      chainId: this.chainId
+    })
   }
 
-  getReferralCredits(input: hooks.GetReferralCreditsInput) {
-    return hooks.useGetReferralCredits(input, this.contractInteractor)
+  getReferralCredits(input: Omit<hooks.GetReferralCreditsInput, 'chainId'>) {
+    return hooks.useGetReferralCredits({ ...input, chainId: this.chainId })
   }
 
-  incrementReferralCredits(input: hooks.IncrementReferralCreditsInput) {
-    return hooks.useIncrementReferralCredits(
-      input,
-      this.contractInteractor,
-      this.config
-    )
+  incrementReferralCredits(
+    input: Omit<hooks.IncrementReferralCreditsInput, 'chainId'>
+  ) {
+    return hooks.useIncrementReferralCredits({
+      ...input,
+      chainId: this.chainId
+    })
   }
 
-  setCreditControlPermission(input: hooks.SetCreditControlPermissionInput) {
-    return hooks.useSetCreditControlPermission(
-      input,
-      this.contractInteractor,
-      this.config
-    )
+  setCreditControlPermission(
+    input: Omit<hooks.SetCreditControlPermissionInput, 'chainId'>
+  ) {
+    return hooks.useSetCreditControlPermission({
+      ...input,
+      chainId: this.chainId
+    })
   }
 
   // ====================================
   // REGISTRY - VENUE
   // ====================================
-  acceptVenueNomination(input: hooks.AcceptVenueNominationInput) {
-    return hooks.useAcceptVenueNomination(
-      input,
-      this.contractInteractor,
-      this.config
-    )
+  acceptVenueNomination(
+    input: Omit<hooks.AcceptVenueNominationInput, 'chainId'>
+  ) {
+    return hooks.useAcceptVenueNomination({ ...input, chainId: this.chainId })
   }
 
-  deregisterVenue(input: hooks.DeregisterVenueInput) {
-    return hooks.useDeregisterVenue(input, this.contractInteractor, this.config)
+  deregisterVenue(input: Omit<hooks.DeregisterVenueInput, 'chainId'>) {
+    return hooks.useDeregisterVenue({ ...input, chainId: this.chainId })
   }
 
-  getVenue(input: hooks.GetVenueInput) {
-    return hooks.useGetVenue(input, this.contractInteractor, this.config)
+  getVenue(input: Omit<hooks.GetVenueInput, 'chainId'>) {
+    return hooks.useGetVenue({ ...input, chainId: this.chainId })
   }
 
-  isVenueRegistered(input: hooks.IsVenueRegisteredInput) {
-    return hooks.useIsVenueRegistered(
-      input,
-      this.contractInteractor,
-      this.config
-    )
+  isVenueRegistered(input: Omit<hooks.IsVenueRegisteredInput, 'chainId'>) {
+    return hooks.useIsVenueRegistered({ ...input, chainId: this.chainId })
   }
 
-  nominateVenue(input: hooks.NominateVenueInput) {
-    return hooks.useNominateVenue(input, this.contractInteractor, this.config)
+  nominateVenue(input: Omit<hooks.NominateVenueInput, 'chainId'>) {
+    return hooks.useNominateVenue({ ...input, chainId: this.chainId })
   }
 
-  updateVenue(input: hooks.UpdateVenueInput) {
-    return hooks.useUpdateVenue(input, this.contractInteractor, this.config)
+  updateVenue(input: Omit<hooks.UpdateVenueInput, 'chainId'>) {
+    return hooks.useUpdateVenue({ ...input, chainId: this.chainId })
   }
 }
 
 // ====================================
 // Hook to use SelloutSDK
 // ====================================
-export function useSelloutSDK(smartAccountClient?: SmartAccountClient): sdk {
+export function useSelloutSDK(
+  chainId: typeof base.id | typeof baseSepolia.id,
+  smartAccountClient?: SmartAccountClient
+): SelloutSDK {
   const config = useConfig()
-  const chainId = useChainId()
 
   return useMemo(() => {
-    let chain: Chain
-    switch (chainId) {
-      case base.id:
-        chain = base
-        break
-      case baseSepolia.id:
-        chain = baseSepolia
-        break
-      default:
-        throw new Error(`Unsupported chain ID: ${chainId}`)
-    }
-
-    return new sdk(config, chain, smartAccountClient)
+    return new SelloutSDK(config, chainId, smartAccountClient)
   }, [config, chainId, smartAccountClient])
 }
 

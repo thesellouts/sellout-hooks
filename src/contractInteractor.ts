@@ -1,6 +1,7 @@
 import { Config, getPublicClient, writeContract } from '@wagmi/core'
 import { SmartAccountClient } from 'permissionless'
 import { Abi, Address, Chain, Hash, PublicClient } from 'viem'
+import { useConfig } from 'wagmi'
 
 export interface TransactionReceipt {
   transactionHash: Hash
@@ -14,6 +15,22 @@ export interface ContractInteractionParams {
   functionName: string
   args?: readonly unknown[]
   value?: bigint
+}
+
+export class ConfigService {
+  private static config: Config | null = null
+
+  static initialize(config: Config) {
+    this.config = config
+  }
+
+  static getConfig(): Config {
+    if (!this.config)
+      throw new Error(
+        'Config not initialized. Call ConfigService.initialize first.'
+      )
+    return this.config
+  }
 }
 
 export class ContractInteractor {
@@ -129,4 +146,15 @@ export function createContractInteractor(
   smartAccountClient?: SmartAccountClient
 ): ContractInteractor {
   return new ContractInteractor(config, chain, smartAccountClient)
+}
+
+export function useContractInteractor(chainId: number): ContractInteractor {
+  const config = useConfig()
+  const chain = config.chains.find(c => c.id === chainId)!
+
+  if (!chain) {
+    throw new Error(`Chain with id ${chainId} not found in config`)
+  }
+
+  return new ContractInteractor(config, chain)
 }

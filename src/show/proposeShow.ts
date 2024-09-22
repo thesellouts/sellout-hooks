@@ -1,13 +1,18 @@
 import { useMutation, UseMutationResult } from '@tanstack/react-query'
 import { Config, simulateContract } from '@wagmi/core'
-import { useMemo } from 'react'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
+import { useChainId, useConfig } from 'wagmi'
 import { z } from 'zod'
 
 import { ShowABI } from '../abis'
 import { getContractAddresses } from '../config'
-import { ContractInteractor } from '../contractInteractor'
+import {
+  ConfigService,
+  ContractInteractor,
+  createContractInteractor,
+  useContractInteractor
+} from '../contractInteractor'
 import { AddressSchema, NULL_ADDRESS } from '../utils'
 
 const VenueProposalParamsSchema = z.object({
@@ -67,53 +72,74 @@ export interface ProposeShowResult {
   }
 }
 
-const createProposeShow =
-  (contractInteractor: ContractInteractor, config: Config) =>
-  async (input: ProposeShowType): Promise<ProposeShowResult> => {
-    const { chainId, ...args } = input
-    const addresses = getContractAddresses(chainId)
-
-    try {
-      const validatedInput = ProposeShowSchema.parse(input)
-
-      const { request } = await simulateContract(config, {
-        abi: ShowABI as Abi,
-        address: addresses.Show as `0x${string}`,
-        functionName: 'proposeShow',
-        args: [validatedInput],
-        chainId
-      })
-
-      const receipt = await contractInteractor.execute({
-        address: request.address,
-        abi: ShowABI as Abi,
-        functionName: request.functionName,
-        args: Array.isArray(request.args) ? [...request.args] : undefined,
-        value: request.value
-      })
-
-      return {
-        hash: receipt.transactionHash,
-        receipt
-      }
-    } catch (err) {
-      console.error('Validation or Execution Error:', err)
-      throw err
-    }
-  }
-
-export const useProposeShow = (
+const proposeShowCore = async (
   input: ProposeShowType,
   contractInteractor: ContractInteractor,
   config: Config
+): Promise<ProposeShowResult> => {
+  const { chainId, ...args } = input
+  const addresses = getContractAddresses(chainId)
+
+  try {
+    const validatedInput = ProposeShowSchema.parse(input)
+
+    const { request } = await simulateContract(config, {
+      abi: ShowABI as Abi,
+      address: addresses.Show as `0x${string}`,
+      functionName: 'proposeShow',
+      args: [validatedInput],
+      chainId
+    })
+
+    const receipt = await contractInteractor.execute({
+      address: request.address,
+      abi: ShowABI as Abi,
+      functionName: request.functionName,
+      args: Array.isArray(request.args) ? [...request.args] : undefined,
+      value: request.value
+    })
+
+    return {
+      hash: receipt.transactionHash,
+      receipt
+    }
+  } catch (err) {
+    console.error('Validation or Execution Error:', err)
+    throw err
+  }
+}
+
+export const proposeShow = async (
+  input: ProposeShowType
+): Promise<ProposeShowResult> => {
+  const config = ConfigService.getConfig()
+  const chain = config.chains.find(c => c.id === input.chainId)!
+  if (!chain) {
+    throw new Error(`Chain with id ${input.chainId} not found in config`)
+  }
+  const contractInteractor = createContractInteractor(config, chain)
+  return proposeShowCore(input, contractInteractor, config)
+}
+
+export const useProposeShow = (
+  input: ProposeShowType
 ): UseMutationResult<ProposeShowResult, Error> => {
-  const proposeShow = useMemo(
-    () => createProposeShow(contractInteractor, config),
-    [contractInteractor, config]
-  )
+  const config = useConfig()
+  const contextChainId = useChainId()
+  const effectiveChainId = input.chainId ?? contextChainId
+  const contractInteractor = useContractInteractor(effectiveChainId)
 
   return useMutation({
-    mutationFn: () => proposeShow(input),
+    mutationFn: () => {
+      if (effectiveChainId !== base.id && effectiveChainId !== baseSepolia.id) {
+        throw new Error(`Unsupported chain ID: ${effectiveChainId}`)
+      }
+      return proposeShowCore(
+        { ...input, chainId: effectiveChainId },
+        contractInteractor,
+        config
+      )
+    },
     onError: error => {
       console.error('Error proposing show:', error)
     }

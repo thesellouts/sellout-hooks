@@ -1,11 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
+import { useChainId } from 'wagmi'
 import { z } from 'zod'
 
 import { ShowVaultABI } from '../abis'
 import { getContractAddresses } from '../config'
-import { ContractInteractor } from '../contractInteractor'
+import {
+  ConfigService,
+  ContractInteractor,
+  createContractInteractor,
+  useContractInteractor
+} from '../contractInteractor'
 
 const GetShowVaultSchema = z.object({
   showId: z.string(),
@@ -14,7 +20,7 @@ const GetShowVaultSchema = z.object({
 
 export type GetShowVaultInput = z.infer<typeof GetShowVaultSchema>
 
-export const getShowVault = async (
+const getShowVaultCore = async (
   input: GetShowVaultInput,
   contractInteractor: ContractInteractor
 ): Promise<bigint> => {
@@ -34,13 +40,30 @@ export const getShowVault = async (
   }
 }
 
-export const useGetShowVault = (
-  input: GetShowVaultInput,
-  contractInteractor: ContractInteractor
-) => {
+export const getShowVault = async (
+  input: GetShowVaultInput
+): Promise<bigint> => {
+  const config = ConfigService.getConfig()
+  const chain = config.chains.find(c => c.id === input.chainId)!
+  if (!chain) {
+    throw new Error(`Chain with id ${input.chainId} not found in config`)
+  }
+  const contractInteractor = createContractInteractor(config, chain)
+  return getShowVaultCore(input, contractInteractor)
+}
+
+export const useGetShowVault = (input: GetShowVaultInput) => {
+  const contextChainId = useChainId()
+  const effectiveChainId = input.chainId ?? contextChainId
+  const contractInteractor = useContractInteractor(effectiveChainId)
+
   return useQuery({
     queryKey: ['getShowVault', input.showId],
-    queryFn: () => getShowVault(input, contractInteractor),
+    queryFn: () =>
+      getShowVaultCore(
+        { ...input, chainId: effectiveChainId },
+        contractInteractor
+      ),
     enabled: !!input.showId
   })
 }

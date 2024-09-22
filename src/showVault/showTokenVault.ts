@@ -1,11 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
+import { useChainId } from 'wagmi'
 import { z } from 'zod'
 
 import { ShowVaultABI } from '../abis'
 import { getContractAddresses } from '../config'
-import { ContractInteractor } from '../contractInteractor'
+import {
+  ConfigService,
+  ContractInteractor,
+  createContractInteractor,
+  useContractInteractor
+} from '../contractInteractor'
 
 const GetShowTokenVaultSchema = z.object({
   showId: z.string(),
@@ -15,7 +21,7 @@ const GetShowTokenVaultSchema = z.object({
 
 export type GetShowTokenVaultInput = z.infer<typeof GetShowTokenVaultSchema>
 
-export const getShowTokenVault = async (
+const getShowTokenVaultCore = async (
   input: GetShowTokenVaultInput,
   contractInteractor: ContractInteractor
 ): Promise<bigint> => {
@@ -35,14 +41,30 @@ export const getShowTokenVault = async (
   }
 }
 
-// Hook to use the show token vault balance function
-export const useGetShowTokenVault = (
-  input: GetShowTokenVaultInput,
-  contractInteractor: ContractInteractor
-) => {
+export const getShowTokenVault = async (
+  input: GetShowTokenVaultInput
+): Promise<bigint> => {
+  const config = ConfigService.getConfig()
+  const chain = config.chains.find(c => c.id === input.chainId)!
+  if (!chain) {
+    throw new Error(`Chain with id ${input.chainId} not found in config`)
+  }
+  const contractInteractor = createContractInteractor(config, chain)
+  return getShowTokenVaultCore(input, contractInteractor)
+}
+
+export const useGetShowTokenVault = (input: GetShowTokenVaultInput) => {
+  const contextChainId = useChainId()
+  const effectiveChainId = input.chainId ?? contextChainId
+  const contractInteractor = useContractInteractor(effectiveChainId)
+
   return useQuery({
     queryKey: ['getShowTokenVault', input.showId, input.tokenAddress],
-    queryFn: () => getShowTokenVault(input, contractInteractor),
+    queryFn: () =>
+      getShowTokenVaultCore(
+        { ...input, chainId: effectiveChainId },
+        contractInteractor
+      ),
     enabled: !!input.showId && !!input.tokenAddress
   })
 }

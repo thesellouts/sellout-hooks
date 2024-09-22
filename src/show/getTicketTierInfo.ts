@@ -1,11 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
+import { useChainId } from 'wagmi'
 import { z } from 'zod'
 
 import { ShowABI } from '../abis'
 import { getContractAddresses } from '../config'
-import { ContractInteractor } from '../contractInteractor'
+import {
+  ConfigService,
+  ContractInteractor,
+  createContractInteractor,
+  useContractInteractor
+} from '../contractInteractor'
 
 const GetTicketTierInfoSchema = z.object({
   showId: z.string(),
@@ -15,7 +21,7 @@ const GetTicketTierInfoSchema = z.object({
 
 export type GetTicketTierInfoInput = z.infer<typeof GetTicketTierInfoSchema>
 
-export const getTicketTierInfo = async (
+const getTicketTierInfoCore = async (
   input: GetTicketTierInfoInput,
   contractInteractor: ContractInteractor
 ) => {
@@ -35,13 +41,28 @@ export const getTicketTierInfo = async (
   }
 }
 
-export const useGetTicketTierInfo = (
-  input: GetTicketTierInfoInput,
-  contractInteractor: ContractInteractor
-) => {
+export const getTicketTierInfo = async (input: GetTicketTierInfoInput) => {
+  const config = ConfigService.getConfig()
+  const chain = config.chains.find(c => c.id === input.chainId)!
+  if (!chain) {
+    throw new Error(`Chain with id ${input.chainId} not found in config`)
+  }
+  const contractInteractor = createContractInteractor(config, chain)
+  return getTicketTierInfoCore(input, contractInteractor)
+}
+
+export const useGetTicketTierInfo = (input: GetTicketTierInfoInput) => {
+  const contextChainId = useChainId()
+  const effectiveChainId = input.chainId ?? contextChainId
+  const contractInteractor = useContractInteractor(effectiveChainId)
+
   return useQuery({
     queryKey: ['getTicketTierInfo', input.showId, input.tierIndex],
-    queryFn: () => getTicketTierInfo(input, contractInteractor),
+    queryFn: () =>
+      getTicketTierInfoCore(
+        { ...input, chainId: effectiveChainId },
+        contractInteractor
+      ),
     enabled: !!input.showId && input.tierIndex !== undefined
   })
 }

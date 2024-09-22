@@ -5,7 +5,7 @@ export * from './contractInteractor'
 export * from './utils'
 
 // SDK export
-export { sdk } from './sdk'
+export { SelloutSDK } from './sdk'
 
 // Show Exports
 export * from './show/cancelShow'

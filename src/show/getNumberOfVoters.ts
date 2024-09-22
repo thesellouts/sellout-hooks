@@ -1,11 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
+import { useChainId } from 'wagmi'
 import { z } from 'zod'
 
 import { ShowABI } from '../abis'
 import { getContractAddresses } from '../config'
-import { ContractInteractor } from '../contractInteractor'
+import {
+  ConfigService,
+  ContractInteractor,
+  createContractInteractor,
+  useContractInteractor
+} from '../contractInteractor'
 
 const GetNumberOfVotersSchema = z.object({
   showId: z.string(),
@@ -14,7 +20,7 @@ const GetNumberOfVotersSchema = z.object({
 
 export type GetNumberOfVotersInput = z.infer<typeof GetNumberOfVotersSchema>
 
-export const getNumberOfVoters = async (
+const getNumberOfVotersCore = async (
   input: GetNumberOfVotersInput,
   contractInteractor: ContractInteractor
 ): Promise<bigint> => {
@@ -34,13 +40,30 @@ export const getNumberOfVoters = async (
   }
 }
 
-export const useGetNumberOfVoters = (
-  input: GetNumberOfVotersInput,
-  contractInteractor: ContractInteractor
-) => {
+export const getNumberOfVoters = async (
+  input: GetNumberOfVotersInput
+): Promise<bigint> => {
+  const config = ConfigService.getConfig()
+  const chain = config.chains.find(c => c.id === input.chainId)!
+  if (!chain) {
+    throw new Error(`Chain with id ${input.chainId} not found in config`)
+  }
+  const contractInteractor = createContractInteractor(config, chain)
+  return getNumberOfVotersCore(input, contractInteractor)
+}
+
+export const useGetNumberOfVoters = (input: GetNumberOfVotersInput) => {
+  const contextChainId = useChainId()
+  const effectiveChainId = input.chainId ?? contextChainId
+  const contractInteractor = useContractInteractor(effectiveChainId)
+
   return useQuery({
     queryKey: ['getNumberOfVoters', input.showId],
-    queryFn: () => getNumberOfVoters(input, contractInteractor),
+    queryFn: () =>
+      getNumberOfVotersCore(
+        { ...input, chainId: effectiveChainId },
+        contractInteractor
+      ),
     enabled: !!input.showId
   })
 }

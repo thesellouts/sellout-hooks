@@ -1,11 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
+import { useChainId } from 'wagmi'
 import { z } from 'zod'
 
 import { ShowABI } from '../abis'
 import { getContractAddresses } from '../config'
-import { ContractInteractor } from '../contractInteractor'
+import {
+  ConfigService,
+  ContractInteractor,
+  createContractInteractor,
+  useContractInteractor
+} from '../contractInteractor'
 
 const GetShowToTicketProxySchema = z.object({
   showId: z.string(),
@@ -16,10 +22,10 @@ export type GetShowToTicketProxyInput = z.infer<
   typeof GetShowToTicketProxySchema
 >
 
-export const getShowToTicketProxy = async (
+const getShowToTicketProxyCore = async (
   input: GetShowToTicketProxyInput,
   contractInteractor: ContractInteractor
-) => {
+): Promise<`0x${string}`> => {
   const { showId, chainId } = input
   const addresses = getContractAddresses(chainId)
 
@@ -36,13 +42,30 @@ export const getShowToTicketProxy = async (
   }
 }
 
-export const useGetShowToTicketProxy = (
-  input: GetShowToTicketProxyInput,
-  contractInteractor: ContractInteractor
-) => {
+export const getShowToTicketProxy = async (
+  input: GetShowToTicketProxyInput
+): Promise<`0x${string}`> => {
+  const config = ConfigService.getConfig()
+  const chain = config.chains.find(c => c.id === input.chainId)!
+  if (!chain) {
+    throw new Error(`Chain with id ${input.chainId} not found in config`)
+  }
+  const contractInteractor = createContractInteractor(config, chain)
+  return getShowToTicketProxyCore(input, contractInteractor)
+}
+
+export const useGetShowToTicketProxy = (input: GetShowToTicketProxyInput) => {
+  const contextChainId = useChainId()
+  const effectiveChainId = input.chainId ?? contextChainId
+  const contractInteractor = useContractInteractor(effectiveChainId)
+
   return useQuery({
     queryKey: ['getShowToTicketProxy', input.showId],
-    queryFn: () => getShowToTicketProxy(input, contractInteractor),
+    queryFn: () =>
+      getShowToTicketProxyCore(
+        { ...input, chainId: effectiveChainId },
+        contractInteractor
+      ),
     enabled: !!input.showId
   })
 }

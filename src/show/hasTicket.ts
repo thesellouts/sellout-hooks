@@ -1,11 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
+import { useChainId } from 'wagmi'
 import { z } from 'zod'
 
 import { ShowABI } from '../abis'
 import { getContractAddresses } from '../config'
-import { ContractInteractor } from '../contractInteractor'
+import {
+  ConfigService,
+  ContractInteractor,
+  createContractInteractor,
+  useContractInteractor
+} from '../contractInteractor'
 
 const HasTicketSchema = z.object({
   wallet: z.string(),
@@ -15,7 +21,7 @@ const HasTicketSchema = z.object({
 
 export type HasTicketInput = z.infer<typeof HasTicketSchema>
 
-export const hasTicket = async (
+const hasTicketCore = async (
   input: HasTicketInput,
   contractInteractor: ContractInteractor
 ): Promise<boolean> => {
@@ -35,13 +41,28 @@ export const hasTicket = async (
   }
 }
 
-export const useHasTicket = (
-  input: HasTicketInput,
-  contractInteractor: ContractInteractor
-) => {
+export const hasTicket = async (input: HasTicketInput): Promise<boolean> => {
+  const config = ConfigService.getConfig()
+  const chain = config.chains.find(c => c.id === input.chainId)!
+  if (!chain) {
+    throw new Error(`Chain with id ${input.chainId} not found in config`)
+  }
+  const contractInteractor = createContractInteractor(config, chain)
+  return hasTicketCore(input, contractInteractor)
+}
+
+export const useHasTicket = (input: HasTicketInput) => {
+  const contextChainId = useChainId()
+  const effectiveChainId = input.chainId ?? contextChainId
+  const contractInteractor = useContractInteractor(effectiveChainId)
+
   return useQuery({
     queryKey: ['hasTicket', input.wallet, input.showId],
-    queryFn: () => hasTicket(input, contractInteractor),
+    queryFn: () =>
+      hasTicketCore(
+        { ...input, chainId: effectiveChainId },
+        contractInteractor
+      ),
     enabled: !!input.wallet && !!input.showId
   })
 }

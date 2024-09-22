@@ -1,11 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
+import { useChainId } from 'wagmi'
 import { z } from 'zod'
 
 import { VenueABI } from '../abis'
 import { getContractAddresses } from '../config'
-import { ContractInteractor } from '../contractInteractor'
+import {
+  ConfigService,
+  ContractInteractor,
+  createContractInteractor,
+  useContractInteractor
+} from '../contractInteractor'
 
 const GetDateVotesSchema = z.object({
   showId: z.string(),
@@ -15,15 +21,15 @@ const GetDateVotesSchema = z.object({
 
 export type GetDateVotesInput = z.infer<typeof GetDateVotesSchema>
 
-export const getDateVotes = async (
+const getDateVotesCore = async (
   input: GetDateVotesInput,
   contractInteractor: ContractInteractor
-) => {
+): Promise<bigint> => {
   const { showId, date, chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
-    return await contractInteractor.read({
+    return await contractInteractor.read<bigint>({
       address: addresses.Venue as `0x${string}`,
       abi: VenueABI as Abi,
       functionName: 'getDateVotes',
@@ -35,13 +41,30 @@ export const getDateVotes = async (
   }
 }
 
-export const useGetDateVotes = (
-  input: GetDateVotesInput,
-  contractInteractor: ContractInteractor
-) => {
+export const getDateVotes = async (
+  input: GetDateVotesInput
+): Promise<bigint> => {
+  const config = ConfigService.getConfig()
+  const chain = config.chains.find(c => c.id === input.chainId)!
+  if (!chain) {
+    throw new Error(`Chain with id ${input.chainId} not found in config`)
+  }
+  const contractInteractor = createContractInteractor(config, chain)
+  return getDateVotesCore(input, contractInteractor)
+}
+
+export const useGetDateVotes = (input: GetDateVotesInput) => {
+  const contextChainId = useChainId()
+  const effectiveChainId = input.chainId ?? contextChainId
+  const contractInteractor = useContractInteractor(effectiveChainId)
+
   return useQuery({
     queryKey: ['getDateVotes', input.showId, input.date],
-    queryFn: () => getDateVotes(input, contractInteractor),
+    queryFn: () =>
+      getDateVotesCore(
+        { ...input, chainId: effectiveChainId },
+        contractInteractor
+      ),
     enabled: !!input.showId && !!input.date
   })
 }

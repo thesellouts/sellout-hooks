@@ -1,11 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
+import { useChainId } from 'wagmi'
 import { z } from 'zod'
 
 import { ShowVaultABI } from '../abis'
 import { getContractAddresses } from '../config'
-import { ContractInteractor } from '../contractInteractor'
+import {
+  ConfigService,
+  ContractInteractor,
+  createContractInteractor,
+  useContractInteractor
+} from '../contractInteractor'
 
 const GetShowPaymentTokenSchema = z.object({
   showId: z.string(),
@@ -14,7 +20,7 @@ const GetShowPaymentTokenSchema = z.object({
 
 export type GetShowPaymentTokenInput = z.infer<typeof GetShowPaymentTokenSchema>
 
-export const getShowPaymentToken = async (
+const getShowPaymentTokenCore = async (
   input: GetShowPaymentTokenInput,
   contractInteractor: ContractInteractor
 ) => {
@@ -34,13 +40,28 @@ export const getShowPaymentToken = async (
   }
 }
 
-export const useGetShowPaymentToken = (
-  input: GetShowPaymentTokenInput,
-  contractInteractor: ContractInteractor
-) => {
+export const getShowPaymentToken = async (input: GetShowPaymentTokenInput) => {
+  const config = ConfigService.getConfig()
+  const chain = config.chains.find(c => c.id === input.chainId)!
+  if (!chain) {
+    throw new Error(`Chain with id ${input.chainId} not found in config`)
+  }
+  const contractInteractor = createContractInteractor(config, chain)
+  return getShowPaymentTokenCore(input, contractInteractor)
+}
+
+export const useGetShowPaymentToken = (input: GetShowPaymentTokenInput) => {
+  const contextChainId = useChainId()
+  const effectiveChainId = input.chainId ?? contextChainId
+  const contractInteractor = useContractInteractor(effectiveChainId)
+
   return useQuery({
     queryKey: ['getShowPaymentToken', input.showId],
-    queryFn: () => getShowPaymentToken(input, contractInteractor),
+    queryFn: () =>
+      getShowPaymentTokenCore(
+        { ...input, chainId: effectiveChainId },
+        contractInteractor
+      ),
     enabled: !!input.showId
   })
 }

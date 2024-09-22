@@ -1,11 +1,17 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, UseQueryResult } from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
+import { useChainId, useConfig } from 'wagmi'
 import { z } from 'zod'
 
 import { ArtistRegistryABI } from '../../abis'
 import { getContractAddresses } from '../../config'
-import { ContractInteractor } from '../../contractInteractor'
+import {
+  ConfigService,
+  ContractInteractor,
+  createContractInteractor,
+  useContractInteractor
+} from '../../contractInteractor'
 
 const IsArtistRegisteredSchema = z.object({
   artistAddress: z.string(),
@@ -14,29 +20,52 @@ const IsArtistRegisteredSchema = z.object({
 
 export type IsArtistRegisteredInput = z.infer<typeof IsArtistRegisteredSchema>
 
-export const isArtistRegistered = async (
+export const isArtistRegisteredCore = async (
   input: IsArtistRegisteredInput,
   contractInteractor: ContractInteractor
-) => {
+): Promise<boolean> => {
   const { chainId, artistAddress } = input
   const addresses = getContractAddresses(chainId)
   const validatedInput = IsArtistRegisteredSchema.parse(input)
 
-  return await contractInteractor.read({
+  // Casting the response to boolean
+  const result = await contractInteractor.read({
     abi: ArtistRegistryABI as Abi,
     address: addresses.ArtistRegistry as `0x${string}`,
     functionName: 'isArtistRegistered',
     args: [validatedInput.artistAddress]
   })
+
+  return Boolean(result) // Explicitly casting to boolean
+}
+
+export const isArtistRegistered = async (
+  input: IsArtistRegisteredInput
+): Promise<boolean> => {
+  const config = ConfigService.getConfig()
+  const chain = config.chains.find(c => c.id === input.chainId)!
+  if (!chain) {
+    throw new Error(`Chain with id ${input.chainId} not found in config`)
+  }
+  const contractInteractor = createContractInteractor(config, chain)
+  return isArtistRegisteredCore(input, contractInteractor)
 }
 
 export const useIsArtistRegistered = (
-  input: IsArtistRegisteredInput,
-  contractInteractor: ContractInteractor
-) => {
+  input: IsArtistRegisteredInput
+): UseQueryResult<boolean, Error> => {
+  const config = useConfig()
+  const contextChainId = useChainId()
+  const effectiveChainId = input.chainId ?? contextChainId
+  const contractInteractor = useContractInteractor(effectiveChainId)
+
   return useQuery({
     queryKey: ['isArtistRegistered', input.artistAddress],
-    queryFn: () => isArtistRegistered(input, contractInteractor),
+    queryFn: () =>
+      isArtistRegisteredCore(
+        { ...input, chainId: effectiveChainId },
+        contractInteractor
+      ),
     enabled: !!input.artistAddress
   })
 }
