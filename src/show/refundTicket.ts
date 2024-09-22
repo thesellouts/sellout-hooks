@@ -1,6 +1,6 @@
 import { useMutation, UseMutationResult } from '@tanstack/react-query'
 import { Config, simulateContract } from '@wagmi/core'
-import { Abi } from 'viem'
+import { Abi, TransactionReceipt } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId, useConfig } from 'wagmi'
 import { z } from 'zod'
@@ -24,11 +24,7 @@ export type RefundTicketType = z.infer<typeof RefundTicketSchema>
 
 export interface RefundTicketResult {
   hash: `0x${string}`
-  receipt: {
-    transactionHash: `0x${string}`
-    blockNumber: bigint
-    status: 'success' | 'reverted'
-  }
+  receipt: TransactionReceipt
 }
 
 const refundTicketCore = async (
