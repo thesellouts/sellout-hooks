@@ -1,6 +1,14 @@
 import { Config, getPublicClient, writeContract } from '@wagmi/core'
 import { SmartAccountClient } from 'permissionless'
-import { Abi, Address, Chain, PublicClient, TransactionReceipt } from 'viem'
+import {
+  Abi,
+  Account,
+  Address,
+  Chain,
+  Hash,
+  PublicClient,
+  TransactionReceipt
+} from 'viem'
 import { useConfig } from 'wagmi'
 
 export interface ContractInteractionParams {
@@ -78,19 +86,20 @@ export class ContractInteractor {
   private async executeWithSmartAccount(
     params: ContractInteractionParams
   ): Promise<TransactionReceipt> {
-    if (!this.publicClient) {
-      throw new Error('Public client is not available')
+    if (!this.publicClient || !this.smartAccountClient) {
+      throw new Error('Public client or Smart Account client is not available')
     }
 
     try {
-      const hash = await (this.smartAccountClient as any).writeContract({
+      const hash = await this.smartAccountClient.writeContract({
         ...params,
+        account: this.smartAccountClient.account as Account,
         args: params.args ? [...params.args] : undefined,
         chain: this.chain
       })
 
       return await this.publicClient.waitForTransactionReceipt({
-        hash
+        hash: hash as Hash
       })
     } catch (error) {
       console.error('Error executing with smart account:', error)
