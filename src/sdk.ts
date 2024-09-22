@@ -399,32 +399,3 @@ export function useSelloutSDK(
     return new SelloutSDK(config, chainId, smartAccountClient)
   }, [config, chainId, smartAccountClient])
 }
-
-// ====================================
-// Export types
-// ====================================
-export type {
-  CancelShowResult,
-  CancelShowType,
-  PayoutResult,
-  PayoutType,
-  ProposeShowResult,
-  ProposeShowType,
-  RefundBribeResult,
-  RefundBribeType,
-  RefundTicketResult,
-  RefundTicketType,
-  VoteForEmergencyRefundResult,
-  VoteForEmergencyRefundType,
-  WithdrawRefundResult,
-  WithdrawRefundType
-} from './hooks'
-
-export interface TransactionResult {
-  hash: `0x${string}`
-  receipt: {
-    transactionHash: `0x${string}`
-    blockNumber: bigint
-    status: 'success' | 'reverted'
-  }
-}
