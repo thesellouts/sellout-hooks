@@ -1,5 +1,5 @@
 export * from './abis'
 export * from './contractInteractor'
 export * from './hooks'
-export { SelloutSDK } from './sdk'
+export * from './sdk'
 export * from './utils'
