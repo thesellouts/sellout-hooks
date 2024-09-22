@@ -1,13 +1,7 @@
 import { Config, getPublicClient, writeContract } from '@wagmi/core'
 import { SmartAccountClient } from 'permissionless'
-import { Abi, Address, Chain, Hash, PublicClient } from 'viem'
+import { Abi, Address, Chain, PublicClient, TransactionReceipt } from 'viem'
 import { useConfig } from 'wagmi'
-
-export interface TransactionReceipt {
-  transactionHash: Hash
-  blockNumber: bigint
-  status: 'success' | 'reverted'
-}
 
 export interface ContractInteractionParams {
   address: Address
@@ -95,15 +89,9 @@ export class ContractInteractor {
         chain: this.chain
       })
 
-      const receipt = await this.publicClient.waitForTransactionReceipt({
+      return await this.publicClient.waitForTransactionReceipt({
         hash
       })
-
-      return {
-        transactionHash: receipt.transactionHash,
-        blockNumber: receipt.blockNumber,
-        status: receipt.status === 'success' ? 'success' : 'reverted'
-      }
     } catch (error) {
       console.error('Error executing with smart account:', error)
       throw error
@@ -124,15 +112,9 @@ export class ContractInteractor {
         chain: this.chain
       })
 
-      const receipt = await this.publicClient.waitForTransactionReceipt({
+      return await this.publicClient.waitForTransactionReceipt({
         hash
       })
-
-      return {
-        transactionHash: receipt.transactionHash,
-        blockNumber: receipt.blockNumber,
-        status: receipt.status === 'success' ? 'success' : 'reverted'
-      }
     } catch (error) {
       console.error('Error executing with EOA:', error)
       throw error
