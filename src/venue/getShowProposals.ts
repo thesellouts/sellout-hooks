@@ -18,10 +18,10 @@ const GetShowProposalsSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type GetShowProposalsInput = z.infer<typeof GetShowProposalsSchema>
+export type GetShowProposals = z.infer<typeof GetShowProposalsSchema>
 
 export const getShowProposalsCore = async (
-  input: GetShowProposalsInput,
+  input: GetShowProposals,
   contractInteractor: ContractInteractor
 ): Promise<any> => {
   const { showId, chainId } = input
@@ -41,7 +41,7 @@ export const getShowProposalsCore = async (
 }
 
 export const getShowProposals = async (
-  input: GetShowProposalsInput
+  input: GetShowProposals
 ): Promise<any> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -52,7 +52,7 @@ export const getShowProposals = async (
   return getShowProposalsCore(input, contractInteractor)
 }
 
-export const useGetShowProposals = (input: GetShowProposalsInput) => {
+export const useGetShowProposals = (input: GetShowProposals) => {
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId
   const contractInteractor = useContractInteractor(effectiveChainId)

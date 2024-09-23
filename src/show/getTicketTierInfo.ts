@@ -19,10 +19,10 @@ const GetTicketTierInfoSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type GetTicketTierInfoInput = z.infer<typeof GetTicketTierInfoSchema>
+export type GetTicketTierInfo = z.infer<typeof GetTicketTierInfoSchema>
 
 export const getTicketTierInfoCore = async (
-  input: GetTicketTierInfoInput,
+  input: GetTicketTierInfo,
   contractInteractor: ContractInteractor
 ) => {
   const { showId, tierIndex, chainId } = input
@@ -41,7 +41,7 @@ export const getTicketTierInfoCore = async (
   }
 }
 
-export const getTicketTierInfo = async (input: GetTicketTierInfoInput) => {
+export const getTicketTierInfo = async (input: GetTicketTierInfo) => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
   if (!chain) {
@@ -51,7 +51,7 @@ export const getTicketTierInfo = async (input: GetTicketTierInfoInput) => {
   return getTicketTierInfoCore(input, contractInteractor)
 }
 
-export const useGetTicketTierInfo = (input: GetTicketTierInfoInput) => {
+export const useGetTicketTierInfo = (input: GetTicketTierInfo) => {
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId
   const contractInteractor = useContractInteractor(effectiveChainId)

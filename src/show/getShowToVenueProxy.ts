@@ -18,10 +18,10 @@ const GetShowToVenueProxySchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type GetShowToVenueProxyInput = z.infer<typeof GetShowToVenueProxySchema>
+export type GetShowToVenueProxy = z.infer<typeof GetShowToVenueProxySchema>
 
 export const getShowToVenueProxyCore = async (
-  input: GetShowToVenueProxyInput,
+  input: GetShowToVenueProxy,
   contractInteractor: ContractInteractor
 ): Promise<`0x${string}`> => {
   const { showId, chainId } = input
@@ -41,7 +41,7 @@ export const getShowToVenueProxyCore = async (
 }
 
 export const getShowToVenueProxy = async (
-  input: GetShowToVenueProxyInput
+  input: GetShowToVenueProxy
 ): Promise<`0x${string}`> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -52,7 +52,7 @@ export const getShowToVenueProxy = async (
   return getShowToVenueProxyCore(input, contractInteractor)
 }
 
-export const useGetShowToVenueProxy = (input: GetShowToVenueProxyInput) => {
+export const useGetShowToVenueProxy = (input: GetShowToVenueProxy) => {
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId
   const contractInteractor = useContractInteractor(effectiveChainId)

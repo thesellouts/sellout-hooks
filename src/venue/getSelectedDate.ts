@@ -18,10 +18,10 @@ const GetSelectedDateSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type GetSelectedDateInput = z.infer<typeof GetSelectedDateSchema>
+export type GetSelectedDate = z.infer<typeof GetSelectedDateSchema>
 
 export const getSelectedDateCore = async (
-  input: GetSelectedDateInput,
+  input: GetSelectedDate,
   contractInteractor: ContractInteractor
 ): Promise<bigint> => {
   const { showId, chainId } = input
@@ -41,7 +41,7 @@ export const getSelectedDateCore = async (
 }
 
 export const getSelectedDate = async (
-  input: GetSelectedDateInput
+  input: GetSelectedDate
 ): Promise<bigint> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -52,7 +52,7 @@ export const getSelectedDate = async (
   return getSelectedDateCore(input, contractInteractor)
 }
 
-export const useGetSelectedDate = (input: GetSelectedDateInput) => {
+export const useGetSelectedDate = (input: GetSelectedDate) => {
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId
   const contractInteractor = useContractInteractor(effectiveChainId)

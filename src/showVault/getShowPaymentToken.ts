@@ -18,10 +18,10 @@ const GetShowPaymentTokenSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type GetShowPaymentTokenInput = z.infer<typeof GetShowPaymentTokenSchema>
+export type GetShowPaymentToken = z.infer<typeof GetShowPaymentTokenSchema>
 
 export const getShowPaymentTokenCore = async (
-  input: GetShowPaymentTokenInput,
+  input: GetShowPaymentToken,
   contractInteractor: ContractInteractor
 ) => {
   const { showId, chainId } = input
@@ -40,7 +40,7 @@ export const getShowPaymentTokenCore = async (
   }
 }
 
-export const getShowPaymentToken = async (input: GetShowPaymentTokenInput) => {
+export const getShowPaymentToken = async (input: GetShowPaymentToken) => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
   if (!chain) {
@@ -50,7 +50,7 @@ export const getShowPaymentToken = async (input: GetShowPaymentTokenInput) => {
   return getShowPaymentTokenCore(input, contractInteractor)
 }
 
-export const useGetShowPaymentToken = (input: GetShowPaymentTokenInput) => {
+export const useGetShowPaymentToken = (input: GetShowPaymentToken) => {
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId
   const contractInteractor = useContractInteractor(effectiveChainId)

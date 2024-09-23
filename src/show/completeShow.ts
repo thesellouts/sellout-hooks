@@ -19,7 +19,7 @@ const CompleteShowSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type CompleteShowType = z.infer<typeof CompleteShowSchema>
+export type CompleteShow = z.infer<typeof CompleteShowSchema>
 
 export interface CompleteShowResult {
   hash: `0x${string}`
@@ -27,7 +27,7 @@ export interface CompleteShowResult {
 }
 
 export const completeShowCore = async (
-  input: CompleteShowType,
+  input: CompleteShow,
   contractInteractor: ContractInteractor,
   config: Config
 ): Promise<CompleteShowResult> => {
@@ -63,7 +63,7 @@ export const completeShowCore = async (
 }
 
 export const completeShow = async (
-  input: CompleteShowType
+  input: CompleteShow
 ): Promise<CompleteShowResult> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -75,7 +75,7 @@ export const completeShow = async (
 }
 
 export const useCompleteShow = (
-  input: CompleteShowType
+  input: CompleteShow
 ): UseMutationResult<CompleteShowResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()

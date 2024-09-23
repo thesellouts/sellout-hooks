@@ -19,7 +19,7 @@ const WithdrawRefundSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type WithdrawRefundType = z.infer<typeof WithdrawRefundSchema>
+export type WithdrawRefund = z.infer<typeof WithdrawRefundSchema>
 
 export interface WithdrawRefundResult {
   hash: `0x${string}`
@@ -27,7 +27,7 @@ export interface WithdrawRefundResult {
 }
 
 export const withdrawRefundCore = async (
-  input: WithdrawRefundType,
+  input: WithdrawRefund,
   contractInteractor: ContractInteractor,
   config: Config
 ): Promise<WithdrawRefundResult> => {
@@ -63,7 +63,7 @@ export const withdrawRefundCore = async (
 }
 
 export const withdrawRefund = async (
-  input: WithdrawRefundType
+  input: WithdrawRefund
 ): Promise<WithdrawRefundResult> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -75,7 +75,7 @@ export const withdrawRefund = async (
 }
 
 export const useWithdrawRefund = (
-  input: WithdrawRefundType
+  input: WithdrawRefund
 ): UseMutationResult<WithdrawRefundResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()

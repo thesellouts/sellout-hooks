@@ -19,7 +19,7 @@ const DeregisterVenueSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type DeregisterVenueInput = z.infer<typeof DeregisterVenueSchema>
+export type DeregisterVenue = z.infer<typeof DeregisterVenueSchema>
 
 export interface DeregisterVenueResult {
   hash: `0x${string}`
@@ -27,7 +27,7 @@ export interface DeregisterVenueResult {
 }
 
 export const deregisterVenueCore = async (
-  input: DeregisterVenueInput,
+  input: DeregisterVenue,
   contractInteractor: ContractInteractor,
   config: Config
 ): Promise<DeregisterVenueResult> => {
@@ -65,7 +65,7 @@ export const deregisterVenueCore = async (
 }
 
 export const deregisterVenue = async (
-  input: DeregisterVenueInput
+  input: DeregisterVenue
 ): Promise<DeregisterVenueResult> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -77,7 +77,7 @@ export const deregisterVenue = async (
 }
 
 export const useDeregisterVenue = (
-  input: DeregisterVenueInput
+  input: DeregisterVenue
 ): UseMutationResult<DeregisterVenueResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()

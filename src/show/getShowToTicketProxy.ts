@@ -18,12 +18,12 @@ const GetShowToTicketProxySchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type GetShowToTicketProxyInput = z.infer<
+export type GetShowToTicketProxy = z.infer<
   typeof GetShowToTicketProxySchema
 >
 
 export const getShowToTicketProxyCore = async (
-  input: GetShowToTicketProxyInput,
+  input: GetShowToTicketProxy,
   contractInteractor: ContractInteractor
 ): Promise<`0x${string}`> => {
   const { showId, chainId } = input
@@ -43,7 +43,7 @@ export const getShowToTicketProxyCore = async (
 }
 
 export const getShowToTicketProxy = async (
-  input: GetShowToTicketProxyInput
+  input: GetShowToTicketProxy
 ): Promise<`0x${string}`> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -54,7 +54,7 @@ export const getShowToTicketProxy = async (
   return getShowToTicketProxyCore(input, contractInteractor)
 }
 
-export const useGetShowToTicketProxy = (input: GetShowToTicketProxyInput) => {
+export const useGetShowToTicketProxy = (input: GetShowToTicketProxy) => {
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId
   const contractInteractor = useContractInteractor(effectiveChainId)

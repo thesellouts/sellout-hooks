@@ -18,10 +18,10 @@ const GetVotingPeriodsSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type GetVotingPeriodsInput = z.infer<typeof GetVotingPeriodsSchema>
+export type GetVotingPeriods = z.infer<typeof GetVotingPeriodsSchema>
 
 export const getVotingPeriodsCore = async (
-  input: GetVotingPeriodsInput,
+  input: GetVotingPeriods,
   contractInteractor: ContractInteractor
 ): Promise<any> => {
   const { showId, chainId } = input
@@ -41,7 +41,7 @@ export const getVotingPeriodsCore = async (
 }
 
 export const getVotingPeriods = async (
-  input: GetVotingPeriodsInput
+  input: GetVotingPeriods
 ): Promise<any> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -52,7 +52,7 @@ export const getVotingPeriods = async (
   return getVotingPeriodsCore(input, contractInteractor)
 }
 
-export const useGetVotingPeriods = (input: GetVotingPeriodsInput) => {
+export const useGetVotingPeriods = (input: GetVotingPeriods) => {
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId
   const contractInteractor = useContractInteractor(effectiveChainId)

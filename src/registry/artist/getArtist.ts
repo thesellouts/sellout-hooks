@@ -18,10 +18,10 @@ const GetArtistSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type GetArtistInput = z.infer<typeof GetArtistSchema>
+export type GetArtist = z.infer<typeof GetArtistSchema>
 
 export const getArtistCore = async (
-  input: GetArtistInput,
+  input: GetArtist,
   contractInteractor: ContractInteractor
 ): Promise<any> => {
   const { chainId, artistAddress } = input
@@ -39,7 +39,7 @@ export const getArtistCore = async (
   return result
 }
 
-export const getArtist = async (input: GetArtistInput): Promise<any> => {
+export const getArtist = async (input: GetArtist): Promise<any> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
   if (!chain) {
@@ -50,7 +50,7 @@ export const getArtist = async (input: GetArtistInput): Promise<any> => {
 }
 
 export const useGetArtist = (
-  input: GetArtistInput
+  input: GetArtist
 ): UseQueryResult<any, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()

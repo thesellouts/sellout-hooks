@@ -19,12 +19,12 @@ const IsOrganizerRegisteredSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type IsOrganizerRegisteredInput = z.infer<
+export type IsOrganizerRegistered = z.infer<
   typeof IsOrganizerRegisteredSchema
 >
 
 export const isOrganizerRegisteredCore = async (
-  input: IsOrganizerRegisteredInput,
+  input: IsOrganizerRegistered,
   contractInteractor: ContractInteractor
 ): Promise<boolean> => {
   const { chainId, organizerAddress } = input
@@ -47,7 +47,7 @@ export const isOrganizerRegisteredCore = async (
 }
 
 export const isOrganizerRegistered = async (
-  input: IsOrganizerRegisteredInput
+  input: IsOrganizerRegistered
 ): Promise<boolean> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -59,7 +59,7 @@ export const isOrganizerRegistered = async (
 }
 
 export const useIsOrganizerRegistered = (
-  input: IsOrganizerRegisteredInput
+  input: IsOrganizerRegistered
 ): UseQueryResult<boolean, Error> => {
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId

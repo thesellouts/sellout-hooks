@@ -21,7 +21,7 @@ const SetCreditControlPermissionSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type SetCreditControlPermissionInput = z.infer<
+export type SetCreditControlPermission = z.infer<
   typeof SetCreditControlPermissionSchema
 >
 
@@ -31,7 +31,7 @@ export interface SetCreditControlPermissionResult {
 }
 
 export const setCreditControlPermissionCore = async (
-  input: SetCreditControlPermissionInput,
+  input: SetCreditControlPermission,
   contractInteractor: ContractInteractor,
   config: Config
 ): Promise<SetCreditControlPermissionResult> => {
@@ -69,7 +69,7 @@ export const setCreditControlPermissionCore = async (
 }
 
 export const setCreditControlPermission = async (
-  input: SetCreditControlPermissionInput
+  input: SetCreditControlPermission
 ): Promise<SetCreditControlPermissionResult> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -81,7 +81,7 @@ export const setCreditControlPermission = async (
 }
 
 export const useSetCreditControlPermission = (
-  input: SetCreditControlPermissionInput
+  input: SetCreditControlPermission
 ): UseMutationResult<SetCreditControlPermissionResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()

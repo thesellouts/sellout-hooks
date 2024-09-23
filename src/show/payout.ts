@@ -19,7 +19,7 @@ const PayoutSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type PayoutType = z.infer<typeof PayoutSchema>
+export type Payout = z.infer<typeof PayoutSchema>
 
 export interface PayoutResult {
   hash: `0x${string}`
@@ -27,7 +27,7 @@ export interface PayoutResult {
 }
 
 export const payoutCore = async (
-  input: PayoutType,
+  input: Payout,
   contractInteractor: ContractInteractor,
   config: Config
 ): Promise<PayoutResult> => {
@@ -62,7 +62,7 @@ export const payoutCore = async (
   }
 }
 
-export const payout = async (input: PayoutType): Promise<PayoutResult> => {
+export const payout = async (input: Payout): Promise<PayoutResult> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
   if (!chain) {
@@ -73,7 +73,7 @@ export const payout = async (input: PayoutType): Promise<PayoutResult> => {
 }
 
 export const usePayout = (
-  input: PayoutType
+  input: Payout
 ): UseMutationResult<PayoutResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()

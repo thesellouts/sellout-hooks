@@ -19,10 +19,10 @@ const GetTicketPricePaidSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type GetTicketPricePaidInput = z.infer<typeof GetTicketPricePaidSchema>
+export type GetTicketPricePaid = z.infer<typeof GetTicketPricePaidSchema>
 
 export const getTicketPricePaidCore = async (
-  input: GetTicketPricePaidInput,
+  input: GetTicketPricePaid,
   contractInteractor: ContractInteractor
 ): Promise<bigint> => {
   const { chainId, showId, ticketId } = input
@@ -42,7 +42,7 @@ export const getTicketPricePaidCore = async (
 }
 
 export const getTicketPricePaid = async (
-  input: GetTicketPricePaidInput
+  input: GetTicketPricePaid
 ): Promise<bigint> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -53,7 +53,7 @@ export const getTicketPricePaid = async (
   return getTicketPricePaidCore(input, contractInteractor)
 }
 
-export const useGetTicketPricePaid = (input: GetTicketPricePaidInput) => {
+export const useGetTicketPricePaid = (input: GetTicketPricePaid) => {
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId
   const contractInteractor = useContractInteractor(effectiveChainId)

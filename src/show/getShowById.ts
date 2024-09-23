@@ -18,10 +18,10 @@ const GetShowByIdSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type GetShowByIdInput = z.infer<typeof GetShowByIdSchema>
+export type GetShowById = z.infer<typeof GetShowByIdSchema>
 
 export const getShowByIdCore = async (
-  input: GetShowByIdInput,
+  input: GetShowById,
   contractInteractor: ContractInteractor
 ) => {
   const { showId, chainId } = input
@@ -40,7 +40,7 @@ export const getShowByIdCore = async (
   }
 }
 
-export const getShowById = async (input: GetShowByIdInput) => {
+export const getShowById = async (input: GetShowById) => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
   if (!chain) {
@@ -50,7 +50,7 @@ export const getShowById = async (input: GetShowByIdInput) => {
   return getShowByIdCore(input, contractInteractor)
 }
 
-export const useGetShowById = (input: GetShowByIdInput) => {
+export const useGetShowById = (input: GetShowById) => {
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId
   const contractInteractor = useContractInteractor(effectiveChainId)

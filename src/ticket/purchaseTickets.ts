@@ -24,7 +24,7 @@ const PurchaseTicketsSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type PurchaseTicketsType = z.infer<typeof PurchaseTicketsSchema>
+export type PurchaseTickets = z.infer<typeof PurchaseTicketsSchema>
 
 export interface PurchaseTicketsResult {
   hash: `0x${string}`
@@ -32,7 +32,7 @@ export interface PurchaseTicketsResult {
 }
 
 export const purchaseTicketsCore = async (
-  input: PurchaseTicketsType,
+  input: PurchaseTickets,
   contractInteractor: ContractInteractor,
   config: Config
 ): Promise<PurchaseTicketsResult> => {
@@ -79,7 +79,7 @@ export const purchaseTicketsCore = async (
 }
 
 export const purchaseTickets = async (
-  input: PurchaseTicketsType
+  input: PurchaseTickets
 ): Promise<PurchaseTicketsResult> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -91,7 +91,7 @@ export const purchaseTickets = async (
 }
 
 export const usePurchaseTickets = (
-  input: PurchaseTicketsType
+  input: PurchaseTickets
 ): UseMutationResult<PurchaseTicketsResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()

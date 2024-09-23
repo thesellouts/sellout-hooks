@@ -19,7 +19,7 @@ const VoteForEmergencyRefundSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type VoteForEmergencyRefundType = z.infer<
+export type VoteForEmergencyRefund = z.infer<
   typeof VoteForEmergencyRefundSchema
 >
 
@@ -29,7 +29,7 @@ export interface VoteForEmergencyRefundResult {
 }
 
 export const voteForEmergencyRefundCore = async (
-  input: VoteForEmergencyRefundType,
+  input: VoteForEmergencyRefund,
   contractInteractor: ContractInteractor,
   config: Config
 ): Promise<VoteForEmergencyRefundResult> => {
@@ -65,7 +65,7 @@ export const voteForEmergencyRefundCore = async (
 }
 
 export const voteForEmergencyRefund = async (
-  input: VoteForEmergencyRefundType
+  input: VoteForEmergencyRefund
 ): Promise<VoteForEmergencyRefundResult> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -77,7 +77,7 @@ export const voteForEmergencyRefund = async (
 }
 
 export const useVoteForEmergencyRefund = (
-  input: VoteForEmergencyRefundType
+  input: VoteForEmergencyRefund
 ): UseMutationResult<VoteForEmergencyRefundResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()

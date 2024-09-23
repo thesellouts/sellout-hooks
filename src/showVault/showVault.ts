@@ -18,10 +18,10 @@ const GetShowVaultSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type GetShowVaultInput = z.infer<typeof GetShowVaultSchema>
+export type GetShowVault = z.infer<typeof GetShowVaultSchema>
 
 export const getShowVaultCore = async (
-  input: GetShowVaultInput,
+  input: GetShowVault,
   contractInteractor: ContractInteractor
 ): Promise<bigint> => {
   const { showId, chainId } = input
@@ -41,7 +41,7 @@ export const getShowVaultCore = async (
 }
 
 export const getShowVault = async (
-  input: GetShowVaultInput
+  input: GetShowVault
 ): Promise<bigint> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -52,7 +52,7 @@ export const getShowVault = async (
   return getShowVaultCore(input, contractInteractor)
 }
 
-export const useGetShowVault = (input: GetShowVaultInput) => {
+export const useGetShowVault = (input: GetShowVault) => {
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId
   const contractInteractor = useContractInteractor(effectiveChainId)

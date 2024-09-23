@@ -18,10 +18,10 @@ const GetShowOrganizerSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type GetShowOrganizerInput = z.infer<typeof GetShowOrganizerSchema>
+export type GetShowOrganizer = z.infer<typeof GetShowOrganizerSchema>
 
 export const getShowOrganizerCore = async (
-  input: GetShowOrganizerInput,
+  input: GetShowOrganizer,
   contractInteractor: ContractInteractor
 ): Promise<string> => {
   const { showId, chainId } = input
@@ -41,7 +41,7 @@ export const getShowOrganizerCore = async (
 }
 
 export const getShowOrganizer = async (
-  input: GetShowOrganizerInput
+  input: GetShowOrganizer
 ): Promise<string> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -52,7 +52,7 @@ export const getShowOrganizer = async (
   return getShowOrganizerCore(input, contractInteractor)
 }
 
-export const useGetShowOrganizer = (input: GetShowOrganizerInput) => {
+export const useGetShowOrganizer = (input: GetShowOrganizer) => {
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId
   const contractInteractor = useContractInteractor(effectiveChainId)

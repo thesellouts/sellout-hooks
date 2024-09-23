@@ -20,7 +20,7 @@ const RefundTicketSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type RefundTicketType = z.infer<typeof RefundTicketSchema>
+export type RefundTicket = z.infer<typeof RefundTicketSchema>
 
 export interface RefundTicketResult {
   hash: `0x${string}`
@@ -28,7 +28,7 @@ export interface RefundTicketResult {
 }
 
 export const refundTicketCore = async (
-  input: RefundTicketType,
+  input: RefundTicket,
   contractInteractor: ContractInteractor,
   config: Config
 ): Promise<RefundTicketResult> => {
@@ -64,7 +64,7 @@ export const refundTicketCore = async (
 }
 
 export const refundTicket = async (
-  input: RefundTicketType
+  input: RefundTicket
 ): Promise<RefundTicketResult> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -76,7 +76,7 @@ export const refundTicket = async (
 }
 
 export const useRefundTicket = (
-  input: RefundTicketType
+  input: RefundTicket
 ): UseMutationResult<RefundTicketResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()

@@ -19,7 +19,7 @@ const NominateArtistSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type NominateArtistInput = z.infer<typeof NominateArtistSchema>
+export type NominateArtist = z.infer<typeof NominateArtistSchema>
 
 export interface NominateArtistResult {
   hash: `0x${string}`
@@ -27,7 +27,7 @@ export interface NominateArtistResult {
 }
 
 export const nominateArtistCore = async (
-  input: NominateArtistInput,
+  input: NominateArtist,
   contractInteractor: ContractInteractor,
   config: Config
 ): Promise<NominateArtistResult> => {
@@ -65,7 +65,7 @@ export const nominateArtistCore = async (
 }
 
 export const nominateArtist = async (
-  input: NominateArtistInput
+  input: NominateArtist
 ): Promise<NominateArtistResult> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -77,7 +77,7 @@ export const nominateArtist = async (
 }
 
 export const useNominateArtist = (
-  input: NominateArtistInput
+  input: NominateArtist
 ): UseMutationResult<NominateArtistResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()

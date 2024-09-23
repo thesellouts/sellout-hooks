@@ -23,7 +23,7 @@ const IncrementReferralCreditsSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type IncrementReferralCreditsInput = z.infer<
+export type IncrementReferralCredits = z.infer<
   typeof IncrementReferralCreditsSchema
 >
 
@@ -33,7 +33,7 @@ export interface IncrementReferralCreditsResult {
 }
 
 export const incrementReferralCreditsCore = async (
-  input: IncrementReferralCreditsInput,
+  input: IncrementReferralCredits,
   contractInteractor: ContractInteractor,
   config: Config
 ): Promise<IncrementReferralCreditsResult> => {
@@ -76,7 +76,7 @@ export const incrementReferralCreditsCore = async (
 }
 
 export const incrementReferralCredits = async (
-  input: IncrementReferralCreditsInput
+  input: IncrementReferralCredits
 ): Promise<IncrementReferralCreditsResult> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -88,7 +88,7 @@ export const incrementReferralCredits = async (
 }
 
 export const useIncrementReferralCredits = (
-  input: IncrementReferralCreditsInput
+  input: IncrementReferralCredits
 ): UseMutationResult<IncrementReferralCreditsResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()

@@ -19,14 +19,14 @@ const IsVenueRegisteredSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type IsVenueRegisteredInput = z.infer<typeof IsVenueRegisteredSchema>
+export type IsVenueRegistered = z.infer<typeof IsVenueRegisteredSchema>
 
 export interface IsVenueRegisteredResult {
   isRegistered: boolean
 }
 
 export const isVenueRegisteredCore = async (
-  input: IsVenueRegisteredInput,
+  input: IsVenueRegistered,
   contractInteractor: ContractInteractor
 ): Promise<IsVenueRegisteredResult> => {
   const { chainId, venueAddress } = input
@@ -51,7 +51,7 @@ export const isVenueRegisteredCore = async (
 }
 
 export const isVenueRegistered = async (
-  input: IsVenueRegisteredInput
+  input: IsVenueRegistered
 ): Promise<IsVenueRegisteredResult> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -63,7 +63,7 @@ export const isVenueRegistered = async (
 }
 
 export const useIsVenueRegistered = (
-  input: IsVenueRegisteredInput
+  input: IsVenueRegistered
 ): UseQueryResult<IsVenueRegisteredResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()
@@ -71,7 +71,7 @@ export const useIsVenueRegistered = (
   const contractInteractor = useContractInteractor(effectiveChainId)
 
   const isVenueRegisteredMemoized = useMemo(
-    () => (input: IsVenueRegisteredInput) =>
+    () => (input: IsVenueRegistered) =>
       isVenueRegisteredCore(input, contractInteractor),
     [contractInteractor]
   )

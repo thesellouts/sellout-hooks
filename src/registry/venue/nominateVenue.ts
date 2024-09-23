@@ -19,7 +19,7 @@ const NominateVenueSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type NominateVenueInput = z.infer<typeof NominateVenueSchema>
+export type NominateVenue = z.infer<typeof NominateVenueSchema>
 
 export interface NominateVenueResult {
   hash: `0x${string}`
@@ -27,7 +27,7 @@ export interface NominateVenueResult {
 }
 
 export const nominateVenueCore = async (
-  input: NominateVenueInput,
+  input: NominateVenue,
   contractInteractor: ContractInteractor,
   config: Config
 ): Promise<NominateVenueResult> => {
@@ -65,7 +65,7 @@ export const nominateVenueCore = async (
 }
 
 export const nominateVenue = async (
-  input: NominateVenueInput
+  input: NominateVenue
 ): Promise<NominateVenueResult> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -77,7 +77,7 @@ export const nominateVenue = async (
 }
 
 export const useNominateVenue = (
-  input: NominateVenueInput
+  input: NominateVenue
 ): UseMutationResult<NominateVenueResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()

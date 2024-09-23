@@ -19,12 +19,12 @@ const CalculateTotalPayoutAmountSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type CalculateTotalPayoutAmountInput = z.infer<
+export type CalculateTotalPayoutAmount = z.infer<
   typeof CalculateTotalPayoutAmountSchema
 >
 
 export const calculateTotalPayoutAmountCore = async (
-  input: CalculateTotalPayoutAmountInput,
+  input: CalculateTotalPayoutAmount,
   contractInteractor: ContractInteractor
 ) => {
   const { showId, paymentToken, chainId } = input
@@ -44,7 +44,7 @@ export const calculateTotalPayoutAmountCore = async (
 }
 
 export const calculateTotalPayoutAmount = async (
-  input: CalculateTotalPayoutAmountInput
+  input: CalculateTotalPayoutAmount
 ) => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -56,7 +56,7 @@ export const calculateTotalPayoutAmount = async (
 }
 
 export const useCalculateTotalPayoutAmount = (
-  input: CalculateTotalPayoutAmountInput
+  input: CalculateTotalPayoutAmount
 ) => {
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId

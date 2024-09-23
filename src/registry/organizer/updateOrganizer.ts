@@ -22,7 +22,7 @@ const UpdateOrganizerSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type UpdateOrganizerInput = z.infer<typeof UpdateOrganizerSchema>
+export type UpdateOrganizer = z.infer<typeof UpdateOrganizerSchema>
 
 export interface UpdateOrganizerResult {
   hash: `0x${string}`
@@ -30,7 +30,7 @@ export interface UpdateOrganizerResult {
 }
 
 export const updateOrganizerCore = async (
-  input: UpdateOrganizerInput,
+  input: UpdateOrganizer,
   contractInteractor: ContractInteractor,
   config: Config
 ): Promise<UpdateOrganizerResult> => {
@@ -73,7 +73,7 @@ export const updateOrganizerCore = async (
 }
 
 export const updateOrganizer = async (
-  input: UpdateOrganizerInput
+  input: UpdateOrganizer
 ): Promise<UpdateOrganizerResult> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -85,7 +85,7 @@ export const updateOrganizer = async (
 }
 
 export const useUpdateOrganizer = (
-  input: UpdateOrganizerInput
+  input: UpdateOrganizer
 ): UseMutationResult<UpdateOrganizerResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()

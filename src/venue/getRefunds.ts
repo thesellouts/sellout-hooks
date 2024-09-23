@@ -18,10 +18,10 @@ const GetRefundsSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type GetRefundsInput = z.infer<typeof GetRefundsSchema>
+export type GetRefunds = z.infer<typeof GetRefundsSchema>
 
 export const getRefundsCore = async (
-  input: GetRefundsInput,
+  input: GetRefunds,
   contractInteractor: ContractInteractor
 ): Promise<any> => {
   const { user, chainId } = input
@@ -40,7 +40,7 @@ export const getRefundsCore = async (
   }
 }
 
-export const getRefunds = async (input: GetRefundsInput): Promise<any> => {
+export const getRefunds = async (input: GetRefunds): Promise<any> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
   if (!chain) {
@@ -50,7 +50,7 @@ export const getRefunds = async (input: GetRefundsInput): Promise<any> => {
   return getRefundsCore(input, contractInteractor)
 }
 
-export const useGetRefunds = (input: GetRefundsInput) => {
+export const useGetRefunds = (input: GetRefunds) => {
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId
   const contractInteractor = useContractInteractor(effectiveChainId)

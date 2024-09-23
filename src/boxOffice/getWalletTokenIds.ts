@@ -19,10 +19,10 @@ const GetWalletTokenIdsSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type GetWalletTokenIdsInput = z.infer<typeof GetWalletTokenIdsSchema>
+export type GetWalletTokenIds = z.infer<typeof GetWalletTokenIdsSchema>
 
 export const getWalletTokenIdsCore = async (
-  input: GetWalletTokenIdsInput,
+  input: GetWalletTokenIds,
   contractInteractor: ContractInteractor
 ): Promise<bigint[]> => {
   const { chainId, showId, address } = input
@@ -42,7 +42,7 @@ export const getWalletTokenIdsCore = async (
 }
 
 export const getWalletTokenIds = async (
-  input: GetWalletTokenIdsInput
+  input: GetWalletTokenIds
 ): Promise<bigint[]> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -53,7 +53,7 @@ export const getWalletTokenIds = async (
   return getWalletTokenIdsCore(input, contractInteractor)
 }
 
-export const useGetWalletTokenIds = (input: GetWalletTokenIdsInput) => {
+export const useGetWalletTokenIds = (input: GetWalletTokenIds) => {
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId
   const contractInteractor = useContractInteractor(effectiveChainId)

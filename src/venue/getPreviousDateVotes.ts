@@ -19,12 +19,12 @@ const GetPreviousDateVotesSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type GetPreviousDateVotesInput = z.infer<
+export type GetPreviousDateVotes = z.infer<
   typeof GetPreviousDateVotesSchema
 >
 
 export const getPreviousDateVoteCore = async (
-  input: GetPreviousDateVotesInput,
+  input: GetPreviousDateVotes,
   contractInteractor: ContractInteractor
 ): Promise<bigint> => {
   const { showId, user, chainId } = input
@@ -44,7 +44,7 @@ export const getPreviousDateVoteCore = async (
 }
 
 export const getPreviousDateVote = async (
-  input: GetPreviousDateVotesInput
+  input: GetPreviousDateVotes
 ): Promise<bigint> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -55,7 +55,7 @@ export const getPreviousDateVote = async (
   return getPreviousDateVoteCore(input, contractInteractor)
 }
 
-export const useGetPreviousDateVote = (input: GetPreviousDateVotesInput) => {
+export const useGetPreviousDateVote = (input: GetPreviousDateVotes) => {
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId
   const contractInteractor = useContractInteractor(effectiveChainId)

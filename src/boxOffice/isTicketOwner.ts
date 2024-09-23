@@ -20,10 +20,10 @@ const IsTicketOwnerSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type IsTicketOwnerInput = z.infer<typeof IsTicketOwnerSchema>
+export type IsTicketOwner = z.infer<typeof IsTicketOwnerSchema>
 
 export const isTicketOwnerCore = async (
-  input: IsTicketOwnerInput,
+  input: IsTicketOwner,
   contractInteractor: ContractInteractor
 ): Promise<boolean> => {
   const { chainId, showId, wallet, tokenId } = input
@@ -43,7 +43,7 @@ export const isTicketOwnerCore = async (
 }
 
 export const isTicketOwner = async (
-  input: IsTicketOwnerInput
+  input: IsTicketOwner
 ): Promise<boolean> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -54,7 +54,7 @@ export const isTicketOwner = async (
   return isTicketOwnerCore(input, contractInteractor)
 }
 
-export const useIsTicketOwner = (input: IsTicketOwnerInput) => {
+export const useIsTicketOwner = (input: IsTicketOwner) => {
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId
   const contractInteractor = useContractInteractor(effectiveChainId)

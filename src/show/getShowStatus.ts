@@ -18,10 +18,10 @@ const GetShowStatusSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type GetShowStatusInput = z.infer<typeof GetShowStatusSchema>
+export type GetShowStatus = z.infer<typeof GetShowStatusSchema>
 
 export const getShowStatusCore = async (
-  input: GetShowStatusInput,
+  input: GetShowStatus,
   contractInteractor: ContractInteractor
 ): Promise<number> => {
   const { showId, chainId } = input
@@ -41,7 +41,7 @@ export const getShowStatusCore = async (
 }
 
 export const getShowStatus = async (
-  input: GetShowStatusInput
+  input: GetShowStatus
 ): Promise<number> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -52,7 +52,7 @@ export const getShowStatus = async (
   return getShowStatusCore(input, contractInteractor)
 }
 
-export const useGetShowStatus = (input: GetShowStatusInput) => {
+export const useGetShowStatus = (input: GetShowStatus) => {
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId
   const contractInteractor = useContractInteractor(effectiveChainId)

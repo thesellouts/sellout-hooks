@@ -19,12 +19,12 @@ const GetHasTicketOwnerVotedSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type GetHasTicketOwnerVotedInput = z.infer<
+export type GetHasTicketOwnerVoted = z.infer<
   typeof GetHasTicketOwnerVotedSchema
 >
 
 export const getHasTicketOwnerVotedCore = async (
-  input: GetHasTicketOwnerVotedInput,
+  input: GetHasTicketOwnerVoted,
   contractInteractor: ContractInteractor
 ): Promise<boolean> => {
   const { showId, user, chainId } = input
@@ -44,7 +44,7 @@ export const getHasTicketOwnerVotedCore = async (
 }
 
 export const getHasTicketOwnerVoted = async (
-  input: GetHasTicketOwnerVotedInput
+  input: GetHasTicketOwnerVoted
 ): Promise<boolean> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -56,7 +56,7 @@ export const getHasTicketOwnerVoted = async (
 }
 
 export const useGetHasTicketOwnerVoted = (
-  input: GetHasTicketOwnerVotedInput
+  input: GetHasTicketOwnerVoted
 ) => {
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId

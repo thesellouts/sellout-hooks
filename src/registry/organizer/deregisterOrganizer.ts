@@ -19,7 +19,7 @@ const DeregisterOrganizerSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type DeregisterOrganizerInput = z.infer<typeof DeregisterOrganizerSchema>
+export type DeregisterOrganizer = z.infer<typeof DeregisterOrganizerSchema>
 
 export interface DeregisterOrganizerResult {
   hash: `0x${string}`
@@ -27,7 +27,7 @@ export interface DeregisterOrganizerResult {
 }
 
 export const deregisterOrganizerCore = async (
-  input: DeregisterOrganizerInput,
+  input: DeregisterOrganizer,
   contractInteractor: ContractInteractor,
   config: Config
 ): Promise<DeregisterOrganizerResult> => {
@@ -65,7 +65,7 @@ export const deregisterOrganizerCore = async (
 }
 
 export const deregisterOrganizer = async (
-  input: DeregisterOrganizerInput
+  input: DeregisterOrganizer
 ): Promise<DeregisterOrganizerResult> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -77,7 +77,7 @@ export const deregisterOrganizer = async (
 }
 
 export const useDeregisterOrganizer = (
-  input: DeregisterOrganizerInput
+  input: DeregisterOrganizer
 ): UseMutationResult<DeregisterOrganizerResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()

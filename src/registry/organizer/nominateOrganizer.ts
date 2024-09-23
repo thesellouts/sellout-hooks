@@ -19,7 +19,7 @@ const NominateOrganizerSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type NominateOrganizerInput = z.infer<typeof NominateOrganizerSchema>
+export type NominateOrganizer = z.infer<typeof NominateOrganizerSchema>
 
 export interface NominateOrganizerResult {
   hash: `0x${string}`
@@ -27,7 +27,7 @@ export interface NominateOrganizerResult {
 }
 
 export const nominateOrganizerCore = async (
-  input: NominateOrganizerInput,
+  input: NominateOrganizer,
   contractInteractor: ContractInteractor,
   config: Config
 ): Promise<NominateOrganizerResult> => {
@@ -65,7 +65,7 @@ export const nominateOrganizerCore = async (
 }
 
 export const nominateOrganizer = async (
-  input: NominateOrganizerInput
+  input: NominateOrganizer
 ): Promise<NominateOrganizerResult> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -77,7 +77,7 @@ export const nominateOrganizer = async (
 }
 
 export const useNominateOrganizer = (
-  input: NominateOrganizerInput
+  input: NominateOrganizer
 ): UseMutationResult<NominateOrganizerResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()

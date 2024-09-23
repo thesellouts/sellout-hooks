@@ -20,7 +20,7 @@ const SetDefaultURIForShowSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type SetDefaultURIForShowType = z.infer<
+export type SetDefaultURIForShow = z.infer<
   typeof SetDefaultURIForShowSchema
 >
 
@@ -30,7 +30,7 @@ export interface SetDefaultURIForShowResult {
 }
 
 export const setDefaultURIForShowCore = async (
-  input: SetDefaultURIForShowType,
+  input: SetDefaultURIForShow,
   contractInteractor: ContractInteractor,
   config: Config
 ): Promise<SetDefaultURIForShowResult> => {
@@ -68,7 +68,7 @@ export const setDefaultURIForShowCore = async (
 }
 
 export const setDefaultURIForShow = async (
-  input: SetDefaultURIForShowType
+  input: SetDefaultURIForShow
 ): Promise<SetDefaultURIForShowResult> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -80,7 +80,7 @@ export const setDefaultURIForShow = async (
 }
 
 export const useSetDefaultURIForShow = (
-  input: SetDefaultURIForShowType
+  input: SetDefaultURIForShow
 ): UseMutationResult<SetDefaultURIForShowResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()

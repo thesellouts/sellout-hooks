@@ -19,7 +19,7 @@ const GetReferralCreditsSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type GetReferralCreditsInput = z.infer<typeof GetReferralCreditsSchema>
+export type GetReferralCredits = z.infer<typeof GetReferralCreditsSchema>
 
 export interface GetReferralCreditsResult {
   artistCredits: bigint
@@ -28,7 +28,7 @@ export interface GetReferralCreditsResult {
 }
 
 export const getReferralCreditsCore = async (
-  input: GetReferralCreditsInput,
+  input: GetReferralCredits,
   contractInteractor: ContractInteractor
 ): Promise<GetReferralCreditsResult> => {
   const { chainId, referrer } = input
@@ -58,7 +58,7 @@ export const getReferralCreditsCore = async (
 }
 
 export const getReferralCredits = async (
-  input: GetReferralCreditsInput
+  input: GetReferralCredits
 ): Promise<GetReferralCreditsResult> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -70,7 +70,7 @@ export const getReferralCredits = async (
 }
 
 export const useGetReferralCredits = (
-  input: GetReferralCreditsInput
+  input: GetReferralCredits
 ): UseQueryResult<GetReferralCreditsResult, Error> => {
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId

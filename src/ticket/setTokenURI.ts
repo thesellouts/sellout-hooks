@@ -21,7 +21,7 @@ const SetTokenURISchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type SetTokenURIType = z.infer<typeof SetTokenURISchema>
+export type SetTokenURI = z.infer<typeof SetTokenURISchema>
 
 export interface SetTokenURIResult {
   hash: `0x${string}`
@@ -29,7 +29,7 @@ export interface SetTokenURIResult {
 }
 
 export const setTokenURICore = async (
-  input: SetTokenURIType,
+  input: SetTokenURI,
   contractInteractor: ContractInteractor,
   config: Config
 ): Promise<SetTokenURIResult> => {
@@ -71,7 +71,7 @@ export const setTokenURICore = async (
 }
 
 export const setTokenURI = async (
-  input: SetTokenURIType
+  input: SetTokenURI
 ): Promise<SetTokenURIResult> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -83,7 +83,7 @@ export const setTokenURI = async (
 }
 
 export const useSetTokenURI = (
-  input: SetTokenURIType
+  input: SetTokenURI
 ): UseMutationResult<SetTokenURIResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()

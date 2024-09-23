@@ -19,10 +19,10 @@ const GetPreviousVoteSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type GetPreviousVoteInput = z.infer<typeof GetPreviousVoteSchema>
+export type GetPreviousVote = z.infer<typeof GetPreviousVoteSchema>
 
 export const getPreviousVoteCore = async (
-  input: GetPreviousVoteInput,
+  input: GetPreviousVote,
   contractInteractor: ContractInteractor
 ): Promise<bigint> => {
   const { showId, user, chainId } = input
@@ -42,7 +42,7 @@ export const getPreviousVoteCore = async (
 }
 
 export const getPreviousVote = async (
-  input: GetPreviousVoteInput
+  input: GetPreviousVote
 ): Promise<bigint> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -53,7 +53,7 @@ export const getPreviousVote = async (
   return getPreviousVoteCore(input, contractInteractor)
 }
 
-export const useGetPreviousVote = (input: GetPreviousVoteInput) => {
+export const useGetPreviousVote = (input: GetPreviousVote) => {
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId
   const contractInteractor = useContractInteractor(effectiveChainId)

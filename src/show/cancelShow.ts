@@ -19,7 +19,7 @@ const CancelShowSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type CancelShowType = z.infer<typeof CancelShowSchema>
+export type CancelShow = z.infer<typeof CancelShowSchema>
 
 export interface CancelShowResult {
   hash: `0x${string}`
@@ -27,7 +27,7 @@ export interface CancelShowResult {
 }
 
 export const cancelShowCore = async (
-  input: CancelShowType,
+  input: CancelShow,
   contractInteractor: ContractInteractor,
   config: Config
 ): Promise<CancelShowResult> => {
@@ -63,7 +63,7 @@ export const cancelShowCore = async (
 }
 
 export const cancelShow = async (
-  input: CancelShowType
+  input: CancelShow
 ): Promise<CancelShowResult> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -75,7 +75,7 @@ export const cancelShow = async (
 }
 
 export const useCancelShow = (
-  input: CancelShowType
+  input: CancelShow
 ): UseMutationResult<CancelShowResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()

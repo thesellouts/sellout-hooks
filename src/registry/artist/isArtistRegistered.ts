@@ -18,10 +18,10 @@ const IsArtistRegisteredSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type IsArtistRegisteredInput = z.infer<typeof IsArtistRegisteredSchema>
+export type IsArtistRegistered = z.infer<typeof IsArtistRegisteredSchema>
 
 export const isArtistRegisteredCore = async (
-  input: IsArtistRegisteredInput,
+  input: IsArtistRegistered,
   contractInteractor: ContractInteractor
 ): Promise<boolean> => {
   const { chainId, artistAddress } = input
@@ -40,7 +40,7 @@ export const isArtistRegisteredCore = async (
 }
 
 export const isArtistRegistered = async (
-  input: IsArtistRegisteredInput
+  input: IsArtistRegistered
 ): Promise<boolean> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -52,7 +52,7 @@ export const isArtistRegistered = async (
 }
 
 export const useIsArtistRegistered = (
-  input: IsArtistRegisteredInput
+  input: IsArtistRegistered
 ): UseQueryResult<boolean, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()

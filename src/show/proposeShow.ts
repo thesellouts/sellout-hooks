@@ -61,7 +61,7 @@ const ProposeShowSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type ProposeShowType = z.infer<typeof ProposeShowSchema>
+export type ProposeShow = z.infer<typeof ProposeShowSchema>
 
 export interface ProposeShowResult {
   hash: `0x${string}`
@@ -69,7 +69,7 @@ export interface ProposeShowResult {
 }
 
 export const proposeShowCore = async (
-  input: ProposeShowType,
+  input: ProposeShow,
   contractInteractor: ContractInteractor,
   config: Config
 ): Promise<ProposeShowResult> => {
@@ -106,7 +106,7 @@ export const proposeShowCore = async (
 }
 
 export const proposeShow = async (
-  input: ProposeShowType
+  input: ProposeShow
 ): Promise<ProposeShowResult> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -118,7 +118,7 @@ export const proposeShow = async (
 }
 
 export const useProposeShow = (
-  input: ProposeShowType
+  input: ProposeShow
 ): UseMutationResult<ProposeShowResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()

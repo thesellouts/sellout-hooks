@@ -21,7 +21,7 @@ const RefundBribeSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type RefundBribeType = z.infer<typeof RefundBribeSchema>
+export type RefundBribe = z.infer<typeof RefundBribeSchema>
 
 export interface RefundBribeResult {
   hash: `0x${string}`
@@ -29,7 +29,7 @@ export interface RefundBribeResult {
 }
 
 export const refundBribeCore = async (
-  input: RefundBribeType,
+  input: RefundBribe,
   contractInteractor: ContractInteractor,
   config: Config
 ): Promise<RefundBribeResult> => {
@@ -69,7 +69,7 @@ export const refundBribeCore = async (
 }
 
 export const refundBribe = async (
-  input: RefundBribeType
+  input: RefundBribe
 ): Promise<RefundBribeResult> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -81,7 +81,7 @@ export const refundBribe = async (
 }
 
 export const useRefundBribe = (
-  input: RefundBribeType
+  input: RefundBribe
 ): UseMutationResult<RefundBribeResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()

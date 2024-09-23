@@ -18,12 +18,12 @@ const GetSelectedProposalIndexSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type GetSelectedProposalIndexInput = z.infer<
+export type GetSelectedProposalIndex = z.infer<
   typeof GetSelectedProposalIndexSchema
 >
 
 export const getSelectedProposalIndexCore = async (
-  input: GetSelectedProposalIndexInput,
+  input: GetSelectedProposalIndex,
   contractInteractor: ContractInteractor
 ): Promise<number> => {
   const { showId, chainId } = input
@@ -43,7 +43,7 @@ export const getSelectedProposalIndexCore = async (
 }
 
 export const getSelectedProposalIndex = async (
-  input: GetSelectedProposalIndexInput
+  input: GetSelectedProposalIndex
 ): Promise<number> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
@@ -55,7 +55,7 @@ export const getSelectedProposalIndex = async (
 }
 
 export const useGetSelectedProposalIndex = (
-  input: GetSelectedProposalIndexInput
+  input: GetSelectedProposalIndex
 ) => {
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId
