@@ -44,12 +44,22 @@ export const getReferralCreditsCore = async (
       args: [validatedInput.referrer]
     })
 
-    if (Array.isArray(result) && result.length === 3) {
-      const [artistCredits, organizerCredits, venueCredits] = result as [
-        bigint,
-        bigint,
-        bigint
-      ]
+    if (
+      result &&
+      typeof result === 'object' &&
+      'artist' in result &&
+      'organizer' in result &&
+      'venue' in result
+    ) {
+      const {
+        artist: artistCredits,
+        organizer: organizerCredits,
+        venue: venueCredits
+      } = result as {
+        artist: bigint
+        organizer: bigint
+        venue: bigint
+      }
 
       return {
         artistCredits,
