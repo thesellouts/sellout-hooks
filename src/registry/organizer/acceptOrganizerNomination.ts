@@ -29,7 +29,7 @@ export interface AcceptOrganizerNominationResult {
   receipt: TransactionReceipt
 }
 
-const acceptOrganizerNominationCore = async (
+export const acceptOrganizerNominationCore = async (
   input: AcceptOrganizerNominationInput,
   contractInteractor: ContractInteractor,
   config: Config

@@ -20,7 +20,7 @@ const GetShowVaultSchema = z.object({
 
 export type GetShowVaultInput = z.infer<typeof GetShowVaultSchema>
 
-const getShowVaultCore = async (
+export const getShowVaultCore = async (
   input: GetShowVaultInput,
   contractInteractor: ContractInteractor
 ): Promise<bigint> => {

@@ -25,7 +25,7 @@ export interface IsVenueRegisteredResult {
   isRegistered: boolean
 }
 
-const isVenueRegisteredCore = async (
+export const isVenueRegisteredCore = async (
   input: IsVenueRegisteredInput,
   contractInteractor: ContractInteractor
 ): Promise<IsVenueRegisteredResult> => {

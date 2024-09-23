@@ -28,7 +28,7 @@ export interface VoteForEmergencyRefundResult {
   receipt: TransactionReceipt
 }
 
-const voteForEmergencyRefundCore = async (
+export const voteForEmergencyRefundCore = async (
   input: VoteForEmergencyRefundType,
   contractInteractor: ContractInteractor,
   config: Config

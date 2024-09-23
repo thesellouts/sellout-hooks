@@ -20,7 +20,7 @@ const GetVotingPeriodsSchema = z.object({
 
 export type GetVotingPeriodsInput = z.infer<typeof GetVotingPeriodsSchema>
 
-const getVotingPeriodsCore = async (
+export const getVotingPeriodsCore = async (
   input: GetVotingPeriodsInput,
   contractInteractor: ContractInteractor
 ): Promise<any> => {

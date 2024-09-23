@@ -21,7 +21,7 @@ const GetDateVotesSchema = z.object({
 
 export type GetDateVotesInput = z.infer<typeof GetDateVotesSchema>
 
-const getDateVotesCore = async (
+export const getDateVotesCore = async (
   input: GetDateVotesInput,
   contractInteractor: ContractInteractor
 ): Promise<bigint> => {

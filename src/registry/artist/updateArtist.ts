@@ -29,7 +29,7 @@ export interface UpdateArtistResult {
   receipt: TransactionReceipt
 }
 
-const updateArtistCore = async (
+export const updateArtistCore = async (
   input: UpdateArtistInput,
   contractInteractor: ContractInteractor,
   config: Config

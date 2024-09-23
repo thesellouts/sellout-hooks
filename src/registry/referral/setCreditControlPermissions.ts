@@ -30,7 +30,7 @@ export interface SetCreditControlPermissionResult {
   receipt: TransactionReceipt
 }
 
-const setCreditControlPermissionCore = async (
+export const setCreditControlPermissionCore = async (
   input: SetCreditControlPermissionInput,
   contractInteractor: ContractInteractor,
   config: Config

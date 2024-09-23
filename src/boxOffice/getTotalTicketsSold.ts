@@ -20,7 +20,7 @@ const GetTotalTicketsSoldSchema = z.object({
 
 export type GetTotalTicketsSoldInput = z.infer<typeof GetTotalTicketsSoldSchema>
 
-const getTotalTicketsSoldCore = async (
+export const getTotalTicketsSoldCore = async (
   input: GetTotalTicketsSoldInput,
   contractInteractor: ContractInteractor
 ): Promise<bigint> => {

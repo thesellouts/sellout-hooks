@@ -31,7 +31,7 @@ export interface PurchaseTicketsResult {
   receipt: TransactionReceipt
 }
 
-const purchaseTicketsCore = async (
+export const purchaseTicketsCore = async (
   input: PurchaseTicketsType,
   contractInteractor: ContractInteractor,
   config: Config

@@ -21,7 +21,7 @@ const GetProposalSchema = z.object({
 
 export type GetProposalInput = z.infer<typeof GetProposalSchema>
 
-const getProposalCore = async (
+export const getProposalCore = async (
   input: GetProposalInput,
   contractInteractor: ContractInteractor
 ): Promise<any> => {

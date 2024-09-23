@@ -21,7 +21,7 @@ const GetHasDateVotedSchema = z.object({
 
 export type GetHasDateVotedInput = z.infer<typeof GetHasDateVotedSchema>
 
-const getHasDateVotedCore = async (
+export const getHasDateVotedCore = async (
   input: GetHasDateVotedInput,
   contractInteractor: ContractInteractor
 ): Promise<boolean> => {

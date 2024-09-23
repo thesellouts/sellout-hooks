@@ -25,7 +25,7 @@ export interface GetVenueResult {
   venueData: any // You can update this type according to the expected data structure
 }
 
-const getVenueCore = async (
+export const getVenueCore = async (
   input: GetVenueInput,
   contractInteractor: ContractInteractor
 ): Promise<GetVenueResult> => {

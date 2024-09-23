@@ -21,7 +21,7 @@ const IsOrganizerSchema = z.object({
 
 export type IsOrganizerInput = z.infer<typeof IsOrganizerSchema>
 
-const isOrganizerCore = async (
+export const isOrganizerCore = async (
   input: IsOrganizerInput,
   contractInteractor: ContractInteractor
 ): Promise<boolean> => {

@@ -27,7 +27,7 @@ export interface GetReferralCreditsResult {
   venueCredits: bigint
 }
 
-const getReferralCreditsCore = async (
+export const getReferralCreditsCore = async (
   input: GetReferralCreditsInput,
   contractInteractor: ContractInteractor
 ): Promise<GetReferralCreditsResult> => {

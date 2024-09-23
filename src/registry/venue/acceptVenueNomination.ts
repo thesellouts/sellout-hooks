@@ -31,7 +31,7 @@ export interface AcceptVenueNominationResult {
   receipt: TransactionReceipt
 }
 
-const acceptVenueNominationCore = async (
+export const acceptVenueNominationCore = async (
   input: AcceptVenueNominationInput,
   contractInteractor: ContractInteractor,
   config: Config

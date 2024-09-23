@@ -27,7 +27,7 @@ export interface RefundTicketResult {
   receipt: TransactionReceipt
 }
 
-const refundTicketCore = async (
+export const refundTicketCore = async (
   input: RefundTicketType,
   contractInteractor: ContractInteractor,
   config: Config

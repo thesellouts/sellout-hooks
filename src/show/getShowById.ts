@@ -20,7 +20,7 @@ const GetShowByIdSchema = z.object({
 
 export type GetShowByIdInput = z.infer<typeof GetShowByIdSchema>
 
-const getShowByIdCore = async (
+export const getShowByIdCore = async (
   input: GetShowByIdInput,
   contractInteractor: ContractInteractor
 ) => {

@@ -21,7 +21,7 @@ const GetShowTokenVaultSchema = z.object({
 
 export type GetShowTokenVaultInput = z.infer<typeof GetShowTokenVaultSchema>
 
-const getShowTokenVaultCore = async (
+export const getShowTokenVaultCore = async (
   input: GetShowTokenVaultInput,
   contractInteractor: ContractInteractor
 ): Promise<bigint> => {

@@ -21,7 +21,7 @@ const GetWalletTokenIdsSchema = z.object({
 
 export type GetWalletTokenIdsInput = z.infer<typeof GetWalletTokenIdsSchema>
 
-const getWalletTokenIdsCore = async (
+export const getWalletTokenIdsCore = async (
   input: GetWalletTokenIdsInput,
   contractInteractor: ContractInteractor
 ): Promise<bigint[]> => {

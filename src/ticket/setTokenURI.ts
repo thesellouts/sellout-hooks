@@ -28,7 +28,7 @@ export interface SetTokenURIResult {
   receipt: TransactionReceipt
 }
 
-const setTokenURICore = async (
+export const setTokenURICore = async (
   input: SetTokenURIType,
   contractInteractor: ContractInteractor,
   config: Config

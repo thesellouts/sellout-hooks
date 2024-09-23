@@ -20,7 +20,7 @@ const GetShowProposalsSchema = z.object({
 
 export type GetShowProposalsInput = z.infer<typeof GetShowProposalsSchema>
 
-const getShowProposalsCore = async (
+export const getShowProposalsCore = async (
   input: GetShowProposalsInput,
   contractInteractor: ContractInteractor
 ): Promise<any> => {

@@ -20,7 +20,7 @@ const GetShowToVenueProxySchema = z.object({
 
 export type GetShowToVenueProxyInput = z.infer<typeof GetShowToVenueProxySchema>
 
-const getShowToVenueProxyCore = async (
+export const getShowToVenueProxyCore = async (
   input: GetShowToVenueProxyInput,
   contractInteractor: ContractInteractor
 ): Promise<`0x${string}`> => {

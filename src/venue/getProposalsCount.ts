@@ -20,7 +20,7 @@ const GetProposalsCountSchema = z.object({
 
 export type GetProposalsCountInput = z.infer<typeof GetProposalsCountSchema>
 
-const getProposalsCountCore = async (
+export const getProposalsCountCore = async (
   input: GetProposalsCountInput,
   contractInteractor: ContractInteractor
 ): Promise<bigint> => {

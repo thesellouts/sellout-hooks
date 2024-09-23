@@ -32,7 +32,7 @@ export interface IncrementReferralCreditsResult {
   receipt: TransactionReceipt
 }
 
-const incrementReferralCreditsCore = async (
+export const incrementReferralCreditsCore = async (
   input: IncrementReferralCreditsInput,
   contractInteractor: ContractInteractor,
   config: Config

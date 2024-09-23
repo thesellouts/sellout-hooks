@@ -29,7 +29,7 @@ export interface SetDefaultURIForShowResult {
   receipt: TransactionReceipt
 }
 
-const setDefaultURIForShowCore = async (
+export const setDefaultURIForShowCore = async (
   input: SetDefaultURIForShowType,
   contractInteractor: ContractInteractor,
   config: Config

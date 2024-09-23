@@ -20,7 +20,7 @@ const GetShowPaymentTokenSchema = z.object({
 
 export type GetShowPaymentTokenInput = z.infer<typeof GetShowPaymentTokenSchema>
 
-const getShowPaymentTokenCore = async (
+export const getShowPaymentTokenCore = async (
   input: GetShowPaymentTokenInput,
   contractInteractor: ContractInteractor
 ) => {

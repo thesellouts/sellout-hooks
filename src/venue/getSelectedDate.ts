@@ -20,7 +20,7 @@ const GetSelectedDateSchema = z.object({
 
 export type GetSelectedDateInput = z.infer<typeof GetSelectedDateSchema>
 
-const getSelectedDateCore = async (
+export const getSelectedDateCore = async (
   input: GetSelectedDateInput,
   contractInteractor: ContractInteractor
 ): Promise<bigint> => {

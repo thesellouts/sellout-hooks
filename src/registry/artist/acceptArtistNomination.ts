@@ -27,7 +27,7 @@ export interface AcceptArtistNominationResult {
   receipt: TransactionReceipt
 }
 
-const acceptArtistNominationCore = async (
+export const acceptArtistNominationCore = async (
   input: AcceptArtistNominationInput,
   contractInteractor: ContractInteractor,
   config: Config

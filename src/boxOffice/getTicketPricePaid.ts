@@ -21,7 +21,7 @@ const GetTicketPricePaidSchema = z.object({
 
 export type GetTicketPricePaidInput = z.infer<typeof GetTicketPricePaidSchema>
 
-const getTicketPricePaidCore = async (
+export const getTicketPricePaidCore = async (
   input: GetTicketPricePaidInput,
   contractInteractor: ContractInteractor
 ): Promise<bigint> => {

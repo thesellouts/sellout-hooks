@@ -23,7 +23,7 @@ export type GetHasTicketOwnerVotedInput = z.infer<
   typeof GetHasTicketOwnerVotedSchema
 >
 
-const getHasTicketOwnerVotedCore = async (
+export const getHasTicketOwnerVotedCore = async (
   input: GetHasTicketOwnerVotedInput,
   contractInteractor: ContractInteractor
 ): Promise<boolean> => {

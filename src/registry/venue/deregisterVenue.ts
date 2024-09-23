@@ -26,7 +26,7 @@ export interface DeregisterVenueResult {
   receipt: TransactionReceipt
 }
 
-const deregisterVenueCore = async (
+export const deregisterVenueCore = async (
   input: DeregisterVenueInput,
   contractInteractor: ContractInteractor,
   config: Config

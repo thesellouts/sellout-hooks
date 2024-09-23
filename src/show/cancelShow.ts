@@ -26,7 +26,7 @@ export interface CancelShowResult {
   receipt: TransactionReceipt
 }
 
-const cancelShowCore = async (
+export const cancelShowCore = async (
   input: CancelShowType,
   contractInteractor: ContractInteractor,
   config: Config

@@ -22,7 +22,7 @@ const IsTicketOwnerSchema = z.object({
 
 export type IsTicketOwnerInput = z.infer<typeof IsTicketOwnerSchema>
 
-const isTicketOwnerCore = async (
+export const isTicketOwnerCore = async (
   input: IsTicketOwnerInput,
   contractInteractor: ContractInteractor
 ): Promise<boolean> => {

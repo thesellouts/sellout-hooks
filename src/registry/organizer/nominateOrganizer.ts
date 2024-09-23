@@ -26,7 +26,7 @@ export interface NominateOrganizerResult {
   receipt: TransactionReceipt
 }
 
-const nominateOrganizerCore = async (
+export const nominateOrganizerCore = async (
   input: NominateOrganizerInput,
   contractInteractor: ContractInteractor,
   config: Config

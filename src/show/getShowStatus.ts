@@ -20,7 +20,7 @@ const GetShowStatusSchema = z.object({
 
 export type GetShowStatusInput = z.infer<typeof GetShowStatusSchema>
 
-const getShowStatusCore = async (
+export const getShowStatusCore = async (
   input: GetShowStatusInput,
   contractInteractor: ContractInteractor
 ): Promise<number> => {

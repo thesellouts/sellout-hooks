@@ -21,7 +21,7 @@ const IsArtistSchema = z.object({
 
 export type IsArtistInput = z.infer<typeof IsArtistSchema>
 
-const isArtistCore = async (
+export const isArtistCore = async (
   input: IsArtistInput,
   contractInteractor: ContractInteractor
 ): Promise<boolean> => {

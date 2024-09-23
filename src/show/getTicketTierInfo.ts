@@ -21,7 +21,7 @@ const GetTicketTierInfoSchema = z.object({
 
 export type GetTicketTierInfoInput = z.infer<typeof GetTicketTierInfoSchema>
 
-const getTicketTierInfoCore = async (
+export const getTicketTierInfoCore = async (
   input: GetTicketTierInfoInput,
   contractInteractor: ContractInteractor
 ) => {

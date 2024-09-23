@@ -23,7 +23,7 @@ export type GetTicketPricePaidAndTierIndexInput = z.infer<
   typeof GetTicketPricePaidAndTierIndexSchema
 >
 
-const getTicketPricePaidAndTierIndexCore = async (
+export const getTicketPricePaidAndTierIndexCore = async (
   input: GetTicketPricePaidAndTierIndexInput,
   contractInteractor: ContractInteractor
 ) => {

@@ -20,7 +20,7 @@ const GetProposalPeriodSchema = z.object({
 
 export type GetProposalPeriodInput = z.infer<typeof GetProposalPeriodSchema>
 
-const getProposalPeriodCore = async (
+export const getProposalPeriodCore = async (
   input: GetProposalPeriodInput,
   contractInteractor: ContractInteractor
 ): Promise<bigint> => {

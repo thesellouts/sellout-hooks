@@ -23,7 +23,7 @@ export type GetPreviousDateVotesInput = z.infer<
   typeof GetPreviousDateVotesSchema
 >
 
-const getPreviousDateVoteCore = async (
+export const getPreviousDateVoteCore = async (
   input: GetPreviousDateVotesInput,
   contractInteractor: ContractInteractor
 ): Promise<bigint> => {

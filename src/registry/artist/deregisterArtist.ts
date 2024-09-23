@@ -26,7 +26,7 @@ export interface DeregisterArtistResult {
   receipt: TransactionReceipt
 }
 
-const deregisterArtistCore = async (
+export const deregisterArtistCore = async (
   input: DeregisterArtistInput,
   contractInteractor: ContractInteractor,
   config: Config

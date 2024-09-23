@@ -28,7 +28,7 @@ export interface RefundBribeResult {
   receipt: TransactionReceipt
 }
 
-const refundBribeCore = async (
+export const refundBribeCore = async (
   input: RefundBribeType,
   contractInteractor: ContractInteractor,
   config: Config

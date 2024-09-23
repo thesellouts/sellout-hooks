@@ -23,7 +23,7 @@ export type CalculateTotalPayoutAmountInput = z.infer<
   typeof CalculateTotalPayoutAmountSchema
 >
 
-const calculateTotalPayoutAmountCore = async (
+export const calculateTotalPayoutAmountCore = async (
   input: CalculateTotalPayoutAmountInput,
   contractInteractor: ContractInteractor
 ) => {

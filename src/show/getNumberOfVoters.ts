@@ -20,7 +20,7 @@ const GetNumberOfVotersSchema = z.object({
 
 export type GetNumberOfVotersInput = z.infer<typeof GetNumberOfVotersSchema>
 
-const getNumberOfVotersCore = async (
+export const getNumberOfVotersCore = async (
   input: GetNumberOfVotersInput,
   contractInteractor: ContractInteractor
 ): Promise<bigint> => {

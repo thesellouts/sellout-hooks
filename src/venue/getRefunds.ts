@@ -20,7 +20,7 @@ const GetRefundsSchema = z.object({
 
 export type GetRefundsInput = z.infer<typeof GetRefundsSchema>
 
-const getRefundsCore = async (
+export const getRefundsCore = async (
   input: GetRefundsInput,
   contractInteractor: ContractInteractor
 ): Promise<any> => {

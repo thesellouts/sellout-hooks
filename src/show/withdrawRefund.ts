@@ -26,7 +26,7 @@ export interface WithdrawRefundResult {
   receipt: TransactionReceipt
 }
 
-const withdrawRefundCore = async (
+export const withdrawRefundCore = async (
   input: WithdrawRefundType,
   contractInteractor: ContractInteractor,
   config: Config

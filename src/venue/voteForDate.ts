@@ -27,7 +27,7 @@ export interface VoteForDateResult {
   receipt: TransactionReceipt
 }
 
-const voteForDateCore = async (
+export const voteForDateCore = async (
   input: VoteForDate,
   contractInteractor: ContractInteractor,
   config: Config

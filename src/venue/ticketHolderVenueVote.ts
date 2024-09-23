@@ -27,7 +27,7 @@ export interface TicketHolderVenueVoteResult {
   receipt: TransactionReceipt
 }
 
-const ticketHolderVenueVoteCore = async (
+export const ticketHolderVenueVoteCore = async (
   input: TicketHolderVenueVote,
   contractInteractor: ContractInteractor,
   config: Config

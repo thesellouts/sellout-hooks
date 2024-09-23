@@ -26,7 +26,7 @@ export interface DeregisterOrganizerResult {
   receipt: TransactionReceipt
 }
 
-const deregisterOrganizerCore = async (
+export const deregisterOrganizerCore = async (
   input: DeregisterOrganizerInput,
   contractInteractor: ContractInteractor,
   config: Config

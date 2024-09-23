@@ -68,7 +68,7 @@ export interface ProposeShowResult {
   receipt: TransactionReceipt
 }
 
-const proposeShowCore = async (
+export const proposeShowCore = async (
   input: ProposeShowType,
   contractInteractor: ContractInteractor,
   config: Config

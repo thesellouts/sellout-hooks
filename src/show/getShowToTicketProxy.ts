@@ -22,7 +22,7 @@ export type GetShowToTicketProxyInput = z.infer<
   typeof GetShowToTicketProxySchema
 >
 
-const getShowToTicketProxyCore = async (
+export const getShowToTicketProxyCore = async (
   input: GetShowToTicketProxyInput,
   contractInteractor: ContractInteractor
 ): Promise<`0x${string}`> => {

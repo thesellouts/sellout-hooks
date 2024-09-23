@@ -26,7 +26,7 @@ export interface CompleteShowResult {
   receipt: TransactionReceipt
 }
 
-const completeShowCore = async (
+export const completeShowCore = async (
   input: CompleteShowType,
   contractInteractor: ContractInteractor,
   config: Config

@@ -21,7 +21,7 @@ const HasTicketSchema = z.object({
 
 export type HasTicketInput = z.infer<typeof HasTicketSchema>
 
-const hasTicketCore = async (
+export const hasTicketCore = async (
   input: HasTicketInput,
   contractInteractor: ContractInteractor
 ): Promise<boolean> => {

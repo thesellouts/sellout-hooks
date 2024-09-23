@@ -29,7 +29,7 @@ export interface UpdateOrganizerResult {
   receipt: TransactionReceipt
 }
 
-const updateOrganizerCore = async (
+export const updateOrganizerCore = async (
   input: UpdateOrganizerInput,
   contractInteractor: ContractInteractor,
   config: Config

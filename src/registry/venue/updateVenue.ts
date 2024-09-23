@@ -33,7 +33,7 @@ export interface UpdateVenueResult {
   receipt: TransactionReceipt
 }
 
-const updateVenueCore = async (
+export const updateVenueCore = async (
   input: UpdateVenueInput,
   contractInteractor: ContractInteractor,
   config: Config

@@ -30,7 +30,7 @@ export interface SubmitProposalResult {
   receipt: TransactionReceipt
 }
 
-const submitProposalCore = async (
+export const submitProposalCore = async (
   input: SubmitProposal,
   contractInteractor: ContractInteractor,
   config: Config

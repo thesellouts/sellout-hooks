@@ -22,7 +22,7 @@ export type GetSelectedProposalIndexInput = z.infer<
   typeof GetSelectedProposalIndexSchema
 >
 
-const getSelectedProposalIndexCore = async (
+export const getSelectedProposalIndexCore = async (
   input: GetSelectedProposalIndexInput,
   contractInteractor: ContractInteractor
 ): Promise<number> => {

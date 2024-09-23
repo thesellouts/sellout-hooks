@@ -20,7 +20,7 @@ const GetShowOrganizerSchema = z.object({
 
 export type GetShowOrganizerInput = z.infer<typeof GetShowOrganizerSchema>
 
-const getShowOrganizerCore = async (
+export const getShowOrganizerCore = async (
   input: GetShowOrganizerInput,
   contractInteractor: ContractInteractor
 ): Promise<string> => {

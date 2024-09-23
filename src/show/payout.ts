@@ -26,7 +26,7 @@ export interface PayoutResult {
   receipt: TransactionReceipt
 }
 
-const payoutCore = async (
+export const payoutCore = async (
   input: PayoutType,
   contractInteractor: ContractInteractor,
   config: Config
