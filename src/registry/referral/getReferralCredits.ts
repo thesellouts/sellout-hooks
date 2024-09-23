@@ -37,19 +37,28 @@ export const getReferralCreditsCore = async (
   try {
     const validatedInput = GetReferralCreditsSchema.parse(input)
 
-    // Cast the result to the expected type (tuple of bigints)
-    const [artistCredits, organizerCredits, venueCredits] =
-      (await contractInteractor.read({
-        abi: ReferralABI as Abi,
-        address: addresses.ReferralModule as `0x${string}`,
-        functionName: 'getReferralCredits',
-        args: [validatedInput.referrer]
-      })) as [bigint, bigint, bigint] // Type assertion for destructuring
+    const result = await contractInteractor.read({
+      abi: ReferralABI as Abi,
+      address: addresses.ReferralModule as `0x${string}`,
+      functionName: 'getReferralCredits',
+      args: [validatedInput.referrer]
+    })
 
-    return {
-      artistCredits,
-      organizerCredits,
-      venueCredits
+    if (Array.isArray(result) && result.length === 3) {
+      const [artistCredits, organizerCredits, venueCredits] = result as [
+        bigint,
+        bigint,
+        bigint
+      ]
+
+      return {
+        artistCredits,
+        organizerCredits,
+        venueCredits
+      }
+    } else {
+      console.error('Unexpected result format:', result)
+      throw new Error('Unexpected result format from getReferralCredits')
     }
   } catch (err) {
     console.error('Validation or Execution Error:', err)
@@ -62,10 +71,13 @@ export const getReferralCredits = async (
 ): Promise<GetReferralCreditsResult> => {
   const config = ConfigService.getConfig()
   const chain = config.chains.find(c => c.id === input.chainId)!
+
   if (!chain) {
     throw new Error(`Chain with id ${input.chainId} not found in config`)
   }
+
   const contractInteractor = createContractInteractor(config, chain)
+
   return getReferralCreditsCore(input, contractInteractor)
 }
 

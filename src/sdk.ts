@@ -674,5 +674,3 @@ export function useSelloutSDK(
     return new SelloutSDK(config, chainId, smartAccountClient)
   }, [config, chainId, smartAccountClient])
 }
-
-
