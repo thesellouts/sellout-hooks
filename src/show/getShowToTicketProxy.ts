@@ -7,9 +7,7 @@ import { z } from 'zod'
 import { ShowABI } from '../abis'
 import { getContractAddresses } from '../config'
 import {
-  ConfigService,
   ContractInteractor,
-  createContractInteractor,
   useContractInteractor
 } from '../contractInteractor'
 
@@ -18,9 +16,7 @@ const GetShowToTicketProxySchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type GetShowToTicketProxy = z.infer<
-  typeof GetShowToTicketProxySchema
->
+export type GetShowToTicketProxy = z.infer<typeof GetShowToTicketProxySchema>
 
 export const getShowToTicketProxyCore = async (
   input: GetShowToTicketProxy,
@@ -40,18 +36,6 @@ export const getShowToTicketProxyCore = async (
     console.error('Error reading ticket proxy:', error)
     throw new Error('Failed to fetch ticket proxy')
   }
-}
-
-export const getShowToTicketProxy = async (
-  input: GetShowToTicketProxy
-): Promise<`0x${string}`> => {
-  const config = ConfigService.getConfig()
-  const chain = config.chains.find(c => c.id === input.chainId)!
-  if (!chain) {
-    throw new Error(`Chain with id ${input.chainId} not found in config`)
-  }
-  const contractInteractor = createContractInteractor(config, chain)
-  return getShowToTicketProxyCore(input, contractInteractor)
 }
 
 export const useGetShowToTicketProxy = (input: GetShowToTicketProxy) => {

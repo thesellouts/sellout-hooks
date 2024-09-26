@@ -42,18 +42,6 @@ export const isTicketOwnerCore = async (
   }
 }
 
-export const isTicketOwner = async (
-  input: IsTicketOwner
-): Promise<boolean> => {
-  const config = ConfigService.getConfig()
-  const chain = config.chains.find(c => c.id === input.chainId)!
-  if (!chain) {
-    throw new Error(`Chain with id ${input.chainId} not found in config`)
-  }
-  const contractInteractor = createContractInteractor(config, chain)
-  return isTicketOwnerCore(input, contractInteractor)
-}
-
 export const useIsTicketOwner = (input: IsTicketOwner) => {
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId

@@ -1,5 +1,6 @@
 import { useMutation, UseMutationResult } from '@tanstack/react-query'
 import { Config, simulateContract } from '@wagmi/core'
+import { SmartAccountClient } from 'permissionless'
 import { Abi, TransactionReceipt } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId, useConfig } from 'wagmi'
@@ -7,11 +8,7 @@ import { z } from 'zod'
 
 import { TicketABI } from '../abis'
 import { ContractInteractor } from '../contractInteractor'
-import {
-  ConfigService,
-  createContractInteractor,
-  useContractInteractor
-} from '../contractInteractor'
+import { useContractInteractor } from '../contractInteractor'
 import { AddressSchema, NULL_ADDRESS } from '../utils'
 
 const PurchaseTicketsSchema = z.object({
@@ -34,7 +31,8 @@ export interface PurchaseTicketsResult {
 export const purchaseTicketsCore = async (
   input: PurchaseTickets,
   contractInteractor: ContractInteractor,
-  config: Config
+  config: Config,
+  options?: { smart?: boolean }
 ): Promise<PurchaseTicketsResult> => {
   const {
     ticketProxy,
@@ -60,13 +58,16 @@ export const purchaseTicketsCore = async (
     })
 
     // Execute the contract interaction
-    const receipt = await contractInteractor.execute({
-      address: request.address,
-      abi: TicketABI as Abi,
-      functionName: request.functionName,
-      args: request.args ? [...request.args] : undefined,
-      value: paymentToken === NULL_ADDRESS ? BigInt(value ?? 0) : undefined
-    })
+    const receipt = await contractInteractor.execute(
+      {
+        address: request.address,
+        abi: TicketABI as Abi,
+        functionName: request.functionName,
+        args: request.args ? [...request.args] : undefined,
+        value: paymentToken === NULL_ADDRESS ? BigInt(value ?? 0) : undefined
+      },
+      options
+    )
 
     return {
       hash: receipt.transactionHash,
@@ -78,25 +79,17 @@ export const purchaseTicketsCore = async (
   }
 }
 
-export const purchaseTickets = async (
-  input: PurchaseTickets
-): Promise<PurchaseTicketsResult> => {
-  const config = ConfigService.getConfig()
-  const chain = config.chains.find(c => c.id === input.chainId)!
-  if (!chain) {
-    throw new Error(`Chain with id ${input.chainId} not found in config`)
-  }
-  const contractInteractor = createContractInteractor(config, chain)
-  return purchaseTicketsCore(input, contractInteractor, config)
-}
-
 export const usePurchaseTickets = (
-  input: PurchaseTickets
+  input: PurchaseTickets,
+  options?: { smartAccountClient?: SmartAccountClient }
 ): UseMutationResult<PurchaseTicketsResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId
-  const contractInteractor = useContractInteractor(effectiveChainId)
+  const contractInteractor = useContractInteractor(
+    effectiveChainId,
+    options?.smartAccountClient
+  )
 
   return useMutation({
     mutationFn: () =>

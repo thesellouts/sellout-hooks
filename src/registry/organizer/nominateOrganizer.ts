@@ -1,5 +1,6 @@
 import { useMutation, UseMutationResult } from '@tanstack/react-query'
 import { Config, simulateContract } from '@wagmi/core'
+import { SmartAccountClient } from 'permissionless'
 import { Abi, TransactionReceipt } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId, useConfig } from 'wagmi'
@@ -8,9 +9,7 @@ import { z } from 'zod'
 import { OrganizerRegistryABI } from '../../abis'
 import { getContractAddresses } from '../../config'
 import {
-  ConfigService,
   ContractInteractor,
-  createContractInteractor,
   useContractInteractor
 } from '../../contractInteractor'
 
@@ -29,7 +28,8 @@ export interface NominateOrganizerResult {
 export const nominateOrganizerCore = async (
   input: NominateOrganizer,
   contractInteractor: ContractInteractor,
-  config: Config
+  config: Config,
+  options?: { smart?: boolean }
 ): Promise<NominateOrganizerResult> => {
   const { chainId, nominee } = input
   const addresses = getContractAddresses(chainId)
@@ -47,12 +47,15 @@ export const nominateOrganizerCore = async (
     })
 
     // Execute the contract interaction
-    const receipt = await contractInteractor.execute({
-      address: request.address,
-      abi: OrganizerRegistryABI as Abi,
-      functionName: request.functionName,
-      args: request.args ? [...request.args] : undefined
-    })
+    const receipt = await contractInteractor.execute(
+      {
+        address: request.address,
+        abi: OrganizerRegistryABI as Abi,
+        functionName: request.functionName,
+        args: request.args ? [...request.args] : undefined
+      },
+      options
+    )
 
     return {
       hash: receipt.transactionHash,
@@ -64,25 +67,17 @@ export const nominateOrganizerCore = async (
   }
 }
 
-export const nominateOrganizer = async (
-  input: NominateOrganizer
-): Promise<NominateOrganizerResult> => {
-  const config = ConfigService.getConfig()
-  const chain = config.chains.find(c => c.id === input.chainId)!
-  if (!chain) {
-    throw new Error(`Chain with id ${input.chainId} not found in config`)
-  }
-  const contractInteractor = createContractInteractor(config, chain)
-  return nominateOrganizerCore(input, contractInteractor, config)
-}
-
 export const useNominateOrganizer = (
-  input: NominateOrganizer
+  input: NominateOrganizer,
+  options?: { smartAccountClient?: SmartAccountClient }
 ): UseMutationResult<NominateOrganizerResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId
-  const contractInteractor = useContractInteractor(effectiveChainId)
+  const contractInteractor = useContractInteractor(
+    effectiveChainId,
+    options?.smartAccountClient
+  )
 
   return useMutation({
     mutationFn: () =>

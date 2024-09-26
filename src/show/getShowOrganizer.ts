@@ -7,9 +7,7 @@ import { z } from 'zod'
 import { ShowABI } from '../abis'
 import { getContractAddresses } from '../config'
 import {
-  ConfigService,
   ContractInteractor,
-  createContractInteractor,
   useContractInteractor
 } from '../contractInteractor'
 
@@ -38,18 +36,6 @@ export const getShowOrganizerCore = async (
     console.error('Error reading organizer:', error)
     throw new Error('Failed to fetch organizer')
   }
-}
-
-export const getShowOrganizer = async (
-  input: GetShowOrganizer
-): Promise<string> => {
-  const config = ConfigService.getConfig()
-  const chain = config.chains.find(c => c.id === input.chainId)!
-  if (!chain) {
-    throw new Error(`Chain with id ${input.chainId} not found in config`)
-  }
-  const contractInteractor = createContractInteractor(config, chain)
-  return getShowOrganizerCore(input, contractInteractor)
 }
 
 export const useGetShowOrganizer = (input: GetShowOrganizer) => {

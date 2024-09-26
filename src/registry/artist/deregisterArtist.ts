@@ -1,5 +1,6 @@
 import { useMutation, UseMutationResult } from '@tanstack/react-query'
 import { Config, simulateContract } from '@wagmi/core'
+import { SmartAccountClient } from 'permissionless'
 import { Abi, TransactionReceipt } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId, useConfig } from 'wagmi'
@@ -8,9 +9,7 @@ import { z } from 'zod'
 import { ArtistRegistryABI } from '../../abis'
 import { getContractAddresses } from '../../config'
 import {
-  ConfigService,
   ContractInteractor,
-  createContractInteractor,
   useContractInteractor
 } from '../../contractInteractor'
 
@@ -29,7 +28,8 @@ export interface DeregisterArtistResult {
 export const deregisterArtistCore = async (
   input: DeregisterArtist,
   contractInteractor: ContractInteractor,
-  config: Config
+  config: Config,
+  options?: { smart?: boolean }
 ): Promise<DeregisterArtistResult> => {
   const { chainId, artistId } = input
   const addresses = getContractAddresses(chainId)
@@ -47,12 +47,15 @@ export const deregisterArtistCore = async (
     })
 
     // Execute the contract interaction
-    const receipt = await contractInteractor.execute({
-      address: request.address,
-      abi: ArtistRegistryABI as Abi,
-      functionName: request.functionName,
-      args: request.args ? [...request.args] : undefined
-    })
+    const receipt = await contractInteractor.execute(
+      {
+        address: request.address,
+        abi: ArtistRegistryABI as Abi,
+        functionName: request.functionName,
+        args: request.args ? [...request.args] : undefined
+      },
+      options
+    )
 
     return {
       hash: receipt.transactionHash,
@@ -64,25 +67,17 @@ export const deregisterArtistCore = async (
   }
 }
 
-export const deregisterArtist = async (
-  input: DeregisterArtist
-): Promise<DeregisterArtistResult> => {
-  const config = ConfigService.getConfig()
-  const chain = config.chains.find(c => c.id === input.chainId)!
-  if (!chain) {
-    throw new Error(`Chain with id ${input.chainId} not found in config`)
-  }
-  const contractInteractor = createContractInteractor(config, chain)
-  return deregisterArtistCore(input, contractInteractor, config)
-}
-
 export const useDeregisterArtist = (
-  input: DeregisterArtist
+  input: DeregisterArtist,
+  options?: { smartAccountClient?: SmartAccountClient }
 ): UseMutationResult<DeregisterArtistResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId
-  const contractInteractor = useContractInteractor(effectiveChainId)
+  const contractInteractor = useContractInteractor(
+    effectiveChainId,
+    options?.smartAccountClient
+  )
 
   return useMutation({
     mutationFn: () =>

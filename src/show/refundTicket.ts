@@ -1,5 +1,6 @@
 import { useMutation, UseMutationResult } from '@tanstack/react-query'
 import { Config, simulateContract } from '@wagmi/core'
+import { SmartAccountClient } from 'permissionless'
 import { Abi, TransactionReceipt } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId, useConfig } from 'wagmi'
@@ -8,9 +9,7 @@ import { z } from 'zod'
 import { ShowABI } from '../abis'
 import { getContractAddresses } from '../config'
 import {
-  ConfigService,
   ContractInteractor,
-  createContractInteractor,
   useContractInteractor
 } from '../contractInteractor'
 
@@ -30,7 +29,8 @@ export interface RefundTicketResult {
 export const refundTicketCore = async (
   input: RefundTicket,
   contractInteractor: ContractInteractor,
-  config: Config
+  config: Config,
+  options?: { smart?: boolean }
 ): Promise<RefundTicketResult> => {
   const { showId, ticketId, chainId } = input
   const addresses = getContractAddresses(chainId)
@@ -46,12 +46,15 @@ export const refundTicketCore = async (
       chainId
     })
 
-    const receipt = await contractInteractor.execute({
-      address: request.address,
-      abi: ShowABI as Abi,
-      functionName: request.functionName,
-      args: request.args ? [...request.args] : undefined
-    })
+    const receipt = await contractInteractor.execute(
+      {
+        address: request.address,
+        abi: ShowABI as Abi,
+        functionName: request.functionName,
+        args: request.args ? [...request.args] : undefined
+      },
+      options
+    )
 
     return {
       hash: receipt.transactionHash,
@@ -63,25 +66,17 @@ export const refundTicketCore = async (
   }
 }
 
-export const refundTicket = async (
-  input: RefundTicket
-): Promise<RefundTicketResult> => {
-  const config = ConfigService.getConfig()
-  const chain = config.chains.find(c => c.id === input.chainId)!
-  if (!chain) {
-    throw new Error(`Chain with id ${input.chainId} not found in config`)
-  }
-  const contractInteractor = createContractInteractor(config, chain)
-  return refundTicketCore(input, contractInteractor, config)
-}
-
 export const useRefundTicket = (
-  input: RefundTicket
+  input: RefundTicket,
+  options?: { smartAccountClient?: SmartAccountClient }
 ): UseMutationResult<RefundTicketResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId
-  const contractInteractor = useContractInteractor(effectiveChainId)
+  const contractInteractor = useContractInteractor(
+    effectiveChainId,
+    options?.smartAccountClient
+  )
 
   return useMutation({
     mutationFn: () => {

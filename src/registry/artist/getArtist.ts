@@ -7,9 +7,7 @@ import { z } from 'zod'
 import { ArtistRegistryABI } from '../../abis'
 import { getContractAddresses } from '../../config'
 import {
-  ConfigService,
   ContractInteractor,
-  createContractInteractor,
   useContractInteractor
 } from '../../contractInteractor'
 
@@ -29,29 +27,15 @@ export const getArtistCore = async (
   const validatedInput = GetArtistSchema.parse(input)
 
   // Fetch the artist details from the contract
-  const result = await contractInteractor.read({
+  return await contractInteractor.read({
     abi: ArtistRegistryABI as Abi,
     address: addresses.ArtistRegistry as `0x${string}`,
     functionName: 'getArtist',
     args: [validatedInput.artistAddress]
   })
-
-  return result
 }
 
-export const getArtist = async (input: GetArtist): Promise<any> => {
-  const config = ConfigService.getConfig()
-  const chain = config.chains.find(c => c.id === input.chainId)!
-  if (!chain) {
-    throw new Error(`Chain with id ${input.chainId} not found in config`)
-  }
-  const contractInteractor = createContractInteractor(config, chain)
-  return getArtistCore(input, contractInteractor)
-}
-
-export const useGetArtist = (
-  input: GetArtist
-): UseQueryResult<any, Error> => {
+export const useGetArtist = (input: GetArtist): UseQueryResult<any, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId

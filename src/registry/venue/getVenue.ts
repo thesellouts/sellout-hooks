@@ -8,9 +8,7 @@ import { z } from 'zod'
 import { VenueRegistryABI } from '../../abis'
 import { getContractAddresses } from '../../config'
 import {
-  ConfigService,
   ContractInteractor,
-  createContractInteractor,
   useContractInteractor
 } from '../../contractInteractor'
 
@@ -22,7 +20,7 @@ const GetVenueSchema = z.object({
 export type GetVenueInput = z.infer<typeof GetVenueSchema>
 
 export interface GetVenueResult {
-  venueData: any // You can update this type according to the expected data structure
+  venueData: any
 }
 
 export const getVenueCore = async (
@@ -48,18 +46,6 @@ export const getVenueCore = async (
     console.error('Validation or Execution Error:', err)
     throw err
   }
-}
-
-export const getVenue = async (
-  input: GetVenueInput
-): Promise<GetVenueResult> => {
-  const config = ConfigService.getConfig()
-  const chain = config.chains.find(c => c.id === input.chainId)!
-  if (!chain) {
-    throw new Error(`Chain with id ${input.chainId} not found in config`)
-  }
-  const contractInteractor = createContractInteractor(config, chain)
-  return getVenueCore(input, contractInteractor)
 }
 
 export const useGetVenue = (

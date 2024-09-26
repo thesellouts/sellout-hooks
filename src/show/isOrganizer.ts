@@ -7,9 +7,7 @@ import { z } from 'zod'
 import { ShowABI } from '../abis'
 import { getContractAddresses } from '../config'
 import {
-  ConfigService,
   ContractInteractor,
-  createContractInteractor,
   useContractInteractor
 } from '../contractInteractor'
 
@@ -39,18 +37,6 @@ export const isOrganizerCore = async (
     console.error('Error checking if user is an organizer:', error)
     throw new Error('Failed to check if user is an organizer')
   }
-}
-
-export const isOrganizer = async (
-  input: IsOrganizerInput
-): Promise<boolean> => {
-  const config = ConfigService.getConfig()
-  const chain = config.chains.find(c => c.id === input.chainId)!
-  if (!chain) {
-    throw new Error(`Chain with id ${input.chainId} not found in config`)
-  }
-  const contractInteractor = createContractInteractor(config, chain)
-  return isOrganizerCore(input, contractInteractor)
 }
 
 export const useIsOrganizer = (input: IsOrganizerInput) => {

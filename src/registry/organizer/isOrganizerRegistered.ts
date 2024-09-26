@@ -7,9 +7,7 @@ import { z } from 'zod'
 import { OrganizerRegistryABI } from '../../abis'
 import { getContractAddresses } from '../../config'
 import {
-  ConfigService,
   ContractInteractor,
-  createContractInteractor,
   useContractInteractor
 } from '../../contractInteractor'
 import { AddressSchema } from '../../utils'
@@ -19,9 +17,7 @@ const IsOrganizerRegisteredSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type IsOrganizerRegistered = z.infer<
-  typeof IsOrganizerRegisteredSchema
->
+export type IsOrganizerRegistered = z.infer<typeof IsOrganizerRegisteredSchema>
 
 export const isOrganizerRegisteredCore = async (
   input: IsOrganizerRegistered,
@@ -44,18 +40,6 @@ export const isOrganizerRegisteredCore = async (
     console.error('Error checking if organizer is registered:', err)
     throw new Error('Failed to check if organizer is registered')
   }
-}
-
-export const isOrganizerRegistered = async (
-  input: IsOrganizerRegistered
-): Promise<boolean> => {
-  const config = ConfigService.getConfig()
-  const chain = config.chains.find(c => c.id === input.chainId)!
-  if (!chain) {
-    throw new Error(`Chain with id ${input.chainId} not found in config`)
-  }
-  const contractInteractor = createContractInteractor(config, chain)
-  return isOrganizerRegisteredCore(input, contractInteractor)
 }
 
 export const useIsOrganizerRegistered = (

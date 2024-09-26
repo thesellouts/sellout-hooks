@@ -41,18 +41,6 @@ export const getTicketPricePaidCore = async (
   }
 }
 
-export const getTicketPricePaid = async (
-  input: GetTicketPricePaid
-): Promise<bigint> => {
-  const config = ConfigService.getConfig()
-  const chain = config.chains.find(c => c.id === input.chainId)!
-  if (!chain) {
-    throw new Error(`Chain with id ${input.chainId} not found in config`)
-  }
-  const contractInteractor = createContractInteractor(config, chain)
-  return getTicketPricePaidCore(input, contractInteractor)
-}
-
 export const useGetTicketPricePaid = (input: GetTicketPricePaid) => {
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId

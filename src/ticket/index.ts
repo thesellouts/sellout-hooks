@@ -1,16 +1,11 @@
 export {
   GetTicketPricePaidAndTierIndex,
-  getTicketPricePaidAndTierIndex,
   useGetTicketPricePaidAndTierIndex
 } from './getTicketPricePaidAndTierIndex'
-export {
-  PurchaseTickets,
-  purchaseTickets,
-  usePurchaseTickets
-} from './purchaseTickets'
+export { PurchaseTickets, usePurchaseTickets } from './purchaseTickets'
+export { PurchaseTicketsFor, usePurchaseTicketsFor } from './purchaseTicketsFor'
 export {
   SetDefaultURIForShow,
-  setDefaultURIForShow,
   useSetDefaultURIForShow
 } from './setDefaultURIForShow'
-export { SetTokenURI, setTokenURI, useSetTokenURI } from './setTokenURI'
+export { SetTokenURI, useSetTokenURI } from './setTokenURI'

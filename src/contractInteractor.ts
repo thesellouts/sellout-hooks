@@ -57,9 +57,10 @@ export class ContractInteractor {
   }
 
   async execute(
-    params: ContractInteractionParams
+    params: ContractInteractionParams,
+    options?: { smart?: boolean }
   ): Promise<TransactionReceipt> {
-    if (this.smartAccountClient) {
+    if (this.smartAccountClient && options?.smart !== false) {
       return this.executeWithSmartAccount(params)
     } else {
       return this.executeWithEOA(params)
@@ -139,7 +140,10 @@ export function createContractInteractor(
   return new ContractInteractor(config, chain, smartAccountClient)
 }
 
-export function useContractInteractor(chainId: number): ContractInteractor {
+export function useContractInteractor(
+  chainId: number,
+  smartAccountClient?: SmartAccountClient
+): ContractInteractor {
   const config = useConfig()
   const chain = config.chains.find(c => c.id === chainId)!
 
@@ -147,5 +151,5 @@ export function useContractInteractor(chainId: number): ContractInteractor {
     throw new Error(`Chain with id ${chainId} not found in config`)
   }
 
-  return new ContractInteractor(config, chain)
+  return new ContractInteractor(config, chain, smartAccountClient)
 }

@@ -7,9 +7,7 @@ import { z } from 'zod'
 import { ShowABI } from '../abis'
 import { getContractAddresses } from '../config'
 import {
-  ConfigService,
   ContractInteractor,
-  createContractInteractor,
   useContractInteractor
 } from '../contractInteractor'
 
@@ -38,18 +36,6 @@ export const getShowToVenueProxyCore = async (
     console.error('Error reading venue proxy:', error)
     throw new Error('Failed to fetch venue proxy')
   }
-}
-
-export const getShowToVenueProxy = async (
-  input: GetShowToVenueProxy
-): Promise<`0x${string}`> => {
-  const config = ConfigService.getConfig()
-  const chain = config.chains.find(c => c.id === input.chainId)!
-  if (!chain) {
-    throw new Error(`Chain with id ${input.chainId} not found in config`)
-  }
-  const contractInteractor = createContractInteractor(config, chain)
-  return getShowToVenueProxyCore(input, contractInteractor)
 }
 
 export const useGetShowToVenueProxy = (input: GetShowToVenueProxy) => {

@@ -7,9 +7,7 @@ import { z } from 'zod'
 import { ReferralABI } from '../../abis'
 import { getContractAddresses } from '../../config'
 import {
-  ConfigService,
   ContractInteractor,
-  createContractInteractor,
   useContractInteractor
 } from '../../contractInteractor'
 import { AddressSchema } from '../../utils'
@@ -74,21 +72,6 @@ export const getReferralCreditsCore = async (
     console.error('Validation or Execution Error:', err)
     throw err
   }
-}
-
-export const getReferralCredits = async (
-  input: GetReferralCredits
-): Promise<GetReferralCreditsResult> => {
-  const config = ConfigService.getConfig()
-  const chain = config.chains.find(c => c.id === input.chainId)!
-
-  if (!chain) {
-    throw new Error(`Chain with id ${input.chainId} not found in config`)
-  }
-
-  const contractInteractor = createContractInteractor(config, chain)
-
-  return getReferralCreditsCore(input, contractInteractor)
 }
 
 export const useGetReferralCredits = (

@@ -6,63 +6,56 @@ import { base, baseSepolia } from 'viem/chains'
 import { useChainId, useConfig } from 'wagmi'
 import { z } from 'zod'
 
-import { VenueRegistryABI } from '../../abis'
-import { getContractAddresses } from '../../config'
-import {
-  ContractInteractor,
-  useContractInteractor
-} from '../../contractInteractor'
+import { TicketABI } from '../abis'
+import { ContractInteractor } from '../contractInteractor'
+import { useContractInteractor } from '../contractInteractor'
+import { AddressSchema, NULL_ADDRESS } from '../utils'
 
-const AcceptNominationSchema = z.object({
-  name: z.string(),
-  bio: z.string(),
-  latitude: z.number(),
-  longitude: z.number(),
-  totalCapacity: z.number(),
-  streetAddress: z.string(),
+const PurchaseTicketsForSchema = z.object({
+  recipient: AddressSchema,
+  ticketProxy: AddressSchema,
+  showId: z.string(),
+  tierIndex: z.number(),
+  quantity: z.number(),
+  paymentToken: AddressSchema,
+  value: z.bigint().optional(),
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type AcceptVenueNomination = z.infer<typeof AcceptNominationSchema>
+export type PurchaseTicketsFor = z.infer<typeof PurchaseTicketsForSchema>
 
-export interface AcceptVenueNominationResult {
+export interface PurchaseTicketsForResult {
   hash: `0x${string}`
   receipt: TransactionReceipt
 }
 
-export const acceptVenueNominationCore = async (
-  input: AcceptVenueNomination,
+export const purchaseTicketsForCore = async (
+  input: PurchaseTicketsFor,
   contractInteractor: ContractInteractor,
   config: Config,
   options?: { smart?: boolean }
-): Promise<AcceptVenueNominationResult> => {
+): Promise<PurchaseTicketsForResult> => {
   const {
-    name,
-    bio,
-    latitude,
-    longitude,
-    totalCapacity,
-    streetAddress,
+    recipient,
+    ticketProxy,
+    showId,
+    tierIndex,
+    quantity,
+    paymentToken,
+    value,
     chainId
   } = input
-  const addresses = getContractAddresses(chainId)
 
   try {
-    const validatedInput = AcceptNominationSchema.parse(input)
+    const validatedInput = PurchaseTicketsForSchema.parse(input)
 
     // Simulate the contract call
     const { request } = await simulateContract(config, {
-      abi: VenueRegistryABI,
-      address: addresses.VenueRegistry as `0x${string}`,
-      functionName: 'acceptNomination',
-      args: [
-        validatedInput.name,
-        validatedInput.bio,
-        validatedInput.latitude,
-        validatedInput.longitude,
-        validatedInput.totalCapacity,
-        validatedInput.streetAddress
-      ],
+      abi: TicketABI,
+      address: ticketProxy as `0x${string}`,
+      functionName: 'purchaseTicketsFor',
+      args: [recipient, showId, tierIndex, quantity, paymentToken],
+      value: paymentToken === NULL_ADDRESS ? BigInt(value ?? 0) : undefined,
       chainId
     })
 
@@ -70,9 +63,10 @@ export const acceptVenueNominationCore = async (
     const receipt = await contractInteractor.execute(
       {
         address: request.address,
-        abi: VenueRegistryABI as Abi,
+        abi: TicketABI as Abi,
         functionName: request.functionName,
-        args: request.args ? [...request.args] : undefined
+        args: request.args ? [...request.args] : undefined,
+        value: paymentToken === NULL_ADDRESS ? BigInt(value ?? 0) : undefined
       },
       options
     )
@@ -87,10 +81,10 @@ export const acceptVenueNominationCore = async (
   }
 }
 
-export const useAcceptVenueNomination = (
-  input: AcceptVenueNomination,
+export const usePurchaseTicketsFor = (
+  input: PurchaseTicketsFor,
   options?: { smartAccountClient?: SmartAccountClient }
-): UseMutationResult<AcceptVenueNominationResult, Error> => {
+): UseMutationResult<PurchaseTicketsForResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId
@@ -101,13 +95,13 @@ export const useAcceptVenueNomination = (
 
   return useMutation({
     mutationFn: () =>
-      acceptVenueNominationCore(
+      purchaseTicketsForCore(
         { ...input, chainId: effectiveChainId },
         contractInteractor,
         config
       ),
     onError: error => {
-      console.error('Error accepting venue nomination:', error)
+      console.error('Error purchasing tickets for recipient:', error)
     }
   })
 }

@@ -7,9 +7,7 @@ import { z } from 'zod'
 import { VenueABI } from '../abis'
 import { getContractAddresses } from '../config'
 import {
-  ConfigService,
   ContractInteractor,
-  createContractInteractor,
   useContractInteractor
 } from '../contractInteractor'
 
@@ -19,9 +17,7 @@ const GetPreviousDateVotesSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type GetPreviousDateVotes = z.infer<
-  typeof GetPreviousDateVotesSchema
->
+export type GetPreviousDateVotes = z.infer<typeof GetPreviousDateVotesSchema>
 
 export const getPreviousDateVoteCore = async (
   input: GetPreviousDateVotes,
@@ -41,18 +37,6 @@ export const getPreviousDateVoteCore = async (
     console.error('Error getting previous date vote:', error)
     throw new Error('Failed to fetch previous date vote')
   }
-}
-
-export const getPreviousDateVote = async (
-  input: GetPreviousDateVotes
-): Promise<bigint> => {
-  const config = ConfigService.getConfig()
-  const chain = config.chains.find(c => c.id === input.chainId)!
-  if (!chain) {
-    throw new Error(`Chain with id ${input.chainId} not found in config`)
-  }
-  const contractInteractor = createContractInteractor(config, chain)
-  return getPreviousDateVoteCore(input, contractInteractor)
 }
 
 export const useGetPreviousDateVote = (input: GetPreviousDateVotes) => {

@@ -7,9 +7,7 @@ import { z } from 'zod'
 import { ShowABI } from '../abis'
 import { getContractAddresses } from '../config'
 import {
-  ConfigService,
   ContractInteractor,
-  createContractInteractor,
   useContractInteractor
 } from '../contractInteractor'
 
@@ -39,16 +37,6 @@ export const getTicketTierInfoCore = async (
     console.error('Error reading ticket tier info:', error)
     throw new Error('Failed to fetch ticket tier info')
   }
-}
-
-export const getTicketTierInfo = async (input: GetTicketTierInfo) => {
-  const config = ConfigService.getConfig()
-  const chain = config.chains.find(c => c.id === input.chainId)!
-  if (!chain) {
-    throw new Error(`Chain with id ${input.chainId} not found in config`)
-  }
-  const contractInteractor = createContractInteractor(config, chain)
-  return getTicketTierInfoCore(input, contractInteractor)
 }
 
 export const useGetTicketTierInfo = (input: GetTicketTierInfo) => {

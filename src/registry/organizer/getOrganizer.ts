@@ -7,9 +7,7 @@ import { z } from 'zod'
 import { OrganizerRegistryABI } from '../../abis'
 import { getContractAddresses } from '../../config'
 import {
-  ConfigService,
   ContractInteractor,
-  createContractInteractor,
   useContractInteractor
 } from '../../contractInteractor'
 
@@ -41,16 +39,6 @@ export const getOrganizerCore = async (
     console.error('Error fetching organizer data:', err)
     throw new Error('Failed to fetch organizer data')
   }
-}
-
-export const getOrganizer = async (input: GetOrganizer): Promise<any> => {
-  const config = ConfigService.getConfig()
-  const chain = config.chains.find(c => c.id === input.chainId)!
-  if (!chain) {
-    throw new Error(`Chain with id ${input.chainId} not found in config`)
-  }
-  const contractInteractor = createContractInteractor(config, chain)
-  return getOrganizerCore(input, contractInteractor)
 }
 
 export const useGetOrganizer = (

@@ -7,9 +7,7 @@ import { z } from 'zod'
 import { VenueABI } from '../abis'
 import { getContractAddresses } from '../config'
 import {
-  ConfigService,
   ContractInteractor,
-  createContractInteractor,
   useContractInteractor
 } from '../contractInteractor'
 
@@ -39,18 +37,6 @@ export const getDateVotesCore = async (
     console.error('Error getting date votes:', error)
     throw new Error('Failed to fetch date votes')
   }
-}
-
-export const getDateVotes = async (
-  input: GetDateVotes
-): Promise<bigint> => {
-  const config = ConfigService.getConfig()
-  const chain = config.chains.find(c => c.id === input.chainId)!
-  if (!chain) {
-    throw new Error(`Chain with id ${input.chainId} not found in config`)
-  }
-  const contractInteractor = createContractInteractor(config, chain)
-  return getDateVotesCore(input, contractInteractor)
 }
 
 export const useGetDateVotes = (input: GetDateVotes) => {

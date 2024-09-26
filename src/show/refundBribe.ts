@@ -1,5 +1,6 @@
 import { useMutation, UseMutationResult } from '@tanstack/react-query'
 import { Config, simulateContract } from '@wagmi/core'
+import { SmartAccountClient } from 'permissionless'
 import { Abi, TransactionReceipt } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId, useConfig } from 'wagmi'
@@ -8,9 +9,7 @@ import { z } from 'zod'
 import { ShowABI } from '../abis'
 import { getContractAddresses } from '../config'
 import {
-  ConfigService,
   ContractInteractor,
-  createContractInteractor,
   useContractInteractor
 } from '../contractInteractor'
 
@@ -31,7 +30,8 @@ export interface RefundBribeResult {
 export const refundBribeCore = async (
   input: RefundBribe,
   contractInteractor: ContractInteractor,
-  config: Config
+  config: Config,
+  options?: { smart?: boolean }
 ): Promise<RefundBribeResult> => {
   const { showId, venueId, proposalIndex, chainId } = input
   const addresses = getContractAddresses(chainId)
@@ -51,12 +51,15 @@ export const refundBribeCore = async (
       chainId
     })
 
-    const receipt = await contractInteractor.execute({
-      address: request.address,
-      abi: ShowABI as Abi,
-      functionName: request.functionName,
-      args: request.args ? [...request.args] : undefined
-    })
+    const receipt = await contractInteractor.execute(
+      {
+        address: request.address,
+        abi: ShowABI as Abi,
+        functionName: request.functionName,
+        args: request.args ? [...request.args] : undefined
+      },
+      options
+    )
 
     return {
       hash: receipt.transactionHash,
@@ -68,25 +71,17 @@ export const refundBribeCore = async (
   }
 }
 
-export const refundBribe = async (
-  input: RefundBribe
-): Promise<RefundBribeResult> => {
-  const config = ConfigService.getConfig()
-  const chain = config.chains.find(c => c.id === input.chainId)!
-  if (!chain) {
-    throw new Error(`Chain with id ${input.chainId} not found in config`)
-  }
-  const contractInteractor = createContractInteractor(config, chain)
-  return refundBribeCore(input, contractInteractor, config)
-}
-
 export const useRefundBribe = (
-  input: RefundBribe
+  input: RefundBribe,
+  options?: { smartAccountClient?: SmartAccountClient }
 ): UseMutationResult<RefundBribeResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId
-  const contractInteractor = useContractInteractor(effectiveChainId)
+  const contractInteractor = useContractInteractor(
+    effectiveChainId,
+    options?.smartAccountClient
+  )
 
   return useMutation({
     mutationFn: () => {

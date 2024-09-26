@@ -1,5 +1,6 @@
 import { useMutation, UseMutationResult } from '@tanstack/react-query'
 import { Config, simulateContract } from '@wagmi/core'
+import { SmartAccountClient } from 'permissionless'
 import { Abi, TransactionReceipt } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId, useConfig } from 'wagmi'
@@ -8,9 +9,7 @@ import { z } from 'zod'
 import { ShowABI } from '../abis'
 import { getContractAddresses } from '../config'
 import {
-  ConfigService,
   ContractInteractor,
-  createContractInteractor,
   useContractInteractor
 } from '../contractInteractor'
 
@@ -29,7 +28,8 @@ export interface CompleteShowResult {
 export const completeShowCore = async (
   input: CompleteShow,
   contractInteractor: ContractInteractor,
-  config: Config
+  config: Config,
+  options?: { smart?: boolean }
 ): Promise<CompleteShowResult> => {
   const { showId, chainId } = input
   const addresses = getContractAddresses(chainId)
@@ -45,12 +45,15 @@ export const completeShowCore = async (
       chainId
     })
 
-    const receipt = await contractInteractor.execute({
-      address: request.address,
-      abi: ShowABI as Abi,
-      functionName: request.functionName,
-      args: request.args ? [...request.args] : undefined
-    })
+    const receipt = await contractInteractor.execute(
+      {
+        address: request.address,
+        abi: ShowABI as Abi,
+        functionName: request.functionName,
+        args: request.args ? [...request.args] : undefined
+      },
+      options
+    )
 
     return {
       hash: receipt.transactionHash,
@@ -62,25 +65,17 @@ export const completeShowCore = async (
   }
 }
 
-export const completeShow = async (
-  input: CompleteShow
-): Promise<CompleteShowResult> => {
-  const config = ConfigService.getConfig()
-  const chain = config.chains.find(c => c.id === input.chainId)!
-  if (!chain) {
-    throw new Error(`Chain with id ${input.chainId} not found in config`)
-  }
-  const contractInteractor = createContractInteractor(config, chain)
-  return completeShowCore(input, contractInteractor, config)
-}
-
 export const useCompleteShow = (
-  input: CompleteShow
+  input: CompleteShow,
+  options?: { smartAccountClient?: SmartAccountClient }
 ): UseMutationResult<CompleteShowResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId
-  const contractInteractor = useContractInteractor(effectiveChainId)
+  const contractInteractor = useContractInteractor(
+    effectiveChainId,
+    options?.smartAccountClient
+  )
 
   return useMutation({
     mutationFn: () => {

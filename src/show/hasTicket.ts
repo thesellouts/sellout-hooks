@@ -7,9 +7,7 @@ import { z } from 'zod'
 import { ShowABI } from '../abis'
 import { getContractAddresses } from '../config'
 import {
-  ConfigService,
   ContractInteractor,
-  createContractInteractor,
   useContractInteractor
 } from '../contractInteractor'
 
@@ -39,16 +37,6 @@ export const hasTicketCore = async (
     console.error('Error checking ticket ownership:', error)
     throw new Error('Failed to check ticket ownership')
   }
-}
-
-export const hasTicket = async (input: HasTicketInput): Promise<boolean> => {
-  const config = ConfigService.getConfig()
-  const chain = config.chains.find(c => c.id === input.chainId)!
-  if (!chain) {
-    throw new Error(`Chain with id ${input.chainId} not found in config`)
-  }
-  const contractInteractor = createContractInteractor(config, chain)
-  return hasTicketCore(input, contractInteractor)
 }
 
 export const useHasTicket = (input: HasTicketInput) => {

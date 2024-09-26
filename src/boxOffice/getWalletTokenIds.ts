@@ -41,18 +41,6 @@ export const getWalletTokenIdsCore = async (
   }
 }
 
-export const getWalletTokenIds = async (
-  input: GetWalletTokenIds
-): Promise<bigint[]> => {
-  const config = ConfigService.getConfig()
-  const chain = config.chains.find(c => c.id === input.chainId)!
-  if (!chain) {
-    throw new Error(`Chain with id ${input.chainId} not found in config`)
-  }
-  const contractInteractor = createContractInteractor(config, chain)
-  return getWalletTokenIdsCore(input, contractInteractor)
-}
-
 export const useGetWalletTokenIds = (input: GetWalletTokenIds) => {
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId

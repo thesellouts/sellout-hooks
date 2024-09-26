@@ -1,5 +1,6 @@
 import { useMutation, UseMutationResult } from '@tanstack/react-query'
 import { Config, simulateContract } from '@wagmi/core'
+import { SmartAccountClient } from 'permissionless'
 import { Abi, TransactionReceipt } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId, useConfig } from 'wagmi'
@@ -8,9 +9,7 @@ import { z } from 'zod'
 import { TicketABI } from '../abis'
 import { getContractAddresses } from '../config'
 import {
-  ConfigService,
   ContractInteractor,
-  createContractInteractor,
   useContractInteractor
 } from '../contractInteractor'
 
@@ -20,9 +19,7 @@ const SetDefaultURIForShowSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type SetDefaultURIForShow = z.infer<
-  typeof SetDefaultURIForShowSchema
->
+export type SetDefaultURIForShow = z.infer<typeof SetDefaultURIForShowSchema>
 
 export interface SetDefaultURIForShowResult {
   hash: `0x${string}`
@@ -32,7 +29,8 @@ export interface SetDefaultURIForShowResult {
 export const setDefaultURIForShowCore = async (
   input: SetDefaultURIForShow,
   contractInteractor: ContractInteractor,
-  config: Config
+  config: Config,
+  options?: { smart?: boolean }
 ): Promise<SetDefaultURIForShowResult> => {
   const { showId, newDefaultURI, chainId } = input
   const addresses = getContractAddresses(chainId)
@@ -50,12 +48,15 @@ export const setDefaultURIForShowCore = async (
     })
 
     // Execute the contract interaction
-    const receipt = await contractInteractor.execute({
-      address: request.address,
-      abi: TicketABI as Abi,
-      functionName: request.functionName,
-      args: request.args ? [...request.args] : undefined
-    })
+    const receipt = await contractInteractor.execute(
+      {
+        address: request.address,
+        abi: TicketABI as Abi,
+        functionName: request.functionName,
+        args: request.args ? [...request.args] : undefined
+      },
+      options
+    )
 
     return {
       hash: receipt.transactionHash,
@@ -67,25 +68,17 @@ export const setDefaultURIForShowCore = async (
   }
 }
 
-export const setDefaultURIForShow = async (
-  input: SetDefaultURIForShow
-): Promise<SetDefaultURIForShowResult> => {
-  const config = ConfigService.getConfig()
-  const chain = config.chains.find(c => c.id === input.chainId)!
-  if (!chain) {
-    throw new Error(`Chain with id ${input.chainId} not found in config`)
-  }
-  const contractInteractor = createContractInteractor(config, chain)
-  return setDefaultURIForShowCore(input, contractInteractor, config)
-}
-
 export const useSetDefaultURIForShow = (
-  input: SetDefaultURIForShow
+  input: SetDefaultURIForShow,
+  options?: { smartAccountClient?: SmartAccountClient }
 ): UseMutationResult<SetDefaultURIForShowResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId
-  const contractInteractor = useContractInteractor(effectiveChainId)
+  const contractInteractor = useContractInteractor(
+    effectiveChainId,
+    options?.smartAccountClient
+  )
 
   return useMutation({
     mutationFn: () =>

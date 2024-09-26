@@ -1,16 +1,7 @@
-export {
-  GetTicketPricePaid,
-  getTicketPricePaid,
-  useGetTicketPricePaid
-} from './getTicketPricePaid'
+export { GetTicketPricePaid, useGetTicketPricePaid } from './getTicketPricePaid'
 export {
   GetTotalTicketsSold,
-  getTotalTicketsSold,
   useGetTotalTicketsSold
 } from './getTotalTicketsSold'
-export {
-  GetWalletTokenIds,
-  getWalletTokenIds,
-  useGetWalletTokenIds
-} from './getWalletTokenIds'
-export { IsTicketOwner, isTicketOwner, useIsTicketOwner } from './isTicketOwner'
+export { GetWalletTokenIds, useGetWalletTokenIds } from './getWalletTokenIds'
+export { IsTicketOwner, useIsTicketOwner } from './isTicketOwner'

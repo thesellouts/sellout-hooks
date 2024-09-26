@@ -8,9 +8,7 @@ import { z } from 'zod'
 import { VenueRegistryABI } from '../../abis'
 import { getContractAddresses } from '../../config'
 import {
-  ConfigService,
   ContractInteractor,
-  createContractInteractor,
   useContractInteractor
 } from '../../contractInteractor'
 
@@ -48,18 +46,6 @@ export const isVenueRegisteredCore = async (
     console.error('Validation or Execution Error:', err)
     throw err
   }
-}
-
-export const isVenueRegistered = async (
-  input: IsVenueRegistered
-): Promise<IsVenueRegisteredResult> => {
-  const config = ConfigService.getConfig()
-  const chain = config.chains.find(c => c.id === input.chainId)!
-  if (!chain) {
-    throw new Error(`Chain with id ${input.chainId} not found in config`)
-  }
-  const contractInteractor = createContractInteractor(config, chain)
-  return isVenueRegisteredCore(input, contractInteractor)
 }
 
 export const useIsVenueRegistered = (

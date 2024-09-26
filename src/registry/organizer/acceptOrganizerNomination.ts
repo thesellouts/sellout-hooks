@@ -1,5 +1,6 @@
 import { useMutation, UseMutationResult } from '@tanstack/react-query'
 import { Config, simulateContract } from '@wagmi/core'
+import { SmartAccountClient } from 'permissionless'
 import { Abi, TransactionReceipt } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId, useConfig } from 'wagmi'
@@ -8,9 +9,7 @@ import { z } from 'zod'
 import { OrganizerRegistryABI } from '../../abis'
 import { getContractAddresses } from '../../config'
 import {
-  ConfigService,
   ContractInteractor,
-  createContractInteractor,
   useContractInteractor
 } from '../../contractInteractor'
 
@@ -20,9 +19,7 @@ const AcceptNominationSchema = z.object({
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
 
-export type AcceptOrganizerNomination = z.infer<
-  typeof AcceptNominationSchema
->
+export type AcceptOrganizerNomination = z.infer<typeof AcceptNominationSchema>
 
 export interface AcceptOrganizerNominationResult {
   hash: `0x${string}`
@@ -32,7 +29,8 @@ export interface AcceptOrganizerNominationResult {
 export const acceptOrganizerNominationCore = async (
   input: AcceptOrganizerNomination,
   contractInteractor: ContractInteractor,
-  config: Config
+  config: Config,
+  options?: { smart?: boolean }
 ): Promise<AcceptOrganizerNominationResult> => {
   const { name, bio, chainId } = input
   const addresses = getContractAddresses(chainId)
@@ -50,12 +48,15 @@ export const acceptOrganizerNominationCore = async (
     })
 
     // Execute the contract interaction
-    const receipt = await contractInteractor.execute({
-      address: request.address,
-      abi: OrganizerRegistryABI as Abi,
-      functionName: request.functionName,
-      args: request.args ? [...request.args] : undefined
-    })
+    const receipt = await contractInteractor.execute(
+      {
+        address: request.address,
+        abi: OrganizerRegistryABI as Abi,
+        functionName: request.functionName,
+        args: request.args ? [...request.args] : undefined
+      },
+      options
+    )
 
     return {
       hash: receipt.transactionHash,
@@ -67,25 +68,17 @@ export const acceptOrganizerNominationCore = async (
   }
 }
 
-export const acceptOrganizerNomination = async (
-  input: AcceptOrganizerNomination
-): Promise<AcceptOrganizerNominationResult> => {
-  const config = ConfigService.getConfig()
-  const chain = config.chains.find(c => c.id === input.chainId)!
-  if (!chain) {
-    throw new Error(`Chain with id ${input.chainId} not found in config`)
-  }
-  const contractInteractor = createContractInteractor(config, chain)
-  return acceptOrganizerNominationCore(input, contractInteractor, config)
-}
-
 export const useAcceptOrganizerNomination = (
-  input: AcceptOrganizerNomination
+  input: AcceptOrganizerNomination,
+  options?: { smartAccountClient?: SmartAccountClient }
 ): UseMutationResult<AcceptOrganizerNominationResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId
-  const contractInteractor = useContractInteractor(effectiveChainId)
+  const contractInteractor = useContractInteractor(
+    effectiveChainId,
+    options?.smartAccountClient
+  )
 
   return useMutation({
     mutationFn: () =>

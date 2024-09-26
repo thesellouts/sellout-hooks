@@ -7,9 +7,7 @@ import { z } from 'zod'
 import { VenueABI } from '../abis'
 import { getContractAddresses } from '../config'
 import {
-  ConfigService,
   ContractInteractor,
-  createContractInteractor,
   useContractInteractor
 } from '../contractInteractor'
 
@@ -43,21 +41,7 @@ export const getHasTicketOwnerVotedCore = async (
   }
 }
 
-export const getHasTicketOwnerVoted = async (
-  input: GetHasTicketOwnerVoted
-): Promise<boolean> => {
-  const config = ConfigService.getConfig()
-  const chain = config.chains.find(c => c.id === input.chainId)!
-  if (!chain) {
-    throw new Error(`Chain with id ${input.chainId} not found in config`)
-  }
-  const contractInteractor = createContractInteractor(config, chain)
-  return getHasTicketOwnerVotedCore(input, contractInteractor)
-}
-
-export const useGetHasTicketOwnerVoted = (
-  input: GetHasTicketOwnerVoted
-) => {
+export const useGetHasTicketOwnerVoted = (input: GetHasTicketOwnerVoted) => {
   const contextChainId = useChainId()
   const effectiveChainId = input.chainId ?? contextChainId
   const contractInteractor = useContractInteractor(effectiveChainId)

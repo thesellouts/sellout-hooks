@@ -7,9 +7,7 @@ import { z } from 'zod'
 import { VenueABI } from '../abis'
 import { getContractAddresses } from '../config'
 import {
-  ConfigService,
   ContractInteractor,
-  createContractInteractor,
   useContractInteractor
 } from '../contractInteractor'
 
@@ -39,16 +37,6 @@ export const getProposalCore = async (
     console.error('Error getting proposal:', error)
     throw new Error('Failed to fetch proposal')
   }
-}
-
-export const getProposal = async (input: GetProposal): Promise<any> => {
-  const config = ConfigService.getConfig()
-  const chain = config.chains.find(c => c.id === input.chainId)!
-  if (!chain) {
-    throw new Error(`Chain with id ${input.chainId} not found in config`)
-  }
-  const contractInteractor = createContractInteractor(config, chain)
-  return getProposalCore(input, contractInteractor)
 }
 
 export const useGetProposal = (input: GetProposal) => {

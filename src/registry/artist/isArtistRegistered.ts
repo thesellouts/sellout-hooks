@@ -7,9 +7,7 @@ import { z } from 'zod'
 import { ArtistRegistryABI } from '../../abis'
 import { getContractAddresses } from '../../config'
 import {
-  ConfigService,
   ContractInteractor,
-  createContractInteractor,
   useContractInteractor
 } from '../../contractInteractor'
 
@@ -37,18 +35,6 @@ export const isArtistRegisteredCore = async (
   })
 
   return Boolean(result) // Explicitly casting to boolean
-}
-
-export const isArtistRegistered = async (
-  input: IsArtistRegistered
-): Promise<boolean> => {
-  const config = ConfigService.getConfig()
-  const chain = config.chains.find(c => c.id === input.chainId)!
-  if (!chain) {
-    throw new Error(`Chain with id ${input.chainId} not found in config`)
-  }
-  const contractInteractor = createContractInteractor(config, chain)
-  return isArtistRegisteredCore(input, contractInteractor)
 }
 
 export const useIsArtistRegistered = (
