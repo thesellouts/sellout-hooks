@@ -80,7 +80,7 @@ import { submitProposalCore } from './venue/submitProposal'
 import { ticketHolderVenueVoteCore } from './venue/ticketHolderVenueVote'
 import { voteCore } from './venue/vote'
 import { voteForDateCore } from './venue/voteForDate'
-import { Abi, encodeFunctionData } from 'viem'
+import { Abi, encodeFunctionData, erc20Abi } from 'viem'
 import { TicketABI } from './abis'
 
 export class SelloutSDK {
@@ -811,6 +811,51 @@ export class SelloutSDK {
       { ...input, chainId: this.chainId },
       this.contractInteractor,
       this.config,
+      options
+    )
+  }
+
+  // ====================================
+  // ERC20 UTILITIES
+  // ====================================
+  async getERC20Balance(
+    tokenAddress: `0x${string}`,
+    account: `0x${string}`
+  ): Promise<bigint> {
+    return this.contractInteractor.read<bigint>({
+      address: tokenAddress,
+      abi: erc20Abi,
+      functionName: 'balanceOf',
+      args: [account]
+    })
+  }
+
+  async getERC20Allowance(
+    tokenAddress: `0x${string}`,
+    owner: `0x${string}`,
+    spender: `0x${string}`
+  ): Promise<bigint> {
+    return this.contractInteractor.read<bigint>({
+      address: tokenAddress,
+      abi: erc20Abi,
+      functionName: 'allowance',
+      args: [owner, spender]
+    })
+  }
+
+  async approveERC20(
+    tokenAddress: `0x${string}`,
+    spender: `0x${string}`,
+    amount: bigint,
+    options?: { smart?: boolean }
+  ) {
+    return this.contractInteractor.execute(
+      {
+        address: tokenAddress,
+        abi: erc20Abi,
+        functionName: 'approve',
+        args: [spender, amount]
+      },
       options
     )
   }
