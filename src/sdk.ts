@@ -1,9 +1,11 @@
 import { Config } from '@wagmi/core'
 import { SmartAccountClient } from 'permissionless'
 import { useMemo } from 'react'
+import { Abi, encodeFunctionData, erc20Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useConfig } from 'wagmi'
 
+import { TicketABI } from './abis'
 import { getTicketPricePaidCore } from './boxOffice/getTicketPricePaid'
 import { getTotalTicketsSoldCore } from './boxOffice/getTotalTicketsSold'
 import { getWalletTokenIdsCore } from './boxOffice/getWalletTokenIds'
@@ -80,8 +82,6 @@ import { submitProposalCore } from './venue/submitProposal'
 import { ticketHolderVenueVoteCore } from './venue/ticketHolderVenueVote'
 import { voteCore } from './venue/vote'
 import { voteForDateCore } from './venue/voteForDate'
-import { Abi, encodeFunctionData, erc20Abi } from 'viem'
-import { TicketABI } from './abis'
 
 export class SelloutSDK {
   private contractInteractor: ContractInteractor
