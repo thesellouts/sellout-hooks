@@ -49,7 +49,7 @@ export class ContractInteractor {
     this.config = config
     this.chain = chain
     this.smartAccountClient = smartAccountClient
-    this.publicClient = getPublicClient(config)
+    this.publicClient = getPublicClient(config, { chainId: chain.id })
 
     if (!this.publicClient) {
       throw new Error('Failed to initialize public client')
