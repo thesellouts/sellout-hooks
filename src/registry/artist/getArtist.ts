@@ -38,7 +38,7 @@ export const getArtistCore = async (
 export const useGetArtist = (input: GetArtist): UseQueryResult<any, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()
-  const effectiveChainId = input.chainId ?? contextChainId
+  const effectiveChainId = (contextChainId ?? input.chainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(effectiveChainId)
 
   return useQuery({

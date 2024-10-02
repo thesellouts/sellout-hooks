@@ -41,7 +41,7 @@ export const getHasVotedCore = async (
 
 export const useGetHasVoted = (input: GetHasVotedInput) => {
   const contextChainId = useChainId()
-  const effectiveChainId = input.chainId ?? contextChainId
+  const effectiveChainId = (contextChainId ?? input.chainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(effectiveChainId)
 
   return useQuery({

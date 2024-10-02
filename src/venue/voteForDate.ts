@@ -74,7 +74,7 @@ export const useVoteForDate = (
 ): UseMutationResult<VoteForDateResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()
-  const effectiveChainId = input.chainId ?? contextChainId
+  const effectiveChainId = (contextChainId ?? input.chainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(
     effectiveChainId,
     options?.smartAccountClient
