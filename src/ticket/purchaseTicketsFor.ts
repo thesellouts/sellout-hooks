@@ -35,28 +35,26 @@ export const purchaseTicketsForCore = async (
   config: Config,
   options?: { smart?: boolean }
 ): Promise<PurchaseTicketsForResult> => {
-  const {
-    recipient,
-    ticketProxy,
-    showId,
-    tierIndex,
-    quantity,
-    paymentToken,
-    value,
-    chainId
-  } = input
-
   try {
     const validatedInput = PurchaseTicketsForSchema.parse(input)
 
     // Simulate the contract call
     const { request } = await simulateContract(config, {
       abi: TicketABI,
-      address: ticketProxy as `0x${string}`,
+      address: validatedInput.ticketProxy as `0x${string}`,
       functionName: 'purchaseTicketsFor',
-      args: [recipient, showId, tierIndex, quantity, paymentToken],
-      value: paymentToken === NULL_ADDRESS ? BigInt(value ?? 0) : undefined,
-      chainId
+      args: [
+        validatedInput.recipient,
+        validatedInput.showId,
+        validatedInput.tierIndex,
+        validatedInput.quantity,
+        validatedInput.paymentToken
+      ],
+      value:
+        validatedInput.paymentToken === NULL_ADDRESS
+          ? BigInt(validatedInput.value ?? 0)
+          : undefined,
+      chainId: validatedInput.chainId
     })
 
     // Execute the contract interaction
@@ -66,7 +64,10 @@ export const purchaseTicketsForCore = async (
         abi: TicketABI as Abi,
         functionName: request.functionName,
         args: request.args ? [...request.args] : undefined,
-        value: paymentToken === NULL_ADDRESS ? BigInt(value ?? 0) : undefined
+        value:
+          validatedInput.paymentToken === NULL_ADDRESS
+            ? BigInt(validatedInput.value ?? 0)
+            : undefined
       },
       options
     )
@@ -87,7 +88,7 @@ export const usePurchaseTicketsFor = (
 ): UseMutationResult<PurchaseTicketsForResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()
-  const effectiveChainId = (contextChainId ?? input.chainId) as 8453 | 84532
+  const effectiveChainId = (input.chainId ?? contextChainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(
     effectiveChainId,
     options?.smartAccountClient

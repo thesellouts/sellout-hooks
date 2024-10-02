@@ -45,7 +45,7 @@ export const useCalculateTotalPayoutAmount = (
   input: CalculateTotalPayoutAmount
 ) => {
   const contextChainId = useChainId()
-  const effectiveChainId = (contextChainId ?? input.chainId) as 8453 | 84532
+  const effectiveChainId = (input.chainId ?? contextChainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(effectiveChainId)
 
   return useQuery({

@@ -2,7 +2,7 @@ import { useQuery, UseQueryResult } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
-import { useChainId, useConfig } from 'wagmi'
+import { useChainId } from 'wagmi'
 import { z } from 'zod'
 
 import { VenueRegistryABI } from '../../abis'
@@ -52,7 +52,7 @@ export const useGetVenue = (
   input: GetVenueInput
 ): UseQueryResult<GetVenueResult, Error> => {
   const contextChainId = useChainId()
-  const effectiveChainId = (contextChainId ?? input.chainId) as 8453 | 84532
+  const effectiveChainId = (input.chainId ?? contextChainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(effectiveChainId)
 
   const getVenueMemoized = useMemo(

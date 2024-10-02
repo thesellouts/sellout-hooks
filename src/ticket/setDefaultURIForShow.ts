@@ -32,7 +32,7 @@ export const setDefaultURIForShowCore = async (
   config: Config,
   options?: { smart?: boolean }
 ): Promise<SetDefaultURIForShowResult> => {
-  const { showId, newDefaultURI, chainId } = input
+  const { chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
@@ -74,7 +74,7 @@ export const useSetDefaultURIForShow = (
 ): UseMutationResult<SetDefaultURIForShowResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()
-  const effectiveChainId = (contextChainId ?? input.chainId) as 8453 | 84532
+  const effectiveChainId = (input.chainId ?? contextChainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(
     effectiveChainId,
     options?.smartAccountClient

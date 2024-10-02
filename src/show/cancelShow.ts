@@ -71,7 +71,7 @@ export const useCancelShow = (
 ): UseMutationResult<CancelShowResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()
-  const effectiveChainId = (contextChainId ?? input.chainId) as 8453 | 84532
+  const effectiveChainId = (input.chainId ?? contextChainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(
     effectiveChainId,
     options?.smartAccountClient

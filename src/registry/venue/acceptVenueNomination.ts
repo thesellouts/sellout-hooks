@@ -36,15 +36,7 @@ export const acceptVenueNominationCore = async (
   config: Config,
   options?: { smart?: boolean }
 ): Promise<AcceptVenueNominationResult> => {
-  const {
-    name,
-    bio,
-    latitude,
-    longitude,
-    totalCapacity,
-    streetAddress,
-    chainId
-  } = input
+  const { chainId } = input
   const addresses = getContractAddresses(chainId)
 
   try {
@@ -93,7 +85,7 @@ export const useAcceptVenueNomination = (
 ): UseMutationResult<AcceptVenueNominationResult, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()
-  const effectiveChainId = (contextChainId ?? input.chainId) as 8453 | 84532
+  const effectiveChainId = (input.chainId ?? contextChainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(
     effectiveChainId,
     options?.smartAccountClient

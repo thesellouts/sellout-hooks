@@ -7,9 +7,7 @@ import { z } from 'zod'
 import { BoxOfficeABI } from '../abis'
 import { getContractAddresses } from '../config'
 import {
-  ConfigService,
   ContractInteractor,
-  createContractInteractor,
   useContractInteractor
 } from '../contractInteractor'
 
@@ -43,7 +41,7 @@ export const getTicketPricePaidCore = async (
 
 export const useGetTicketPricePaid = (input: GetTicketPricePaid) => {
   const contextChainId = useChainId()
-  const effectiveChainId = (contextChainId ?? input.chainId) as 8453 | 84532
+  const effectiveChainId = (input.chainId ?? contextChainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(effectiveChainId)
 
   return useQuery({
