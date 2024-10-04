@@ -1,5 +1,8 @@
-import { useQuery, UseQueryResult } from '@tanstack/react-query'
-import { useMemo } from 'react'
+import {
+  useQuery,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId } from 'wagmi'
@@ -19,14 +22,10 @@ const GetVenueSchema = z.object({
 
 export type GetVenueInput = z.infer<typeof GetVenueSchema>
 
-export interface GetVenueResult {
-  venueData: any
-}
-
 export const getVenueCore = async (
   input: GetVenueInput,
   contractInteractor: ContractInteractor
-): Promise<GetVenueResult> => {
+): Promise<any> => {
   const { chainId, venueAddress } = input
   const addresses = getContractAddresses(chainId)
 
@@ -34,39 +33,43 @@ export const getVenueCore = async (
     const validatedInput = GetVenueSchema.parse(input)
 
     // Execute the contract interaction
-    const venueData = await contractInteractor.read({
+    return await contractInteractor.read({
       address: addresses.VenueRegistry as `0x${string}`,
       abi: VenueRegistryABI as Abi,
       functionName: 'getVenue',
       args: [validatedInput.venueAddress]
     })
-
-    return { venueData }
   } catch (err) {
-    console.error('Validation or Execution Error:', err)
-    throw err
+    console.error('Error fetching venue data:', err)
+    throw new Error('Failed to fetch venue data')
   }
 }
 
+type UseGetVenueOptions = Omit<
+  UseQueryOptions<any, Error, any, [string, string]>,
+  'queryKey' | 'queryFn'
+> & {
+  enabled?: boolean
+}
+
 export const useGetVenue = (
-  input: GetVenueInput
-): UseQueryResult<GetVenueResult, Error> => {
+  input: GetVenueInput,
+  options?: UseGetVenueOptions
+): UseQueryResult<any, Error> => {
   const contextChainId = useChainId()
   const effectiveChainId = (input.chainId ?? contextChainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(effectiveChainId)
 
-  const getVenueMemoized = useMemo(
-    () => (input: GetVenueInput) => getVenueCore(input, contractInteractor),
-    [contractInteractor]
-  )
+  const { enabled, ...queryOptions } = options || {}
 
   return useQuery({
     queryKey: ['getVenue', input.venueAddress],
     queryFn: () =>
-      getVenueMemoized({
-        ...input,
-        chainId: effectiveChainId
-      }),
-    enabled: !!input.venueAddress
+      getVenueCore({ ...input, chainId: effectiveChainId }, contractInteractor),
+    enabled:
+      enabled !== undefined
+        ? enabled && !!input.venueAddress
+        : !!input.venueAddress,
+    ...queryOptions
   })
 }

@@ -1,4 +1,8 @@
-import { useQuery } from '@tanstack/react-query'
+import {
+  useQuery,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId } from 'wagmi'
@@ -41,10 +45,22 @@ export const getHasTicketOwnerVotedCore = async (
   }
 }
 
-export const useGetHasTicketOwnerVoted = (input: GetHasTicketOwnerVoted) => {
+type UseGetHasTicketOwnerVotedOptions = Omit<
+  UseQueryOptions<boolean, Error, boolean, [string, string, string]>,
+  'queryKey' | 'queryFn'
+> & {
+  enabled?: boolean
+}
+
+export const useGetHasTicketOwnerVoted = (
+  input: GetHasTicketOwnerVoted,
+  options?: UseGetHasTicketOwnerVotedOptions
+): UseQueryResult<boolean, Error> => {
   const contextChainId = useChainId()
   const effectiveChainId = (input.chainId ?? contextChainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(effectiveChainId)
+
+  const { enabled, ...queryOptions } = options || {}
 
   return useQuery({
     queryKey: ['getHasTicketOwnerVoted', input.showId, input.user],
@@ -53,6 +69,10 @@ export const useGetHasTicketOwnerVoted = (input: GetHasTicketOwnerVoted) => {
         { ...input, chainId: effectiveChainId },
         contractInteractor
       ),
-    enabled: !!input.showId && !!input.user
+    enabled:
+      enabled !== undefined
+        ? enabled && !!input.showId && !!input.user
+        : !!input.showId && !!input.user,
+    ...queryOptions
   })
 }

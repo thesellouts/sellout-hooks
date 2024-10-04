@@ -1,4 +1,8 @@
-import { useQuery } from '@tanstack/react-query'
+import {
+  useQuery,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId } from 'wagmi'
@@ -24,7 +28,7 @@ export type CalculateTotalPayoutAmount = z.infer<
 export const calculateTotalPayoutAmountCore = async (
   input: CalculateTotalPayoutAmount,
   contractInteractor: ContractInteractor
-) => {
+): Promise<bigint> => {
   const { showId, paymentToken, chainId } = input
   const addresses = getContractAddresses(chainId)
 
@@ -41,12 +45,22 @@ export const calculateTotalPayoutAmountCore = async (
   }
 }
 
+type UseCalculateTotalPayoutAmountOptions = Omit<
+  UseQueryOptions<bigint, Error, bigint, [string, string, string]>,
+  'queryKey' | 'queryFn'
+> & {
+  enabled?: boolean
+}
+
 export const useCalculateTotalPayoutAmount = (
-  input: CalculateTotalPayoutAmount
-) => {
+  input: CalculateTotalPayoutAmount,
+  options?: UseCalculateTotalPayoutAmountOptions
+): UseQueryResult<bigint, Error> => {
   const contextChainId = useChainId()
   const effectiveChainId = (input.chainId ?? contextChainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(effectiveChainId)
+
+  const { enabled, ...queryOptions } = options || {}
 
   return useQuery({
     queryKey: ['calculateTotalPayoutAmount', input.showId, input.paymentToken],
@@ -55,6 +69,10 @@ export const useCalculateTotalPayoutAmount = (
         { ...input, chainId: effectiveChainId },
         contractInteractor
       ),
-    enabled: !!input.showId && !!input.paymentToken
+    enabled:
+      enabled !== undefined
+        ? enabled && !!input.showId && !!input.paymentToken
+        : !!input.showId && !!input.paymentToken,
+    ...queryOptions
   })
 }

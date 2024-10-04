@@ -1,4 +1,8 @@
-import { useQuery } from '@tanstack/react-query'
+import {
+  useQuery,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId } from 'wagmi'
@@ -38,10 +42,22 @@ export const getShowToTicketProxyCore = async (
   }
 }
 
-export const useGetShowToTicketProxy = (input: GetShowToTicketProxy) => {
+type UseGetShowToTicketProxyOptions = Omit<
+  UseQueryOptions<`0x${string}`, Error, `0x${string}`, [string, string]>,
+  'queryKey' | 'queryFn'
+> & {
+  enabled?: boolean
+}
+
+export const useGetShowToTicketProxy = (
+  input: GetShowToTicketProxy,
+  options?: UseGetShowToTicketProxyOptions
+): UseQueryResult<`0x${string}`, Error> => {
   const contextChainId = useChainId()
   const effectiveChainId = (input.chainId ?? contextChainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(effectiveChainId)
+
+  const { enabled, ...queryOptions } = options || {}
 
   return useQuery({
     queryKey: ['getShowToTicketProxy', input.showId],
@@ -50,6 +66,7 @@ export const useGetShowToTicketProxy = (input: GetShowToTicketProxy) => {
         { ...input, chainId: effectiveChainId },
         contractInteractor
       ),
-    enabled: !!input.showId
+    enabled: enabled !== undefined ? enabled && !!input.showId : !!input.showId,
+    ...queryOptions
   })
 }

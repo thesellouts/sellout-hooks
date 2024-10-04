@@ -1,4 +1,8 @@
-import { useQuery } from '@tanstack/react-query'
+import {
+  useQuery,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId } from 'wagmi'
@@ -38,10 +42,22 @@ export const getShowStatusCore = async (
   }
 }
 
-export const useGetShowStatus = (input: GetShowStatus) => {
+type UseGetShowStatusOptions = Omit<
+  UseQueryOptions<number, Error, number, [string, string]>,
+  'queryKey' | 'queryFn'
+> & {
+  enabled?: boolean
+}
+
+export const useGetShowStatus = (
+  input: GetShowStatus,
+  options?: UseGetShowStatusOptions
+): UseQueryResult<number, Error> => {
   const contextChainId = useChainId()
   const effectiveChainId = (input.chainId ?? contextChainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(effectiveChainId)
+
+  const { enabled, ...queryOptions } = options || {}
 
   return useQuery({
     queryKey: ['getShowStatus', input.showId],
@@ -50,6 +66,7 @@ export const useGetShowStatus = (input: GetShowStatus) => {
         { ...input, chainId: effectiveChainId },
         contractInteractor
       ),
-    enabled: !!input.showId
+    enabled: enabled !== undefined ? enabled && !!input.showId : !!input.showId,
+    ...queryOptions
   })
 }

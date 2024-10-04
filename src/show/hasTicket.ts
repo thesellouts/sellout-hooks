@@ -1,4 +1,8 @@
-import { useQuery } from '@tanstack/react-query'
+import {
+  useQuery,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId } from 'wagmi'
@@ -39,10 +43,22 @@ export const hasTicketCore = async (
   }
 }
 
-export const useHasTicket = (input: HasTicketInput) => {
+type UseHasTicketOptions = Omit<
+  UseQueryOptions<boolean, Error, boolean, [string, string, string]>,
+  'queryKey' | 'queryFn'
+> & {
+  enabled?: boolean
+}
+
+export const useHasTicket = (
+  input: HasTicketInput,
+  options?: UseHasTicketOptions
+): UseQueryResult<boolean, Error> => {
   const contextChainId = useChainId()
   const effectiveChainId = (input.chainId ?? contextChainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(effectiveChainId)
+
+  const { enabled, ...queryOptions } = options || {}
 
   return useQuery({
     queryKey: ['hasTicket', input.wallet, input.showId],
@@ -51,6 +67,10 @@ export const useHasTicket = (input: HasTicketInput) => {
         { ...input, chainId: effectiveChainId },
         contractInteractor
       ),
-    enabled: !!input.wallet && !!input.showId
+    enabled:
+      enabled !== undefined
+        ? enabled && !!input.wallet && !!input.showId
+        : !!input.wallet && !!input.showId,
+    ...queryOptions
   })
 }

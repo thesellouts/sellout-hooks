@@ -1,4 +1,8 @@
-import { useQuery, UseQueryResult } from '@tanstack/react-query'
+import {
+  useQuery,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId } from 'wagmi'
@@ -41,12 +45,22 @@ export const getOrganizerCore = async (
   }
 }
 
+type UseGetOrganizerOptions = Omit<
+  UseQueryOptions<any, Error, any, [string, string]>,
+  'queryKey' | 'queryFn'
+> & {
+  enabled?: boolean
+}
+
 export const useGetOrganizer = (
-  input: GetOrganizer
+  input: GetOrganizer,
+  options?: UseGetOrganizerOptions
 ): UseQueryResult<any, Error> => {
   const contextChainId = useChainId()
   const effectiveChainId = (input.chainId ?? contextChainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(effectiveChainId)
+
+  const { enabled, ...queryOptions } = options || {}
 
   return useQuery({
     queryKey: ['getOrganizer', input.organizerAddress],
@@ -55,6 +69,10 @@ export const useGetOrganizer = (
         { ...input, chainId: effectiveChainId },
         contractInteractor
       ),
-    enabled: !!input.organizerAddress
+    enabled:
+      enabled !== undefined
+        ? enabled && !!input.organizerAddress
+        : !!input.organizerAddress,
+    ...queryOptions
   })
 }

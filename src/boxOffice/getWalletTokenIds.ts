@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, UseQueryOptions } from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId } from 'wagmi'
@@ -39,10 +39,22 @@ export const getWalletTokenIdsCore = async (
   }
 }
 
-export const useGetWalletTokenIds = (input: GetWalletTokenIds) => {
+type UseGetWalletTokenIdsOptions = Omit<
+  UseQueryOptions<bigint[], Error, bigint[], [string, GetWalletTokenIds]>,
+  'queryKey' | 'queryFn'
+> & {
+  enabled?: boolean
+}
+
+export const useGetWalletTokenIds = (
+  input: GetWalletTokenIds,
+  options?: UseGetWalletTokenIdsOptions
+) => {
   const contextChainId = useChainId()
   const effectiveChainId = (input.chainId ?? contextChainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(effectiveChainId)
+
+  const { enabled, ...queryOptions } = options || {}
 
   return useQuery({
     queryKey: ['getWalletTokenIds', input],
@@ -51,6 +63,10 @@ export const useGetWalletTokenIds = (input: GetWalletTokenIds) => {
         { ...input, chainId: effectiveChainId },
         contractInteractor
       ),
-    enabled: !!input.showId && !!input.address
+    enabled:
+      enabled !== undefined
+        ? enabled && !!input.showId && !!input.address
+        : !!input.showId && !!input.address,
+    ...queryOptions
   })
 }

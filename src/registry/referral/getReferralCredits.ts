@@ -1,4 +1,8 @@
-import { useQuery, UseQueryResult } from '@tanstack/react-query'
+import {
+  useQuery,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId } from 'wagmi'
@@ -69,17 +73,32 @@ export const getReferralCreditsCore = async (
       throw new Error('Unexpected result format from getReferralCredits')
     }
   } catch (err) {
-    console.error('Validation or Execution Error:', err)
-    throw err
+    console.error('Error fetching referral credits:', err)
+    throw new Error('Failed to fetch referral credits')
   }
 }
 
+type UseGetReferralCreditsOptions = Omit<
+  UseQueryOptions<
+    GetReferralCreditsResult,
+    Error,
+    GetReferralCreditsResult,
+    [string, string]
+  >,
+  'queryKey' | 'queryFn'
+> & {
+  enabled?: boolean
+}
+
 export const useGetReferralCredits = (
-  input: GetReferralCredits
+  input: GetReferralCredits,
+  options?: UseGetReferralCreditsOptions
 ): UseQueryResult<GetReferralCreditsResult, Error> => {
   const contextChainId = useChainId()
   const effectiveChainId = (input.chainId ?? contextChainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(effectiveChainId)
+
+  const { enabled, ...queryOptions } = options || {}
 
   return useQuery({
     queryKey: ['getReferralCredits', input.referrer],
@@ -88,6 +107,8 @@ export const useGetReferralCredits = (
         { ...input, chainId: effectiveChainId },
         contractInteractor
       ),
-    enabled: !!input.referrer
+    enabled:
+      enabled !== undefined ? enabled && !!input.referrer : !!input.referrer,
+    ...queryOptions
   })
 }

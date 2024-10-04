@@ -1,4 +1,8 @@
-import { useQuery } from '@tanstack/react-query'
+import {
+  useQuery,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId } from 'wagmi'
@@ -39,15 +43,31 @@ export const isArtistCore = async (
   }
 }
 
-export const useIsArtist = (input: IsArtistInput) => {
+type UseIsArtistOptions = Omit<
+  UseQueryOptions<boolean, Error, boolean, [string, string, string]>,
+  'queryKey' | 'queryFn'
+> & {
+  enabled?: boolean
+}
+
+export const useIsArtist = (
+  input: IsArtistInput,
+  options?: UseIsArtistOptions
+): UseQueryResult<boolean, Error> => {
   const contextChainId = useChainId()
   const effectiveChainId = (input.chainId ?? contextChainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(effectiveChainId)
+
+  const { enabled, ...queryOptions } = options || {}
 
   return useQuery({
     queryKey: ['isArtist', input.user, input.showId],
     queryFn: () =>
       isArtistCore({ ...input, chainId: effectiveChainId }, contractInteractor),
-    enabled: !!input.user && !!input.showId
+    enabled:
+      enabled !== undefined
+        ? enabled && !!input.user && !!input.showId
+        : !!input.user && !!input.showId,
+    ...queryOptions
   })
 }

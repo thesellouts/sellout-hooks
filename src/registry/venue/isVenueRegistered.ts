@@ -1,9 +1,12 @@
-import { useQuery, UseQueryResult } from '@tanstack/react-query'
-import { useMemo } from 'react'
+import {
+  useQuery,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId, useConfig } from 'wagmi'
-import { z } from 'zod'
+import { boolean, z } from 'zod'
 
 import { VenueRegistryABI } from '../../abis'
 import { getContractAddresses } from '../../config'
@@ -19,14 +22,10 @@ const IsVenueRegisteredSchema = z.object({
 
 export type IsVenueRegistered = z.infer<typeof IsVenueRegisteredSchema>
 
-export interface IsVenueRegisteredResult {
-  isRegistered: boolean
-}
-
 export const isVenueRegisteredCore = async (
   input: IsVenueRegistered,
   contractInteractor: ContractInteractor
-): Promise<IsVenueRegisteredResult> => {
+): Promise<boolean> => {
   const { chainId, venueAddress } = input
   const addresses = getContractAddresses(chainId)
 
@@ -41,34 +40,42 @@ export const isVenueRegisteredCore = async (
       args: [validatedInput.venueAddress]
     })
 
-    return { isRegistered: Boolean(isRegistered) }
+    return Boolean(isRegistered)
   } catch (err) {
-    console.error('Validation or Execution Error:', err)
-    throw err
+    console.error('Error checking if venue is registered:', err)
+    throw new Error('Failed to check if venue is registered')
   }
 }
 
+type UseIsVenueRegisteredOptions = Omit<
+  UseQueryOptions<boolean, Error, boolean, [string, string]>,
+  'queryKey' | 'queryFn'
+> & {
+  enabled?: boolean
+}
+
 export const useIsVenueRegistered = (
-  input: IsVenueRegistered
-): UseQueryResult<IsVenueRegisteredResult, Error> => {
+  input: IsVenueRegistered,
+  options?: UseIsVenueRegisteredOptions
+): UseQueryResult<boolean, Error> => {
   const config = useConfig()
   const contextChainId = useChainId()
   const effectiveChainId = (input.chainId ?? contextChainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(effectiveChainId)
 
-  const isVenueRegisteredMemoized = useMemo(
-    () => (input: IsVenueRegistered) =>
-      isVenueRegisteredCore(input, contractInteractor),
-    [contractInteractor]
-  )
+  const { enabled, ...queryOptions } = options || {}
 
   return useQuery({
     queryKey: ['isVenueRegistered', input.venueAddress],
     queryFn: () =>
-      isVenueRegisteredMemoized({
-        ...input,
-        chainId: effectiveChainId
-      }),
-    enabled: !!input.venueAddress
+      isVenueRegisteredCore(
+        { ...input, chainId: effectiveChainId },
+        contractInteractor
+      ),
+    enabled:
+      enabled !== undefined
+        ? enabled && !!input.venueAddress
+        : !!input.venueAddress,
+    ...queryOptions
   })
 }

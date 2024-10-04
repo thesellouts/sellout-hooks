@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, UseQueryOptions } from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId } from 'wagmi'
@@ -40,10 +40,22 @@ export const isTicketOwnerCore = async (
   }
 }
 
-export const useIsTicketOwner = (input: IsTicketOwner) => {
+type UseIsTicketOwnerOptions = Omit<
+  UseQueryOptions<boolean, Error, boolean, [string, IsTicketOwner]>,
+  'queryKey' | 'queryFn'
+> & {
+  enabled?: boolean
+}
+
+export const useIsTicketOwner = (
+  input: IsTicketOwner,
+  options?: UseIsTicketOwnerOptions
+) => {
   const contextChainId = useChainId()
   const effectiveChainId = (input.chainId ?? contextChainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(effectiveChainId)
+
+  const { enabled, ...queryOptions } = options || {}
 
   return useQuery({
     queryKey: ['isTicketOwner', input],
@@ -52,6 +64,13 @@ export const useIsTicketOwner = (input: IsTicketOwner) => {
         { ...input, chainId: effectiveChainId },
         contractInteractor
       ),
-    enabled: !!input.showId && !!input.wallet && input.tokenId !== undefined
+    enabled:
+      enabled !== undefined
+        ? enabled &&
+          !!input.showId &&
+          !!input.wallet &&
+          input.tokenId !== undefined
+        : !!input.showId && !!input.wallet && input.tokenId !== undefined,
+    ...queryOptions
   })
 }

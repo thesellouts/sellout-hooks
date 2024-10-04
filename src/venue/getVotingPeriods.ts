@@ -1,4 +1,8 @@
-import { useQuery } from '@tanstack/react-query'
+import {
+  useQuery,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId } from 'wagmi'
@@ -38,10 +42,22 @@ export const getVotingPeriodsCore = async (
   }
 }
 
-export const useGetVotingPeriods = (input: GetVotingPeriods) => {
+type UseGetVotingPeriodsOptions = Omit<
+  UseQueryOptions<any, Error, any, [string, string]>,
+  'queryKey' | 'queryFn'
+> & {
+  enabled?: boolean
+}
+
+export const useGetVotingPeriods = (
+  input: GetVotingPeriods,
+  options?: UseGetVotingPeriodsOptions
+): UseQueryResult<any, Error> => {
   const contextChainId = useChainId()
   const effectiveChainId = (input.chainId ?? contextChainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(effectiveChainId)
+
+  const { enabled, ...queryOptions } = options || {}
 
   return useQuery({
     queryKey: ['getVotingPeriods', input.showId],
@@ -50,6 +66,7 @@ export const useGetVotingPeriods = (input: GetVotingPeriods) => {
         { ...input, chainId: effectiveChainId },
         contractInteractor
       ),
-    enabled: !!input.showId
+    enabled: enabled !== undefined ? enabled && !!input.showId : !!input.showId,
+    ...queryOptions
   })
 }

@@ -1,4 +1,8 @@
-import { useQuery } from '@tanstack/react-query'
+import {
+  useQuery,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId } from 'wagmi'
@@ -39,10 +43,22 @@ export const getPreviousDateVoteCore = async (
   }
 }
 
-export const useGetPreviousDateVote = (input: GetPreviousDateVotes) => {
+type UseGetPreviousDateVoteOptions = Omit<
+  UseQueryOptions<bigint, Error, bigint, [string, string, string]>,
+  'queryKey' | 'queryFn'
+> & {
+  enabled?: boolean
+}
+
+export const useGetPreviousDateVote = (
+  input: GetPreviousDateVotes,
+  options?: UseGetPreviousDateVoteOptions
+): UseQueryResult<bigint, Error> => {
   const contextChainId = useChainId()
   const effectiveChainId = (input.chainId ?? contextChainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(effectiveChainId)
+
+  const { enabled, ...queryOptions } = options || {}
 
   return useQuery({
     queryKey: ['getPreviousDateVote', input.showId, input.user],
@@ -51,6 +67,10 @@ export const useGetPreviousDateVote = (input: GetPreviousDateVotes) => {
         { ...input, chainId: effectiveChainId },
         contractInteractor
       ),
-    enabled: !!input.showId && !!input.user
+    enabled:
+      enabled !== undefined
+        ? enabled && !!input.showId && !!input.user
+        : !!input.showId && !!input.user,
+    ...queryOptions
   })
 }

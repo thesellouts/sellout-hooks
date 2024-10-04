@@ -1,4 +1,8 @@
-import { useQuery, UseQueryResult } from '@tanstack/react-query'
+import {
+  useQuery,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId, useConfig } from 'wagmi'
@@ -35,11 +39,22 @@ export const getArtistCore = async (
   })
 }
 
-export const useGetArtist = (input: GetArtist): UseQueryResult<any, Error> => {
-  const config = useConfig()
+type UseGetArtistOptions = Omit<
+  UseQueryOptions<any, Error, any, [string, string]>,
+  'queryKey' | 'queryFn'
+> & {
+  enabled?: boolean
+}
+
+export const useGetArtist = (
+  input: GetArtist,
+  options?: UseGetArtistOptions
+): UseQueryResult<any, Error> => {
   const contextChainId = useChainId()
   const effectiveChainId = (input.chainId ?? contextChainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(effectiveChainId)
+
+  const { enabled, ...queryOptions } = options || {}
 
   return useQuery({
     queryKey: ['getArtist', input.artistAddress],
@@ -48,6 +63,10 @@ export const useGetArtist = (input: GetArtist): UseQueryResult<any, Error> => {
         { ...input, chainId: effectiveChainId },
         contractInteractor
       ),
-    enabled: !!input.artistAddress
+    enabled:
+      enabled !== undefined
+        ? enabled && !!input.artistAddress
+        : !!input.artistAddress,
+    ...queryOptions
   })
 }

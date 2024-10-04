@@ -1,4 +1,8 @@
-import { useQuery } from '@tanstack/react-query'
+import {
+  useQuery,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId } from 'wagmi'
@@ -38,10 +42,22 @@ export const getRefundsCore = async (
   }
 }
 
-export const useGetRefunds = (input: GetRefunds) => {
+type UseGetRefundsOptions = Omit<
+  UseQueryOptions<any, Error, any, [string, string]>,
+  'queryKey' | 'queryFn'
+> & {
+  enabled?: boolean
+}
+
+export const useGetRefunds = (
+  input: GetRefunds,
+  options?: UseGetRefundsOptions
+): UseQueryResult<any, Error> => {
   const contextChainId = useChainId()
   const effectiveChainId = (input.chainId ?? contextChainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(effectiveChainId)
+
+  const { enabled, ...queryOptions } = options || {}
 
   return useQuery({
     queryKey: ['getRefunds', input.user],
@@ -50,6 +66,7 @@ export const useGetRefunds = (input: GetRefunds) => {
         { ...input, chainId: effectiveChainId },
         contractInteractor
       ),
-    enabled: !!input.user
+    enabled: enabled !== undefined ? enabled && !!input.user : !!input.user,
+    ...queryOptions
   })
 }

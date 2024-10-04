@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, UseQueryOptions } from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId } from 'wagmi'
@@ -39,10 +39,22 @@ export const getTicketPricePaidCore = async (
   }
 }
 
-export const useGetTicketPricePaid = (input: GetTicketPricePaid) => {
+type UseGetTicketPricePaidOptions = Omit<
+  UseQueryOptions<bigint, Error, bigint, [string, GetTicketPricePaid]>,
+  'queryKey' | 'queryFn'
+> & {
+  enabled?: boolean
+}
+
+export const useGetTicketPricePaid = (
+  input: GetTicketPricePaid,
+  options?: UseGetTicketPricePaidOptions
+) => {
   const contextChainId = useChainId()
   const effectiveChainId = (input.chainId ?? contextChainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(effectiveChainId)
+
+  const { enabled, ...queryOptions } = options || {}
 
   return useQuery({
     queryKey: ['getTicketPricePaid', input],
@@ -51,6 +63,10 @@ export const useGetTicketPricePaid = (input: GetTicketPricePaid) => {
         { ...input, chainId: effectiveChainId },
         contractInteractor
       ),
-    enabled: !!input.showId && !!input.ticketId
+    enabled:
+      enabled !== undefined
+        ? enabled && !!input.showId && !!input.ticketId
+        : !!input.showId && !!input.ticketId,
+    ...queryOptions
   })
 }

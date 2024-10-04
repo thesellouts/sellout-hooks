@@ -1,4 +1,8 @@
-import { useQuery } from '@tanstack/react-query'
+import {
+  useQuery,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId } from 'wagmi'
@@ -22,7 +26,7 @@ export type GetTicketTierInfo = z.infer<typeof GetTicketTierInfoSchema>
 export const getTicketTierInfoCore = async (
   input: GetTicketTierInfo,
   contractInteractor: ContractInteractor
-) => {
+): Promise<any> => {
   const { showId, tierIndex, chainId } = input
   const addresses = getContractAddresses(chainId)
 
@@ -39,10 +43,22 @@ export const getTicketTierInfoCore = async (
   }
 }
 
-export const useGetTicketTierInfo = (input: GetTicketTierInfo) => {
+type UseGetTicketTierInfoOptions = Omit<
+  UseQueryOptions<any, Error, any, [string, string, number]>,
+  'queryKey' | 'queryFn'
+> & {
+  enabled?: boolean
+}
+
+export const useGetTicketTierInfo = (
+  input: GetTicketTierInfo,
+  options?: UseGetTicketTierInfoOptions
+): UseQueryResult<any, Error> => {
   const contextChainId = useChainId()
   const effectiveChainId = (input.chainId ?? contextChainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(effectiveChainId)
+
+  const { enabled, ...queryOptions } = options || {}
 
   return useQuery({
     queryKey: ['getTicketTierInfo', input.showId, input.tierIndex],
@@ -51,6 +67,10 @@ export const useGetTicketTierInfo = (input: GetTicketTierInfo) => {
         { ...input, chainId: effectiveChainId },
         contractInteractor
       ),
-    enabled: !!input.showId && input.tierIndex !== undefined
+    enabled:
+      enabled !== undefined
+        ? enabled && !!input.showId && input.tierIndex !== undefined
+        : !!input.showId && input.tierIndex !== undefined,
+    ...queryOptions
   })
 }

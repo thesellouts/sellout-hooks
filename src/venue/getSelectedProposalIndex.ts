@@ -1,4 +1,8 @@
-import { useQuery } from '@tanstack/react-query'
+import {
+  useQuery,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId } from 'wagmi'
@@ -40,12 +44,22 @@ export const getSelectedProposalIndexCore = async (
   }
 }
 
+type UseGetSelectedProposalIndexOptions = Omit<
+  UseQueryOptions<number, Error, number, [string, string]>,
+  'queryKey' | 'queryFn'
+> & {
+  enabled?: boolean
+}
+
 export const useGetSelectedProposalIndex = (
-  input: GetSelectedProposalIndex
-) => {
+  input: GetSelectedProposalIndex,
+  options?: UseGetSelectedProposalIndexOptions
+): UseQueryResult<number, Error> => {
   const contextChainId = useChainId()
   const effectiveChainId = (input.chainId ?? contextChainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(effectiveChainId)
+
+  const { enabled, ...queryOptions } = options || {}
 
   return useQuery({
     queryKey: ['getSelectedProposalIndex', input.showId],
@@ -54,6 +68,7 @@ export const useGetSelectedProposalIndex = (
         { ...input, chainId: effectiveChainId },
         contractInteractor
       ),
-    enabled: !!input.showId
+    enabled: enabled !== undefined ? enabled && !!input.showId : !!input.showId,
+    ...queryOptions
   })
 }

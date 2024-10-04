@@ -1,4 +1,8 @@
-import { useQuery } from '@tanstack/react-query'
+import {
+  useQuery,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query'
 import { Abi } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useChainId } from 'wagmi'
@@ -21,7 +25,7 @@ export type GetShowById = z.infer<typeof GetShowByIdSchema>
 export const getShowByIdCore = async (
   input: GetShowById,
   contractInteractor: ContractInteractor
-) => {
+): Promise<any> => {
   const { showId, chainId } = input
   const addresses = getContractAddresses(chainId)
 
@@ -38,10 +42,22 @@ export const getShowByIdCore = async (
   }
 }
 
-export const useGetShowById = (input: GetShowById) => {
+type UseGetShowByIdOptions = Omit<
+  UseQueryOptions<any, Error, any, [string, string]>,
+  'queryKey' | 'queryFn'
+> & {
+  enabled?: boolean
+}
+
+export const useGetShowById = (
+  input: GetShowById,
+  options?: UseGetShowByIdOptions
+): UseQueryResult<any, Error> => {
   const contextChainId = useChainId()
   const effectiveChainId = (input.chainId ?? contextChainId) as 8453 | 84532
   const contractInteractor = useContractInteractor(effectiveChainId)
+
+  const { enabled, ...queryOptions } = options || {}
 
   return useQuery({
     queryKey: ['getShowById', input.showId],
@@ -50,6 +66,7 @@ export const useGetShowById = (input: GetShowById) => {
         { ...input, chainId: effectiveChainId },
         contractInteractor
       ),
-    enabled: !!input.showId
+    enabled: enabled !== undefined ? enabled && !!input.showId : !!input.showId,
+    ...queryOptions
   })
 }
