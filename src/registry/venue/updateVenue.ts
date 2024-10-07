@@ -43,6 +43,10 @@ export const updateVenueCore = async (
 
   try {
     const validatedInput = UpdateVenueSchema.parse(input)
+    const account =
+      options?.smart !== false
+        ? contractInteractor.smartAccountAddress
+        : undefined
 
     // Simulate the contract call
     const { request } = await simulateContract(config, {
@@ -59,7 +63,8 @@ export const updateVenueCore = async (
         validatedInput.totalCapacity,
         validatedInput.streetAddress
       ],
-      chainId
+      chainId,
+      account
     })
 
     // Execute the contract interaction

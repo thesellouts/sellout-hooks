@@ -42,6 +42,10 @@ export const incrementReferralCreditsCore = async (
 
   try {
     const validatedInput = IncrementReferralCreditsSchema.parse(input)
+    const account =
+      options?.smart !== false
+        ? contractInteractor.smartAccountAddress
+        : undefined
 
     // Simulate the contract call
     const { request } = await simulateContract(config, {
@@ -54,7 +58,8 @@ export const incrementReferralCreditsCore = async (
         validatedInput.organizerCredits,
         validatedInput.venueCredits
       ],
-      chainId
+      chainId,
+      account
     })
 
     // Execute the contract interaction

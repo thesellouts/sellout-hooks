@@ -35,6 +35,10 @@ export const refundBribeCore = async (
 ): Promise<RefundBribeResult> => {
   const { showId, venueId, proposalIndex, chainId } = input
   const addresses = getContractAddresses(chainId)
+  const account =
+    options?.smart !== false
+      ? contractInteractor.smartAccountAddress
+      : undefined
 
   try {
     const validatedInput = RefundBribeSchema.parse(input)
@@ -48,7 +52,8 @@ export const refundBribeCore = async (
         validatedInput.venueId,
         validatedInput.proposalIndex
       ],
-      chainId
+      chainId,
+      account
     })
 
     const receipt = await contractInteractor.execute(

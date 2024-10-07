@@ -38,6 +38,10 @@ export const setTokenURICore = async (
 
   try {
     const validatedInput = SetTokenURISchema.parse(input)
+    const account =
+      options?.smart !== false
+        ? contractInteractor.smartAccountAddress
+        : undefined
 
     // Simulate the contract call
     const { request } = await simulateContract(config, {
@@ -49,7 +53,8 @@ export const setTokenURICore = async (
         validatedInput.tokenId,
         validatedInput.newURI
       ],
-      chainId
+      chainId,
+      account
     })
 
     // Execute the contract interaction

@@ -78,13 +78,18 @@ export const proposeShowCore = async (
 
   try {
     const validatedInput = ProposeShowSchema.parse(input)
+    const account =
+      options?.smart !== false
+        ? contractInteractor.smartAccountAddress
+        : undefined
 
     const { request } = await simulateContract(config, {
       abi: ShowABI as Abi,
       address: addresses.Show as `0x${string}`,
       functionName: 'proposeShow',
       args: [validatedInput],
-      chainId
+      chainId,
+      account
     })
 
     const receipt = await contractInteractor.execute(

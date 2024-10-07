@@ -36,13 +36,18 @@ export const withdrawRefundCore = async (
 
   try {
     const validatedInput = WithdrawRefundSchema.parse(input)
+    const account =
+      options?.smart !== false
+        ? contractInteractor.smartAccountAddress
+        : undefined
 
     const { request } = await simulateContract(config, {
       abi: ShowABI as Abi,
       address: addresses.Show as `0x${string}`,
       functionName: 'withdrawRefund',
       args: [validatedInput.showId],
-      chainId
+      chainId,
+      account
     })
 
     const receipt = await contractInteractor.execute(

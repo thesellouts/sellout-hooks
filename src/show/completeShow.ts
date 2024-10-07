@@ -36,13 +36,18 @@ export const completeShowCore = async (
 
   try {
     const validatedInput = CompleteShowSchema.parse(input)
+    const account =
+      options?.smart !== false
+        ? contractInteractor.smartAccountAddress
+        : undefined
 
     const { request } = await simulateContract(config, {
       abi: ShowABI as Abi,
       address: addresses.Show as `0x${string}`,
       functionName: 'completeShow',
       args: [validatedInput.showId],
-      chainId
+      chainId,
+      account
     })
 
     const receipt = await contractInteractor.execute(

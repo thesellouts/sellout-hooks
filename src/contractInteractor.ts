@@ -41,6 +41,10 @@ export class ContractInteractor {
   private chain: Chain
   private publicClient: PublicClient | undefined
 
+  public get smartAccountAddress(): Address | undefined {
+    return this.smartAccountClient?.account?.address
+  }
+
   constructor(
     config: Config,
     chain: Chain,

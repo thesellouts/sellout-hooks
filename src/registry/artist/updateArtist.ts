@@ -39,6 +39,10 @@ export const updateArtistCore = async (
 
   try {
     const validatedInput = UpdateArtistSchema.parse(input)
+    const account =
+      options?.smart !== false
+        ? contractInteractor.smartAccountAddress
+        : undefined
 
     // Simulate the contract call
     const { request } = await simulateContract(config, {
@@ -51,7 +55,8 @@ export const updateArtistCore = async (
         validatedInput.bio,
         validatedInput.wallet
       ],
-      chainId
+      chainId,
+      account
     })
 
     // Execute the contract interaction

@@ -36,6 +36,10 @@ export const nominateVenueCore = async (
 
   try {
     const validatedInput = NominateVenueSchema.parse(input)
+    const account =
+      options?.smart !== false
+        ? contractInteractor.smartAccountAddress
+        : undefined
 
     // Simulate the contract call
     const { request } = await simulateContract(config, {
@@ -43,7 +47,8 @@ export const nominateVenueCore = async (
       address: addresses.VenueRegistry as `0x${string}`,
       functionName: 'nominate',
       args: [validatedInput.nominee],
-      chainId
+      chainId,
+      account
     })
 
     // Execute the contract interaction

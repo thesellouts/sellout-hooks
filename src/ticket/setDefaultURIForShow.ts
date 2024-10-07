@@ -37,6 +37,10 @@ export const setDefaultURIForShowCore = async (
 
   try {
     const validatedInput = SetDefaultURIForShowSchema.parse(input)
+    const account =
+      options?.smart !== false
+        ? contractInteractor.smartAccountAddress
+        : undefined
 
     // Simulate the contract call
     const { request } = await simulateContract(config, {
@@ -44,7 +48,8 @@ export const setDefaultURIForShowCore = async (
       address: addresses.Ticket as `0x${string}`,
       functionName: 'setDefaultURIForShow',
       args: [validatedInput.showId, validatedInput.newDefaultURI],
-      chainId
+      chainId,
+      account
     })
 
     // Execute the contract interaction

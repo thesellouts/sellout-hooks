@@ -36,6 +36,10 @@ export const deregisterVenueCore = async (
 
   try {
     const validatedInput = DeregisterVenueSchema.parse(input)
+    const account =
+      options?.smart !== false
+        ? contractInteractor.smartAccountAddress
+        : undefined
 
     // Simulate the contract call
     const { request } = await simulateContract(config, {
@@ -43,7 +47,8 @@ export const deregisterVenueCore = async (
       address: addresses.VenueRegistry as `0x${string}`,
       functionName: 'deregisterVenue',
       args: [validatedInput.venueId],
-      chainId
+      chainId,
+      account
     })
 
     // Execute the contract interaction

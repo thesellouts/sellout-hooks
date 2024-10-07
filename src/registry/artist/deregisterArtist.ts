@@ -37,12 +37,18 @@ export const deregisterArtistCore = async (
   try {
     const validatedInput = DeregisterArtistSchema.parse(input)
 
+    const account =
+      options?.smart !== false
+        ? contractInteractor.smartAccountAddress
+        : undefined
+
     // Simulate the contract call
     const { request } = await simulateContract(config, {
       abi: ArtistRegistryABI,
       address: addresses.ArtistRegistry as `0x${string}`,
       functionName: 'deregisterArtist',
       args: [validatedInput.artistId],
+      account,
       chainId
     })
 

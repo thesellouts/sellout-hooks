@@ -37,12 +37,18 @@ export const nominateArtistCore = async (
   try {
     const validatedInput = NominateArtistSchema.parse(input)
 
+    const account =
+      options?.smart !== false
+        ? contractInteractor.smartAccountAddress
+        : undefined
+
     // Simulate the contract call
     const { request } = await simulateContract(config, {
       abi: ArtistRegistryABI,
       address: addresses.ArtistRegistry as `0x${string}`,
       functionName: 'nominate',
       args: [validatedInput.nominee],
+      account,
       chainId
     })
 

@@ -47,6 +47,10 @@ export const submitProposalCore = async (
 
   try {
     const validatedInput = SubmitProposalSchema.parse(input)
+    const account =
+      options?.smart !== false
+        ? contractInteractor.smartAccountAddress
+        : undefined
 
     // Simulate the contract call
     const { request } = await simulateContract(config, {
@@ -54,7 +58,8 @@ export const submitProposalCore = async (
       address: addresses.Venue as `0x${string}`,
       functionName: 'submitProposal',
       args: [showId, venueId, proposedDates, paymentToken],
-      chainId
+      chainId,
+      account
     })
 
     // Execute the contract interaction

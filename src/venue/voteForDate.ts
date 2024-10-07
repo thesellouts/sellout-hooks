@@ -37,6 +37,10 @@ export const voteForDateCore = async (
 
   try {
     const validatedInput = VoteForDateSchema.parse(input)
+    const account =
+      options?.smart !== false
+        ? contractInteractor.smartAccountAddress
+        : undefined
 
     // Simulate the contract call
     const { request } = await simulateContract(config, {
@@ -44,7 +48,8 @@ export const voteForDateCore = async (
       address: addresses.Venue as `0x${string}`,
       functionName: 'voteForDate',
       args: [showId, dateIndex],
-      chainId
+      chainId,
+      account
     })
 
     // Execute the contract interaction

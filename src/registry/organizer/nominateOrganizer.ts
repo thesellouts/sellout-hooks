@@ -36,6 +36,10 @@ export const nominateOrganizerCore = async (
 
   try {
     const validatedInput = NominateOrganizerSchema.parse(input)
+    const account =
+      options?.smart !== false
+        ? contractInteractor.smartAccountAddress
+        : undefined
 
     // Simulate the contract call
     const { request } = await simulateContract(config, {
@@ -43,7 +47,8 @@ export const nominateOrganizerCore = async (
       address: addresses.OrganizerRegistry as `0x${string}`,
       functionName: 'nominate',
       args: [validatedInput.nominee],
-      chainId
+      chainId,
+      account
     })
 
     // Execute the contract interaction

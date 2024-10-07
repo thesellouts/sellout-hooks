@@ -40,6 +40,10 @@ export const setCreditControlPermissionCore = async (
 
   try {
     const validatedInput = SetCreditControlPermissionSchema.parse(input)
+    const account =
+      options?.smart !== false
+        ? contractInteractor.smartAccountAddress
+        : undefined
 
     // Simulate the contract call
     const { request } = await simulateContract(config, {
@@ -47,7 +51,8 @@ export const setCreditControlPermissionCore = async (
       address: addresses.ReferralModule as `0x${string}`,
       functionName: 'setCreditControlPermission',
       args: [validatedInput.contractAddress, validatedInput.permission],
-      chainId
+      chainId,
+      account
     })
 
     // Execute the contract interaction

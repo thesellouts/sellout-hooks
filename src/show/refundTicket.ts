@@ -34,6 +34,10 @@ export const refundTicketCore = async (
 ): Promise<RefundTicketResult> => {
   const { showId, ticketId, chainId } = input
   const addresses = getContractAddresses(chainId)
+  const account =
+    options?.smart !== false
+      ? contractInteractor.smartAccountAddress
+      : undefined
 
   try {
     const validatedInput = RefundTicketSchema.parse(input)
@@ -43,7 +47,8 @@ export const refundTicketCore = async (
       address: addresses.Show as `0x${string}`,
       functionName: 'refundTicket',
       args: [validatedInput.showId, validatedInput.ticketId],
-      chainId
+      chainId,
+      account
     })
 
     const receipt = await contractInteractor.execute(

@@ -36,13 +36,18 @@ export const cancelShowCore = async (
 
   try {
     const validatedInput = CancelShowSchema.parse(input)
+    const account =
+      options?.smart !== false
+        ? contractInteractor.smartAccountAddress
+        : undefined
 
     const { request } = await simulateContract(config, {
       abi: ShowABI as Abi,
       address: addresses.Show as `0x${string}`,
       functionName: 'cancelShow',
       args: [validatedInput.showId],
-      chainId
+      chainId,
+      account
     })
 
     const receipt = await contractInteractor.execute(

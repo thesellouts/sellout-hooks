@@ -36,6 +36,10 @@ export const deregisterOrganizerCore = async (
 
   try {
     const validatedInput = DeregisterOrganizerSchema.parse(input)
+    const account =
+      options?.smart !== false
+        ? contractInteractor.smartAccountAddress
+        : undefined
 
     // Simulate the contract call
     const { request } = await simulateContract(config, {
@@ -43,7 +47,8 @@ export const deregisterOrganizerCore = async (
       address: addresses.OrganizerRegistry as `0x${string}`,
       functionName: 'deregisterOrganizer',
       args: [validatedInput.organizerId],
-      chainId
+      chainId,
+      account
     })
 
     // Execute the contract interaction

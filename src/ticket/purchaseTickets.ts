@@ -36,6 +36,10 @@ export const purchaseTicketsCore = async (
 ): Promise<PurchaseTicketsResult> => {
   try {
     const validatedInput = PurchaseTicketsSchema.parse(input)
+    const account =
+      options?.smart !== false
+        ? contractInteractor.smartAccountAddress
+        : undefined
 
     // Simulate the contract call
     const { request } = await simulateContract(config, {
@@ -52,7 +56,8 @@ export const purchaseTicketsCore = async (
         validatedInput.paymentToken === NULL_ADDRESS
           ? BigInt(validatedInput.value ?? 0)
           : undefined,
-      chainId: validatedInput.chainId
+      chainId: validatedInput.chainId,
+      account
     })
 
     // Execute the contract interaction

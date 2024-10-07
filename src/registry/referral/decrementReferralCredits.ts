@@ -43,6 +43,10 @@ export const decrementReferralCreditsCore = async (
 
   try {
     const validatedInput = DecrementReferralCreditsSchema.parse(input)
+    const account =
+      options?.smart !== false
+        ? contractInteractor.smartAccountAddress
+        : undefined
 
     // Simulate the contract call
     const { request } = await simulateContract(config, {
@@ -55,7 +59,8 @@ export const decrementReferralCreditsCore = async (
         validatedInput.organizerCredits,
         validatedInput.venueCredits
       ],
-      chainId
+      chainId,
+      account
     })
 
     // Execute the contract interaction
