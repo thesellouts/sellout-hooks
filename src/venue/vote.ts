@@ -12,9 +12,11 @@ import {
   ContractInteractor,
   useContractInteractor
 } from '../contractInteractor'
+import { AddressSchema } from '../utils'
 
 const VoteSchema = z.object({
   showId: z.string(),
+  venueProxyAddress: AddressSchema,
   proposalIndex: z.number(),
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
@@ -45,7 +47,7 @@ export const voteCore = async (
     // Simulate the contract call
     const { request } = await simulateContract(config, {
       abi: VenueABI,
-      address: addresses.Venue as `0x${string}`,
+      address: validatedInput.venueProxyAddress as `0x${string}`,
       functionName: 'vote',
       args: [showId, proposalIndex],
       chainId,

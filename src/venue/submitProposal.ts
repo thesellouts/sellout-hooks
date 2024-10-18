@@ -7,7 +7,6 @@ import { useChainId, useConfig } from 'wagmi'
 import { z } from 'zod'
 
 import { VenueABI } from '../abis'
-import { getContractAddresses } from '../config'
 import {
   ContractInteractor,
   useContractInteractor
@@ -15,6 +14,7 @@ import {
 
 const SubmitProposalSchema = z.object({
   showId: z.string(),
+  venueProxyAddress: z.string(),
   venueId: z.number(),
   proposedDates: z.array(z.number()),
   paymentToken: z.string(),
@@ -35,16 +35,6 @@ export const submitProposalCore = async (
   config: Config,
   options?: { smart?: boolean }
 ): Promise<SubmitProposalResult> => {
-  const {
-    showId,
-    venueId,
-    proposedDates,
-    paymentToken,
-    paymentAmount,
-    chainId
-  } = input
-  const addresses = getContractAddresses(chainId)
-
   try {
     const validatedInput = SubmitProposalSchema.parse(input)
     const account =
@@ -55,10 +45,15 @@ export const submitProposalCore = async (
     // Simulate the contract call
     const { request } = await simulateContract(config, {
       abi: VenueABI,
-      address: addresses.Venue as `0x${string}`,
+      address: validatedInput.venueProxyAddress as `0x${string}`,
       functionName: 'submitProposal',
-      args: [showId, venueId, proposedDates, paymentToken],
-      chainId,
+      args: [
+        validatedInput.showId,
+        validatedInput.venueId,
+        validatedInput.proposedDates,
+        validatedInput.paymentToken
+      ],
+      chainId: validatedInput.chainId,
       account
     })
 
@@ -69,7 +64,9 @@ export const submitProposalCore = async (
         abi: VenueABI as Abi,
         functionName: request.functionName,
         args: request.args ? [...request.args] : undefined,
-        value: paymentAmount ? BigInt(paymentAmount) : BigInt(0)
+        value: validatedInput.paymentAmount
+          ? BigInt(validatedInput.paymentAmount)
+          : BigInt(0)
       },
       options
     )

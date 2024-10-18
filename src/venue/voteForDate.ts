@@ -7,14 +7,15 @@ import { useChainId, useConfig } from 'wagmi'
 import { z } from 'zod'
 
 import { VenueABI } from '../abis'
-import { getContractAddresses } from '../config'
 import {
   ContractInteractor,
   useContractInteractor
 } from '../contractInteractor'
+import { AddressSchema } from '../utils'
 
 const VoteForDateSchema = z.object({
   showId: z.string(),
+  venueProxyAddress: AddressSchema,
   dateIndex: z.number(),
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
@@ -32,9 +33,6 @@ export const voteForDateCore = async (
   config: Config,
   options?: { smart?: boolean }
 ): Promise<VoteForDateResult> => {
-  const { showId, dateIndex, chainId } = input
-  const addresses = getContractAddresses(chainId)
-
   try {
     const validatedInput = VoteForDateSchema.parse(input)
     const account =
@@ -45,10 +43,10 @@ export const voteForDateCore = async (
     // Simulate the contract call
     const { request } = await simulateContract(config, {
       abi: VenueABI,
-      address: addresses.Venue as `0x${string}`,
+      address: validatedInput.venueProxyAddress as `0x${string}`,
       functionName: 'voteForDate',
-      args: [showId, dateIndex],
-      chainId,
+      args: [validatedInput.showId, validatedInput.dateIndex],
+      chainId: validatedInput.chainId,
       account
     })
 
