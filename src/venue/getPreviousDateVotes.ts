@@ -9,7 +9,6 @@ import { useChainId } from 'wagmi'
 import { z } from 'zod'
 
 import { VenueABI } from '../abis'
-import { getContractAddresses } from '../config'
 import {
   ContractInteractor,
   useContractInteractor
@@ -17,6 +16,7 @@ import {
 
 const GetPreviousDateVotesSchema = z.object({
   showId: z.string(),
+  venueProxyAddress: z.string(),
   user: z.string(),
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
@@ -27,12 +27,11 @@ export const getPreviousDateVoteCore = async (
   input: GetPreviousDateVotes,
   contractInteractor: ContractInteractor
 ): Promise<bigint> => {
-  const { showId, user, chainId } = input
-  const addresses = getContractAddresses(chainId)
+  const { showId, user, venueProxyAddress } = input
 
   try {
     return await contractInteractor.read<bigint>({
-      address: addresses.Venue as `0x${string}`,
+      address: venueProxyAddress as `0x${string}`,
       abi: VenueABI as Abi,
       functionName: 'getPreviousDateVote',
       args: [showId, user]

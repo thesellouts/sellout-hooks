@@ -17,6 +17,7 @@ import {
 
 const GetProposalSchema = z.object({
   showId: z.string(),
+  venueProxyAddress: z.string(),
   proposalIndex: z.number(),
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
@@ -27,12 +28,11 @@ export const getProposalCore = async (
   input: GetProposal,
   contractInteractor: ContractInteractor
 ): Promise<any> => {
-  const { showId, proposalIndex, chainId } = input
-  const addresses = getContractAddresses(chainId)
+  const { showId, proposalIndex, venueProxyAddress } = input
 
   try {
     return await contractInteractor.read<any>({
-      address: addresses.Venue as `0x${string}`,
+      address: venueProxyAddress as `0x${string}`,
       abi: VenueABI as Abi,
       functionName: 'getProposal',
       args: [showId, proposalIndex]

@@ -17,6 +17,7 @@ import {
 
 const GetHasVotedSchema = z.object({
   showId: z.string(),
+  venueProxyAddress: z.string(),
   user: z.string(),
   chainId: z.union([z.literal(base.id), z.literal(baseSepolia.id)])
 })
@@ -27,12 +28,11 @@ export const getHasVotedCore = async (
   input: GetHasVotedInput,
   contractInteractor: ContractInteractor
 ): Promise<boolean> => {
-  const { showId, user, chainId } = input
-  const addresses = getContractAddresses(chainId)
+  const { showId, user, venueProxyAddress } = input
 
   try {
     return await contractInteractor.read<boolean>({
-      address: addresses.Venue as `0x${string}`,
+      address: venueProxyAddress as `0x${string}`,
       abi: VenueABI as Abi,
       functionName: 'getHasVoted',
       args: [showId, user]
